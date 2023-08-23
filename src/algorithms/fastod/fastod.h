@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <set>
 #include <unordered_set>
 #include <vector>
@@ -25,9 +25,9 @@ private:
     int ocd_count_ = 0;
 
     std::vector<CanonicalOD> result_;
-    std::vector<std::set<AttributeSet>> context_in_each_level_;
-    std::map<AttributeSet, AttributeSet> cc_;
-    std::map<AttributeSet, std::unordered_set<AttributePair>> cs_;
+    std::vector<std::unordered_set<AttributeSet>> context_in_each_level_;
+    std::unordered_map<AttributeSet, AttributeSet> cc_;
+    std::unordered_map<AttributeSet, std::unordered_set<AttributePair>> cs_;
 
     AttributeSet schema_;
     const DataFrame& data_;

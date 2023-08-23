@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <sstream>
 
 #include "schema_value.h"
@@ -49,7 +49,7 @@ StrippedPartition StrippedPartition::Product(int attribute) noexcept {
         int group_begin = begins_[begin_pointer];
         int group_end = begins_[begin_pointer + 1];
         // CHANGE: utilize column types
-        std::map<SchemaValue, std::vector<int>> subgroups;
+        std::unordered_map<SchemaValue, std::vector<int>> subgroups;
 
         for (int i = group_begin; i < group_end; i++) {
             int index = indexes_[i];
@@ -241,7 +241,7 @@ long StrippedPartition::SplitRemoveCount(int right) noexcept {
         int group_end = begins_[begin_pointer + 1];
         int group_length = group_end - group_begin;
         // CHANGE: key type according to column types
-        std::map<SchemaValue, int> group_int_2_count;
+        std::unordered_map<SchemaValue, int> group_int_2_count;
 
         for (int i = group_begin; i < group_end; i++) {
             auto right_value = data_.GetValue(indexes_[i], right);

@@ -2,6 +2,7 @@
 #include <utility>
 #include <set>
 #include <map>
+#include <algorithm>
 
 #include "fastod.h"
 #include "operator_type.h"
@@ -81,7 +82,7 @@ void Fastod::Initialize() noexcept {
 
     AttributeSet empty_set;
 
-    context_in_each_level_.push_back(std::set<AttributeSet>());
+    context_in_each_level_.push_back({});
     context_in_each_level_[0].insert(empty_set);
 
     for (int i = 0; i < data_.GetColumnCount(); i++) {
@@ -90,14 +91,12 @@ void Fastod::Initialize() noexcept {
     }
 
     level_ = 1;
-    std::set<AttributeSet> level_1_candidates;
+    std::unordered_set<AttributeSet> level_1_candidates;
 
-    for (int i = 0; i < data_.GetColumnCount(); i++) {
-        AttributeSet single_attribute = empty_set.AddAttribute(i);
-        level_1_candidates.insert(single_attribute);
-    }
+    for (int i = 0; i < data_.GetColumnCount(); i++)
+        level_1_candidates.emplace(1 << i);
 
-    context_in_each_level_.push_back(level_1_candidates);
+    context_in_each_level_.emplace_back(std::move(level_1_candidates));
 }
 
 // void Fastod::PrintState() const noexcept {
@@ -171,7 +170,7 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
 }
 
 void Fastod::ComputeODs() noexcept {
-    auto context_this_level = context_in_each_level_[level_];
+    const auto& context_this_level = context_in_each_level_[level_];
 
     for (AttributeSet const& context : context_this_level) {
         if (IsTimeUp()) {
@@ -307,10 +306,10 @@ void Fastod::PruneLevels() noexcept {
 }
 
 void Fastod::CalculateNextLevel() noexcept {
-    std::map<AttributeSet, std::vector<int>> prefix_blocks;
-    std::set<AttributeSet> context_next_level;
+    std::unordered_map<AttributeSet, std::vector<int>> prefix_blocks;
+    std::unordered_set<AttributeSet> context_next_level;
 
-    auto context_this_level = context_in_each_level_[level_];
+    const auto& context_this_level = context_in_each_level_[level_];
 
     for (AttributeSet const& attribute_set : context_this_level) {
         for (int attribute : attribute_set) {
