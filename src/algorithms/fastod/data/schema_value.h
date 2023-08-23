@@ -42,6 +42,16 @@ public:
     bool IsNull() const noexcept;
     bool IsNumeric() const noexcept;
 
+    size_t hash() const noexcept {
+        if (IsInt())
+            return std::hash<int>()(AsInt());
+        if (IsDouble())
+            return std::hash<double>()(AsDouble());
+        if (IsBigInt())
+            return std::hash<std::string>()(AsBigInt());
+        return std::hash<std::string>()(AsString());
+    }
+
     static SchemaValue FromTypedColumnData(model::TypedColumnData const& column, std::size_t index) noexcept;
 
     friend bool operator==(SchemaValue const& x, SchemaValue const& y);
@@ -53,3 +63,12 @@ public:
 };
 
 } // namespace algos::fastod
+
+template <>
+struct std::hash<algos::fastod::SchemaValue>
+{
+    size_t operator()(const algos::fastod::SchemaValue& value) const {
+        return value.hash();
+    }
+};
+

@@ -5,69 +5,51 @@
 
 #include "attribute_set.h"
 
-using namespace algos::fastod;
+namespace algos::fastod {
 
-AttributeSet::AttributeSet() noexcept : set_(), value_(0) {}
+AttributeSet::AttributeSet() noexcept : value_(0) {}
 
-AttributeSet::AttributeSet(int attribute) noexcept : set_({attribute}), value_(1 << attribute) {}
+AttributeSet::AttributeSet(int value) noexcept : value_(value) {}
 
 AttributeSet::AttributeSet(const std::vector<int>& attributes) noexcept :
-    set_(attributes.cbegin(), attributes.cend()),
-    value_(std::accumulate(attributes.cbegin(), attributes.cend(), 0, [](const unsigned long long& acc, const int& curr){ return acc + (1 << curr); })) {}
+    value_(std::accumulate(attributes.cbegin(), attributes.cend(), 0, 
+            [](const uint32_t& acc, const int curr){ return acc + (1 << curr); })) {}
 
 AttributeSet::AttributeSet(const std::set<int>& set) noexcept :
-    set_(set),
-    value_(std::accumulate(set.cbegin(), set.cend(), 0, [](const unsigned long long& acc, const int& curr){ return acc + (1 << curr); })) {}
+    value_(std::accumulate(set.cbegin(), set.cend(), 0, 
+            [](const uint32_t& acc, const int curr){ return acc + (1 << curr); })) {}
 
 bool AttributeSet::ContainsAttribute(int attribute) const noexcept {
-    return set_.find(attribute) != set_.end();
+    return (value_ & (1 << attribute)) != 0;
 }
 
-AttributeSet AttributeSet::AddAttribute(int attribute) const noexcept {
-    if (ContainsAttribute(attribute)) {
+AttributeSet AttributeSet::AddAttribute(int attribute) const noexcept{
+    if(ContainsAttribute(attribute)){
         return *this;
     }
-
-    std::set<int> new_set = set_;
-    new_set.insert(attribute);
-
-    return AttributeSet(std::move(new_set));
+    return AttributeSet(value_ | (1 << attribute));
 }
 
 AttributeSet AttributeSet::DeleteAttribute(int attribute) const noexcept {
-    if (!ContainsAttribute(attribute)) {
-        return *this;
-    }
-
-    std::set<int> new_set = set_;
-    new_set.erase(attribute);
-
-    return AttributeSet(std::move(new_set));
+    if(ContainsAttribute(attribute))
+        return AttributeSet(value_ ^ (1 << attribute));
+    return *this;
 }
 
 AttributeSet AttributeSet::Intersect(const AttributeSet& other) const noexcept {
-    std::vector<int> result;
-    std::set_intersection(set_.begin(), set_.end(), other.set_.begin(), other.set_.end(), std::back_inserter(result));
-
-    return AttributeSet(std::move(result));
+    return value_ & other.value_;
 }
 
 AttributeSet AttributeSet::Union(const AttributeSet& other) const noexcept {
-    std::vector<int> result;
-    std::set_union(set_.begin(), set_.end(), other.set_.begin(), other.set_.end(), std::back_inserter(result));
-
-    return AttributeSet(std::move(result));
+    return value_ | other.value_;
 }
 
 AttributeSet AttributeSet::Difference(const AttributeSet& other) const noexcept {
-    std::vector<int> result;
-    std::set_difference(set_.begin(), set_.end(), other.set_.begin(), other.set_.end(), std::back_inserter(result));
-
-    return AttributeSet(std::move(result));
+    return value_ & ( ~0 ^ other.value_);
 }
 
 bool AttributeSet::IsEmpty() const noexcept {
-    return set_.empty();
+    return value_ == 0;
 }
 
 std::string AttributeSet::ToString() const noexcept {
@@ -77,7 +59,7 @@ std::string AttributeSet::ToString() const noexcept {
 
    bool first = true;
 
-   for (int attribute: set_) {
+   for (int attribute: *this) {
         if (first) {
             first = false;
         } else {
@@ -93,40 +75,25 @@ std::string AttributeSet::ToString() const noexcept {
 }
 
 std::size_t AttributeSet::GetAttributeCount() const noexcept {
-    return set_.size();
+    size_t count = 0;
+    uint32_t value = value_;
+    while (value > 0) {
+        ++count;
+        value = value & (value - 1);
+    }
+    return count;
 }
 
-unsigned long long AttributeSet::GetValue() const noexcept {
+uint32_t AttributeSet::GetValue() const noexcept {
     return value_;
 }
 
-std::set<int>::iterator AttributeSet::begin() const noexcept {
-    return set_.begin();
+AttributeSetIterator AttributeSet::begin() const noexcept {
+    return AttributeSetIterator(*this);
 }
 
-std::set<int>::iterator AttributeSet::end() const noexcept {
-    return set_.end();
-}
-
-AttributeSet& AttributeSet::operator=(const AttributeSet& other) {
-    if (this == &other) {
-        return *this;
-    }
-
-    set_ = other.set_;
-    value_ = other.value_;
-
-    return *this;
-}
-
-namespace algos::fastod {
-
-bool operator==(AttributeSet const& x, AttributeSet const& y) {
-    return x.set_ == y.set_;
-}
-
-bool operator<(const AttributeSet& x, const AttributeSet& y) {
-    return x.value_ < y.value_;
+AttributeSetIterator AttributeSet::end() const noexcept {
+    return AttributeSetIterator(*this, MAX_COLS);
 }
 
 } // namespace algos::fastod

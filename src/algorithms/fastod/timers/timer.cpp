@@ -1,5 +1,3 @@
-#include <chrono>
-
 #include "timer.h"
 
 using namespace algos::fastod;
