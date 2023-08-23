@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <queue>
 #include <cstddef>
 
@@ -9,7 +9,7 @@ namespace algos::fastod {
 template <typename K, typename V>
 class CacheWithLimit {
 private:
-    std::map<K, V> entries_;
+    std::unordered_map<K, V> entries_;
     std::queue<K> keys_in_order_;
     const std::size_t max_size_;
 
