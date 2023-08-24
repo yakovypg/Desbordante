@@ -7,76 +7,57 @@
 
 namespace algos::fastod {
 
-AttributeSet::AttributeSet() noexcept : value_(0) {}
-
-AttributeSet::AttributeSet(int value) noexcept : value_(value) {}
-
-AttributeSet::AttributeSet(const std::vector<int>& attributes) noexcept :
-    value_(std::accumulate(attributes.cbegin(), attributes.cend(), 0, 
-            [](const uint32_t& acc, const int curr){ return acc + (1 << curr); })) {}
-
-AttributeSet::AttributeSet(const std::set<int>& set) noexcept :
-    value_(std::accumulate(set.cbegin(), set.cend(), 0, 
-            [](const uint32_t& acc, const int curr){ return acc + (1 << curr); })) {}
-
-bool AttributeSet::ContainsAttribute(int attribute) const noexcept {
-    return (value_ & (1 << attribute)) != 0;
+size_t attributeSet(const std::initializer_list<int>&& attributes) noexcept {
+    return std::accumulate(attributes.begin(), attributes.end(), 0, 
+        [](const uint32_t& acc, const int curr){ return acc + (1 << curr); });
 }
 
-AttributeSet AttributeSet::AddAttribute(int attribute) const noexcept{
-    if(ContainsAttribute(attribute)){
-        return *this;
+bool containsAttribute(size_t value, size_t attribute) noexcept {
+    return (value & (1 << attribute)) != 0;
+}
+
+size_t addAttribute(size_t value, int attribute) noexcept {
+    if(containsAttribute(value, attribute)){
+        return value;
     }
-    return AttributeSet(value_ | (1 << attribute));
+    return value | (1 << attribute);
 }
 
-AttributeSet AttributeSet::DeleteAttribute(int attribute) const noexcept {
-    if(ContainsAttribute(attribute))
-        return AttributeSet(value_ ^ (1 << attribute));
-    return *this;
+size_t deleteAttribute(size_t value, size_t attribute) noexcept {
+    if(containsAttribute(value, attribute))
+        return value ^ (1 << attribute);
+    return value;
 }
 
-AttributeSet AttributeSet::Intersect(const AttributeSet& other) const noexcept {
-    return value_ & other.value_;
+size_t intersect(size_t value1, size_t value2) noexcept {
+    return value1 & value2;
 }
 
-AttributeSet AttributeSet::Union(const AttributeSet& other) const noexcept {
-    return value_ | other.value_;
+size_t difference(size_t value1, size_t value2) noexcept {
+    return value1 & ( ~0 ^ value2);
 }
 
-AttributeSet AttributeSet::Difference(const AttributeSet& other) const noexcept {
-    return value_ & ( ~0 ^ other.value_);
+bool isEmptyAS(size_t value) noexcept {
+    return value == 0;
 }
 
-bool AttributeSet::IsEmpty() const noexcept {
-    return value_ == 0;
-}
-
-std::string AttributeSet::ToString() const noexcept {
-   std::stringstream ss;
-
+std::string ASToString(size_t value) noexcept {
+    std::stringstream ss;
    ss << "{";
-
    bool first = true;
-
-   for (int attribute: *this) {
-        if (first) {
+   for (ASIterator it = attrsBegin(value); it != attrsEnd(value); ++it) {
+        if (first)
             first = false;
-        } else {
+        else
             ss << ",";
-        }
-
-        ss << attribute + 1;
+        ss << *it + 1;
    }
-
    ss << "}";
-
    return ss.str();
 }
 
-std::size_t AttributeSet::GetAttributeCount() const noexcept {
+std::size_t getAttributeCount(size_t value) noexcept {
     size_t count = 0;
-    uint32_t value = value_;
     while (value > 0) {
         ++count;
         value = value & (value - 1);
@@ -84,16 +65,41 @@ std::size_t AttributeSet::GetAttributeCount() const noexcept {
     return count;
 }
 
-uint32_t AttributeSet::GetValue() const noexcept {
-    return value_;
+ASIterator::ASIterator(size_t value, int pos) : value_(value), pos_(pos) {
+    while (pos_ < MAX_COLS && !containsAttribute(value_, pos_))
+        ++pos_;
 }
 
-AttributeSetIterator AttributeSet::begin() const noexcept {
-    return AttributeSetIterator(*this);
+ASIterator attrsBegin(size_t value) noexcept {
+    return ASIterator(value);
 }
 
-AttributeSetIterator AttributeSet::end() const noexcept {
-    return AttributeSetIterator(*this, MAX_COLS);
+ASIterator attrsEnd(size_t value) noexcept {
+    return ASIterator(value, MAX_COLS);
 }
+
+ASIterator::reference ASIterator::operator*() { return pos_; }
+ASIterator::pointer ASIterator::operator->() { return &pos_; }
+ASIterator& ASIterator::operator++() {
+    if (pos_ < MAX_COLS) {
+        ++pos_;
+        while (pos_ < MAX_COLS && !containsAttribute(value_, pos_))
+            ++pos_;
+    }
+    return *this;
+}  
+ASIterator ASIterator::operator++(int) {
+    ASIterator tmp = *this;
+    ++(*this);
+    return tmp; 
+}
+
+bool operator==(const ASIterator& a, const ASIterator& b) { 
+    return a.value_ == b.value_ && a.pos_ == b.pos_; 
+};
+
+bool operator!=(const ASIterator& a, const ASIterator& b) {
+    return !(a == b);
+};
 
 } // namespace algos::fastod

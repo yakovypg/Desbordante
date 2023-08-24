@@ -25,11 +25,11 @@ private:
     int ocd_count_ = 0;
 
     std::vector<CanonicalOD> result_;
-    std::vector<std::unordered_set<AttributeSet>> context_in_each_level_;
-    std::unordered_map<AttributeSet, AttributeSet> cc_;
-    std::unordered_map<AttributeSet, std::unordered_set<AttributePair>> cs_;
+    std::vector<std::unordered_set<size_t>> context_in_each_level_;
+    std::unordered_map<size_t, size_t> cc_;
+    std::unordered_map<size_t, std::unordered_set<AttributePair>> cs_;
 
-    AttributeSet schema_;
+    size_t schema_;
     const DataFrame& data_;
 
     Timer timer_;
@@ -38,11 +38,11 @@ private:
 
     bool IsTimeUp() const noexcept;
     
-    void CCPut(const AttributeSet& key, const AttributeSet& attribute_set) noexcept;
-    void CCPut(const AttributeSet& key, int attribute) noexcept;
-    const AttributeSet& CCGet(const AttributeSet& key) noexcept;
-    void CSPut(const AttributeSet& key, const AttributePair& value) noexcept;
-    std::unordered_set<AttributePair>& CSGet(const AttributeSet& key) noexcept;
+    void CCPut(size_t key, size_t attribute_set) noexcept;
+    void CCPut(size_t key, int attribute) noexcept;
+    size_t CCGet(size_t key) noexcept;
+    void CSPut(size_t key, const AttributePair& value) noexcept;
+    std::unordered_set<AttributePair>& CSGet(size_t key) noexcept;
 
     void Initialize() noexcept;
 
