@@ -98,6 +98,8 @@ void Fastod::Initialize() noexcept {
 std::vector<CanonicalOD> Fastod::Discover() noexcept {
     Initialize();
 
+    // static double lastTime = 0;
+
     while (!context_in_each_level_[level_].empty()) {
         ComputeODs();
         if (IsTimeUp()) {
@@ -111,6 +113,8 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
         }
 
         level_++;
+        // std::cout << "level = " << level_ << " time = " << timer_.GetElapsedSeconds() - lastTime << "\n";
+        // lastTime = timer_.GetElapsedSeconds();
     }
 
     timer_.Stop();

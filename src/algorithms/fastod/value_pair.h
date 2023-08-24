@@ -14,8 +14,10 @@ private:
 public:
     ValuePair(SchemaValue const& data, SchemaValue const& index) noexcept;
 
-    SchemaValue GetFirst() const noexcept;
-    SchemaValue GetSecond() const noexcept;
+    const SchemaValue& GetFirst() const noexcept;
+    const SchemaValue& GetSecond() const noexcept;
+    SchemaValue& GetFirst() noexcept;
+    SchemaValue& GetSecond() noexcept;
 
     std::string ToString() const noexcept;
     friend bool operator<(const ValuePair& x, const ValuePair& y);

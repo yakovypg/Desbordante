@@ -4,6 +4,7 @@
 #include "operator_type.h"
 #include "single_attribute_predicate.h"
 #include "stripped_partition.h"
+#include "timer.h"
 
 using namespace algos::fastod;
 
@@ -15,22 +16,34 @@ CanonicalOD::CanonicalOD(size_t context, const SingleAttributePredicate& left, i
 CanonicalOD::CanonicalOD(size_t context, int right) noexcept : context_(context), left_({}), right_(right) {}
 
 bool CanonicalOD::IsValid(const DataFrame& data, double error_rate_threshold) const noexcept {
+    // static double timeStripped = 0, timeSwap = 0;
+    // std::cout << timeStripped << " " << timeSwap << std::endl;
+    // Timer timer1 = Timer(true);
+    // important
     StrippedPartition sp = StrippedPartition::GetStrippedPartition(context_, data);
+    // timeStripped += timer1.GetElapsedSeconds();
 
     if (error_rate_threshold == -1) {
-        if (!left_.has_value()) {
+        if (!left_) {
             split_check_count_++;
-            return !sp.Split(right_);
+            // timer1.Start();
+            bool res = !sp.Split(right_);
+            // timeSplit += timer1.GetElapsedSeconds();
+            return res;
         }
 
         swap_check_count_++;
 
-        return !sp.Swap(left_.value(), right_);
+        // timer1.Start();
+        // important
+        bool res = !sp.Swap(*left_, right_);
+        // timeSwap += timer1.GetElapsedSeconds();
+        return res;
     }
 
     long violation_count;
 
-    if (!left_.has_value()) {
+    if (!left_) {
         violation_count = sp.SplitRemoveCount(right_);
     } else {
         violation_count = sp.SwapRemoveCount(left_.value(), right_);

@@ -16,9 +16,9 @@ private:
     std::vector<int> begins_;
     const DataFrame& data_;
 
-    static long merge_time_;
-    static long validate_time_;
-    static long clone_time_;
+    static double merge_time_;
+    static double validate_time_;
+    static double clone_time_;
     static CacheWithLimit<size_t, StrippedPartition> cache_;
     
 public:
@@ -26,7 +26,7 @@ public:
     explicit StrippedPartition(const DataFrame& data) noexcept;
     StrippedPartition(const StrippedPartition& origin) noexcept;
 
-    StrippedPartition Product(int attribute) noexcept;
+    void Product(int attribute) noexcept;
 
     bool Split(int right) noexcept;
     bool Swap(const SingleAttributePredicate& left, int right) noexcept;
