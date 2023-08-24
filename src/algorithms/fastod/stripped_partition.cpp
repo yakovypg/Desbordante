@@ -14,10 +14,10 @@
 
 using namespace algos::fastod;
 
-long StrippedPartition::merge_time_ = 0;
-long StrippedPartition::validate_time_ = 0;
-long StrippedPartition::clone_time_ = 0;
-CacheWithLimit<size_t, StrippedPartition> StrippedPartition::cache_(1e4);
+double StrippedPartition::merge_time_ = 0;
+double StrippedPartition::validate_time_ = 0;
+double StrippedPartition::clone_time_ = 0;
+CacheWithLimit<size_t, StrippedPartition> StrippedPartition::cache_(1e8);
 
 StrippedPartition::StrippedPartition() : indexes_({}), begins_({}), data_(DataFrame()) { }
 
@@ -38,7 +38,7 @@ StrippedPartition::StrippedPartition(StrippedPartition const &origin) noexcept :
     begins_ = origin.begins_;
 }
 
-StrippedPartition StrippedPartition::Product(int attribute) noexcept {
+void StrippedPartition::Product(int attribute) noexcept {
     Timer timer = Timer(true);
 
     std::vector<int> new_indexes;
@@ -53,16 +53,15 @@ StrippedPartition StrippedPartition::Product(int attribute) noexcept {
 
         for (int i = group_begin; i < group_end; i++) {
             int index = indexes_[i];
-            auto value = data_.GetValue(index, attribute);
+            const auto& value = data_.GetValue(index, attribute);
 
-            if (subgroups.find(value) == subgroups.end()) {
+            if (subgroups.count(value) == 0)
                 subgroups[value] = {};
-            }
 
             subgroups[value].push_back(index);
         }
 
-        for (auto [_, new_group]: subgroups){
+        for (auto& [_, new_group]: subgroups){
             if (new_group.size() > 1){
                 new_begins.push_back(fill_pointer);
 
@@ -74,13 +73,11 @@ StrippedPartition StrippedPartition::Product(int attribute) noexcept {
         }
     }
 
-    indexes_ = new_indexes;
-    begins_ = new_begins;
+    indexes_ = std::move(new_indexes);
+    begins_ = std::move(new_begins);
     begins_.push_back(indexes_.size());
 
     merge_time_ += timer.GetElapsedSeconds();
-
-    return *this;
 }
 
 
@@ -90,11 +87,11 @@ bool StrippedPartition::Split(int right) noexcept {
     for (int begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
         int group_begin = begins_[begin_pointer];
         int group_end = begins_[begin_pointer + 1];
-        auto group_value = data_.GetValue(indexes_[group_begin], right);
+        const auto& group_value = data_.GetValue(indexes_[group_begin], right);
 
         for (int i = group_begin + 1; i < group_end; i++) {
             int index = indexes_[i];
-            auto value = data_.GetValue(index, right);
+            const auto& value = data_.GetValue(index, right);
 
             if (value != group_value) {
                 validate_time_ += timer.GetElapsedSeconds();
@@ -111,34 +108,43 @@ bool StrippedPartition::Split(int right) noexcept {
 
 bool StrippedPartition::Swap(const SingleAttributePredicate& left, int right) noexcept {
     Timer timer = Timer(true);
+    // Timer timer1(true);
+    // static double time1 = 0, time2 = 0, time3 = 0;
+    // std::cout << time1 << " " << time2 << " " << time3 << std::endl;
 
     for (int begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
         int group_begin = begins_[begin_pointer];
         int group_end = begins_[begin_pointer + 1];
         std::vector<ValuePair> values;
-
+        // timer1.Start();
         for (int i = group_begin; i < group_end; i++) {
             int index = indexes_[i];
 
-            values.push_back(ValuePair(
+            values.emplace_back(
                 data_.GetValue(index, left.GetAttribute()),
                 data_.GetValue(index, right)
-            ));
+            );
         }
+        // time1 += timer1.GetElapsedSeconds();
 
         // CHANGE: utilize operators
         // SCOPE: from here until the end of this loop
-        std::sort(values.begin(), values.end(), [&left](const ValuePair& a, const ValuePair& b) {
-            return left.GetOperator().Satisfy(a.GetFirst(), b.GetFirst()) && a.GetFirst() != b.GetFirst();
+        // timer1.Start();
+        const auto& op = left.GetOperator();
+        std::sort(values.begin(), values.end(), [&op](const ValuePair& a, const ValuePair& b) {
+            return op.Satisfy(a.GetFirst(), b.GetFirst()) && a.GetFirst() != b.GetFirst();
         });
+        // time2 += timer1.GetElapsedSeconds();
 
         int prev_group_max_index = 0;
         int current_group_max_index = 0;
         bool is_first_group = true;
-
+        
+        
         for (int i = 0; i < values.size(); i++) {
-            auto first = values[i].GetFirst();
-            auto second = values[i].GetSecond();
+            // timer1.Start();
+            const auto& first = values[i].GetFirst();
+            const auto& second = values[i].GetSecond();
 
             // values are sorted by "first"
             if (i != 0 && values[i - 1].GetFirst() != first) {
@@ -155,7 +161,8 @@ bool StrippedPartition::Swap(const SingleAttributePredicate& left, int right) no
                 validate_time_ += timer.GetElapsedSeconds();
                 return true;
             }
-        }
+            // time3 += timer1.GetElapsedSeconds();
+        }     
     }
 
     validate_time_ += timer.GetElapsedSeconds();
@@ -215,19 +222,20 @@ StrippedPartition StrippedPartition::GetStrippedPartition(size_t attribute_set, 
         size_t one_less = deleteAttribute(attribute_set, *attr);
         
         if (StrippedPartition::cache_.Contains(one_less)) {
-            result = StrippedPartition::cache_.Get(one_less).DeepClone().Product(*attr);
+            result = StrippedPartition::cache_.Get(one_less).DeepClone();
+            result->Product(*attr);
         }
     }
 
-    if (!result.has_value()) {
+    if (!result) {
         result = StrippedPartition(data);
 
         for (ASIterator attr = attrsBegin(attribute_set); attr != attrsEnd(attribute_set); ++attr) {
-            result.value().Product(*attr);
+            result->Product(*attr);
         }
     }
 
-    StrippedPartition::cache_.Set(attribute_set, result.value());
+    StrippedPartition::cache_.Set(attribute_set, *result);
 
     return result.value();
 }
@@ -244,10 +252,10 @@ long StrippedPartition::SplitRemoveCount(int right) noexcept {
         std::unordered_map<SchemaValue, int> group_int_2_count;
 
         for (int i = group_begin; i < group_end; i++) {
-            auto right_value = data_.GetValue(indexes_[i], right);
+            const auto& right_value = data_.GetValue(indexes_[i], right);
             
-            if (group_int_2_count.find(right_value) != group_int_2_count.end()) {
-                group_int_2_count[right_value] = group_int_2_count[right_value] + 1;
+            if (group_int_2_count.count(right_value) != 0) {
+                ++group_int_2_count[right_value];
             } else {
                 group_int_2_count[right_value] = 1;
             }
@@ -280,13 +288,13 @@ next_class:
 
         for (int i = group_begin; i < group_end; i++) {
             // CHANGE: was FiltereDataFrameGet
-            auto left_i = data_.GetValue(indexes_[i], left.GetAttribute());
-            auto right_i = data_.GetValue(indexes_[i], right);
+            const auto& left_i = data_.GetValue(indexes_[i], left.GetAttribute());
+            const auto& right_i = data_.GetValue(indexes_[i], right);
 
             for (int j = i + 1; j < group_end; j++) {
                 // CHANGE: was FiltereDataFrameGet
-                auto left_j = data_.GetValue(indexes_[j], left.GetAttribute());
-                auto right_j = data_.GetValue(indexes_[j], right);
+                const auto& left_j = data_.GetValue(indexes_[j], left.GetAttribute());
+                const auto& right_j = data_.GetValue(indexes_[j], right);
 
                 // CHANGE: this comparison now uses operators
                 // this is needed to get rid of FilteredDataFrameGet
@@ -318,13 +326,13 @@ next_class:
             deleted[delete_index] = true;
 
             // CHANGE: was FiltereDataFrameGet
-            auto left_i = data_.GetValue(indexes_[delete_index], left.GetAttribute());
-            auto right_i = data_.GetValue(indexes_[delete_index], right);
+            const auto& left_i = data_.GetValue(indexes_[delete_index], left.GetAttribute());
+            const auto& right_i = data_.GetValue(indexes_[delete_index], right);
 
             for (int j = group_begin; j < group_end; j++) {
                 // CHANGE: was FiltereDataFrameGet
-                auto left_j = data_.GetValue(indexes_[j], left.GetAttribute());
-                auto right_j = data_.GetValue(indexes_[j], right);
+                const auto& left_j = data_.GetValue(indexes_[j], left.GetAttribute());
+                const auto& right_j = data_.GetValue(indexes_[j], right);
 
                 // CHANGE: this comparison now uses operators
                 // this is needed to get rid of FilteredDataFrameGet
