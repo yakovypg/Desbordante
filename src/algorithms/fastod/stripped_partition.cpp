@@ -17,7 +17,7 @@ using namespace algos::fastod;
 long StrippedPartition::merge_time_ = 0;
 long StrippedPartition::validate_time_ = 0;
 long StrippedPartition::clone_time_ = 0;
-CacheWithLimit<AttributeSet, StrippedPartition> StrippedPartition::cache_(1e4);
+CacheWithLimit<size_t, StrippedPartition> StrippedPartition::cache_(1e4);
 
 StrippedPartition::StrippedPartition() : indexes_({}), begins_({}), data_(DataFrame()) { }
 
@@ -34,8 +34,8 @@ StrippedPartition::StrippedPartition(const DataFrame& data) noexcept : data_(std
 }
 
 StrippedPartition::StrippedPartition(StrippedPartition const &origin) noexcept : data_(origin.data_) {
-    indexes_ = std::vector<int>(origin.indexes_);
-    begins_ = std::vector<int>(origin.begins_);
+    indexes_ = origin.indexes_;
+    begins_ = origin.begins_;
 }
 
 StrippedPartition StrippedPartition::Product(int attribute) noexcept {
@@ -204,26 +204,26 @@ StrippedPartition StrippedPartition::DeepClone() const noexcept {
     return result;
 }
 
-StrippedPartition StrippedPartition::GetStrippedPartition(const AttributeSet& attribute_set, const DataFrame& data) noexcept {
+StrippedPartition StrippedPartition::GetStrippedPartition(size_t attribute_set, const DataFrame& data) noexcept {
     if (StrippedPartition::cache_.Contains(attribute_set)) {
         return StrippedPartition::cache_.Get(attribute_set);
     }
 
     std::optional<StrippedPartition> result;
 
-    for (int attribute : attribute_set) {
-        AttributeSet one_less = attribute_set.DeleteAttribute(attribute);
+    for (ASIterator attr = attrsBegin(attribute_set); attr != attrsEnd(attribute_set); ++attr) {
+        size_t one_less = deleteAttribute(attribute_set, *attr);
         
         if (StrippedPartition::cache_.Contains(one_less)) {
-            result = StrippedPartition::cache_.Get(one_less).DeepClone().Product(attribute);
+            result = StrippedPartition::cache_.Get(one_less).DeepClone().Product(*attr);
         }
     }
 
     if (!result.has_value()) {
         result = StrippedPartition(data);
 
-        for (int attribute : attribute_set) {
-            result.value().Product(attribute);
+        for (ASIterator attr = attrsBegin(attribute_set); attr != attrsEnd(attribute_set); ++attr) {
+            result.value().Product(*attr);
         }
     }
 

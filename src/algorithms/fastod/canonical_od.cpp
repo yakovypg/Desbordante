@@ -10,9 +10,9 @@ using namespace algos::fastod;
 int CanonicalOD::split_check_count_ = 0;
 int CanonicalOD::swap_check_count_ = 0;
 
-CanonicalOD::CanonicalOD(const AttributeSet& context, const SingleAttributePredicate& left, int right) noexcept : context_(std::move(context)), left_(std::move(left)), right_(right) {}
+CanonicalOD::CanonicalOD(size_t context, const SingleAttributePredicate& left, int right) noexcept : context_(context), left_(std::move(left)), right_(right) {}
 
-CanonicalOD::CanonicalOD(const AttributeSet& context, int right) noexcept : context_(std::move(context)), left_({}), right_(right) {}
+CanonicalOD::CanonicalOD(size_t context, int right) noexcept : context_(context), left_({}), right_(right) {}
 
 bool CanonicalOD::IsValid(const DataFrame& data, double error_rate_threshold) const noexcept {
     StrippedPartition sp = StrippedPartition::GetStrippedPartition(context_, data);
@@ -44,7 +44,7 @@ bool CanonicalOD::IsValid(const DataFrame& data, double error_rate_threshold) co
 std::string CanonicalOD::ToString() const noexcept {
     std::stringstream ss;
 
-    ss << context_.ToString() << " : ";
+    ss << ASToString(context_) << " : ";
 
     if (left_.has_value()) {
         ss << left_.value().ToString() << " ~ ";
@@ -67,12 +67,12 @@ bool operator==(CanonicalOD const& x, CanonicalOD const& y) {
 
 // TODO: Check whether x and y should be swapped
 bool operator<(CanonicalOD const& x, CanonicalOD const& y) {
-    const int attribute_count_difference = x.context_.GetAttributeCount() - y.context_.GetAttributeCount();
+    const int attribute_count_difference = getAttributeCount(x.context_) - getAttributeCount(y.context_);
     if (attribute_count_difference != 0) {
         return attribute_count_difference < 0;
     }
 
-    const int context_value_difference = x.context_.GetValue() - y.context_.GetValue();
+    const int context_value_difference = x.context_ - y.context_;
     if (context_value_difference != 0) {
         return context_value_difference < 0;
     }
