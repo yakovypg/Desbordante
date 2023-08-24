@@ -9,87 +9,41 @@ namespace algos::fastod {
 
 constexpr int MAX_COLS = 8 * sizeof(uint32_t);
 
-class AttributeSetIterator;
+class ASIterator;
 
-class AttributeSet {
-private:
-    uint32_t value_;
+size_t attributeSet(const std::initializer_list<int>&& attributes) noexcept;
+bool containsAttribute(size_t value, size_t attribute) noexcept;
+size_t addAttribute(size_t value, int attribute) noexcept;
+size_t deleteAttribute(size_t value, size_t attribute) noexcept;
+size_t intersect(size_t value1, size_t value2) noexcept;
+size_t difference(size_t value1, size_t value2) noexcept;
+bool isEmptyAS(size_t value) noexcept;
+std::string ASToString(size_t value) noexcept;
+std::size_t getAttributeCount(size_t value) noexcept;
 
-public:
-    AttributeSet() noexcept;
-    AttributeSet(int attribute) noexcept;
-    explicit AttributeSet(const std::vector<int>& attributes) noexcept;
-    explicit AttributeSet(const std::set<int>& set) noexcept;
+ASIterator attrsBegin(size_t value) noexcept;
+ASIterator attrsEnd(size_t value) noexcept;
 
-    bool ContainsAttribute(int attribute) const noexcept;
-    AttributeSet AddAttribute(int attribute) const noexcept;
-    AttributeSet DeleteAttribute(int attribute) const noexcept;
-
-    AttributeSet Intersect(const AttributeSet& other) const noexcept;
-    AttributeSet Union(const AttributeSet& other) const noexcept;
-    AttributeSet Difference(const AttributeSet& other) const noexcept;
-
-    bool IsEmpty() const noexcept;
-    std::string ToString() const noexcept;
-
-    std::size_t GetAttributeCount() const noexcept;
-    uint32_t GetValue() const noexcept;
-
-    AttributeSetIterator begin() const noexcept;
-    AttributeSetIterator end() const noexcept;
-
-    friend bool operator==(AttributeSet const& x, AttributeSet const& y) {
-        return x.value_ == y.value_;
-    }
-    friend bool operator<(const AttributeSet& x, const AttributeSet& y) {
-        return x.value_ < y.value_;
-    }
-
-    AttributeSet& operator=(const AttributeSet& other) = default;
-};
-
-struct AttributeSetIterator {
+struct ASIterator {
     using iterator_category = std::forward_iterator_tag;
     using difference_type   = std::ptrdiff_t;
     using value_type        = int;
     using pointer           = int*;
     using reference         = int&;
 
-    AttributeSetIterator(const AttributeSetIterator&) = default;
-    AttributeSetIterator(const AttributeSet& value, int poss = 0) : value_(value), pos(poss) {
-        while (pos < MAX_COLS && !value_.ContainsAttribute(pos))
-            ++pos;
-    }
+    ASIterator(const ASIterator&) = default;
+    ASIterator(size_t value, int pos = 0);
 
-    reference operator*() { return pos; }
-    pointer operator->() { return &pos; }
-    AttributeSetIterator& operator++() {
-        if (pos < MAX_COLS) {
-            ++pos;
-            while (pos < MAX_COLS && !value_.ContainsAttribute(pos))
-                ++pos;
-        }
-        return *this;
-    }  
-    AttributeSetIterator operator++(int) {
-        AttributeSetIterator tmp = *this;
-        ++(*this);
-        return tmp; 
-    }
-    friend bool operator== (const AttributeSetIterator& a, const AttributeSetIterator& b) { return a.value_ == b.value_ && a.pos == b.pos; };
-    friend bool operator!= (const AttributeSetIterator& a, const AttributeSetIterator& b) { return !(a == b); };
+    reference operator*();
+    pointer operator->();
+    ASIterator& operator++();
+    ASIterator operator++(int);
+    friend bool operator==(const ASIterator& a, const ASIterator& b);
+    friend bool operator!=(const ASIterator& a, const ASIterator& b);
 
 private:
-    AttributeSet value_;
-    int pos = 0;
+    size_t value_;
+    int pos_;
 };
 
-} // namespace algos::fastod 
-
-template <>
-struct std::hash<algos::fastod::AttributeSet>
-{
-    size_t operator()(const algos::fastod::AttributeSet& attr_set) const {
-        return attr_set.GetValue();
-    }
-};
+} // namespace algos::fastod

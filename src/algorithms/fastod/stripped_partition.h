@@ -19,7 +19,7 @@ private:
     static long merge_time_;
     static long validate_time_;
     static long clone_time_;
-    static CacheWithLimit<AttributeSet, StrippedPartition> cache_;
+    static CacheWithLimit<size_t, StrippedPartition> cache_;
     
 public:
     StrippedPartition();
@@ -33,7 +33,7 @@ public:
 
     std::string ToString() const noexcept;
     StrippedPartition DeepClone() const noexcept;
-    static StrippedPartition GetStrippedPartition(const AttributeSet& attribute_set, const DataFrame& data) noexcept;
+    static StrippedPartition GetStrippedPartition(size_t attribute_set, const DataFrame& data) noexcept;
 
     long SplitRemoveCount(int right) noexcept;
     long SwapRemoveCount(const SingleAttributePredicate& left, int right) noexcept;

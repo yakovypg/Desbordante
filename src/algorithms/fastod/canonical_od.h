@@ -10,15 +10,15 @@ namespace algos::fastod {
 
 class CanonicalOD {
 private:
-    AttributeSet const context_;
+    size_t context_;
     std::optional<SingleAttributePredicate> const left_;
     int const right_;
     static int split_check_count_;
     static int swap_check_count_;
 
 public:
-    CanonicalOD(const AttributeSet& context, const SingleAttributePredicate& left, int right) noexcept;
-    CanonicalOD(const AttributeSet& context, int right) noexcept;
+    CanonicalOD(size_t context, const SingleAttributePredicate& left, int right) noexcept;
+    CanonicalOD(size_t context, int right) noexcept;
 
     bool IsValid(const DataFrame& data, double error_rate_threshold) const noexcept;
     std::string ToString() const noexcept;

@@ -5,7 +5,7 @@ algos::fastod::CacheWithLimit<K, V>::CacheWithLimit(std::size_t max_size) noexce
 
 template <typename K, typename V>
 bool algos::fastod::CacheWithLimit<K, V>::Contains(const K& key) const noexcept {
-    return entries_.find(key) != entries_.end();
+    return entries_.count(key) != 0;
 }
 
 template <typename K, typename V>
