@@ -14,13 +14,15 @@ namespace algos::fastod {
 class DataFrame {
 private:
     std::vector<model::TypedColumnData> columns_data_;
+    std::vector<std::vector<SchemaValue>> data_;
 
 public:
     DataFrame() = default;
     DataFrame(const DataFrame&) = delete;
     explicit DataFrame(std::vector<model::TypedColumnData> columns_data) noexcept;
 
-    SchemaValue GetValue(int tuple_index, int attribute_index) const noexcept;
+    const SchemaValue& GetValue(int tuple_index, int attribute_index) const noexcept;
+    SchemaValue& GetValue(int tuple_index, int attribute_index) noexcept;
     
     std::size_t GetColumnCount() const noexcept;
     std::size_t GetTupleCount() const noexcept;

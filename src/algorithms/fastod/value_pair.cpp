@@ -6,14 +6,22 @@
 
 using namespace algos::fastod;
 
-ValuePair::ValuePair(SchemaValue const& first, SchemaValue const& second) noexcept : pair_(std::move(std::make_pair(first, second))) {}
+ValuePair::ValuePair(SchemaValue const& first, SchemaValue const& second) noexcept : pair_(std::make_pair(first, second)) {}
 
-SchemaValue ValuePair::GetFirst() const noexcept {
-    return this->pair_.first;
+const SchemaValue& ValuePair::GetFirst() const noexcept {
+    return pair_.first;
 }
 
-SchemaValue ValuePair::GetSecond() const noexcept {
-    return this->pair_.second;
+const SchemaValue& ValuePair::GetSecond() const noexcept {
+    return pair_.second;
+}
+
+SchemaValue& ValuePair::GetFirst() noexcept {
+    return pair_.first;
+}
+
+SchemaValue& ValuePair::GetSecond() noexcept {
+    return pair_.second;
 }
 
 std::string ValuePair::ToString() const noexcept {

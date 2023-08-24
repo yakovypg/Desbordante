@@ -12,11 +12,24 @@
 
 using namespace algos::fastod;
 
-DataFrame::DataFrame(std::vector<model::TypedColumnData> columns_data) noexcept
-    : columns_data_(std::move(columns_data)) { }
+DataFrame::DataFrame(std::vector<model::TypedColumnData> columns_data) noexcept : columns_data_(std::move(columns_data)) {
+    assert(columns_data_.size() != 0);
+    size_t numRows = columns_data_[0].GetNumRows();
+    data_.reserve(numRows);
+    for (size_t i = 0; i < numRows; ++i) {
+        data_.emplace_back(columns_data_.size());
+        for (size_t col = 0; col < columns_data_.size(); ++col) {
+            data_.back()[col] = SchemaValue::FromTypedColumnData(columns_data_[col], i);
+        }
+    }
+}
 
-SchemaValue DataFrame::GetValue(int tuple_index, int attribute_index) const noexcept {
-    return SchemaValue::FromTypedColumnData(columns_data_.at(attribute_index), tuple_index);
+const SchemaValue& DataFrame::GetValue(int tuple_index, int attribute_index) const noexcept {
+    return data_[tuple_index][attribute_index];
+}
+
+SchemaValue& DataFrame::GetValue(int tuple_index, int attribute_index) noexcept {
+    return data_[tuple_index][attribute_index];
 }
 
 std::size_t DataFrame::GetColumnCount() const noexcept {
