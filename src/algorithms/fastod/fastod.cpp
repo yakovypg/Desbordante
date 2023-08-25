@@ -7,6 +7,7 @@
 #include "fastod.h"
 #include "operator_type.h"
 #include "single_attribute_predicate.h"
+#include "stripped_partition.h"
 
 using namespace algos::fastod;
 
@@ -29,32 +30,34 @@ void Fastod::CCPut(size_t key, size_t attribute_set) noexcept {
     cc_[key] = attribute_set;
 }
 
-void Fastod::CCPut(size_t key, int attribute) noexcept {
-    if (cc_.count(key) == 0)
-        cc_[key] = {};
-
-    cc_[key] = addAttribute(cc_[key], attribute);
-}
-
 size_t Fastod::CCGet(size_t key) noexcept {
-    if (cc_.count(key) == 0)
-        cc_[key] = {};
-
-    return cc_[key];
+    const auto it = cc_.find(key);
+    if (it != cc_.cend())
+        return it->second;
+    return cc_[key] = 0;
 }
 
 void Fastod::CSPut(size_t key, const AttributePair& value) noexcept {
-    if (cs_.count(key) == 0)
-        cs_[key] = {};
+    const auto it = cs_.find(key);
+    if (it != cs_.cend())
+        it->second.emplace(value);
+    else
+        cs_[key] = {value};
+}
 
-    cs_[key].insert(value);
+void Fastod::CSPut(size_t key, AttributePair&& value) noexcept {
+    const auto it = cs_.find(key);
+    if (it != cs_.cend())
+        it->second.emplace(std::move(value));
+    else
+        cs_[key] = {std::move(value)};
 }
 
 std::unordered_set<AttributePair>& Fastod::CSGet(size_t key) noexcept {
-    if (cs_.count(key) == 0)
-        cs_[key] = {};
-
-    return cs_[key];
+    const auto it = cs_.find(key);
+    if (it != cs_.cend())
+        return it->second;
+    return cs_[key] = {};
 }
 
 void Fastod::PrintStatistics() const noexcept {
@@ -80,16 +83,17 @@ void Fastod::Initialize() noexcept {
 
     context_in_each_level_.push_back({});
     context_in_each_level_[0].insert(empty_set);
-
-    for (int i = 0; i < data_.GetColumnCount(); i++) {
+    size_t put_value = 0;
+    for (size_t i = 0; i < data_.GetColumnCount(); i++) {
         schema_ = addAttribute(schema_, i);
-        CCPut(empty_set, i);
+        put_value += 1 << i;
     }
+    CCPut(empty_set, put_value);
 
     level_ = 1;
     std::unordered_set<size_t> level_1_candidates;
 
-    for (int i = 0; i < data_.GetColumnCount(); i++)
+    for (size_t i = 0; i < data_.GetColumnCount(); i++)
         level_1_candidates.emplace(1 << i);
 
     context_in_each_level_.emplace_back(std::move(level_1_candidates));
@@ -105,7 +109,6 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
         if (IsTimeUp()) {
             break;
         }
-
         PruneLevels();
         CalculateNextLevel();
         if (IsTimeUp()) {
@@ -116,6 +119,7 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
         // std::cout << "level = " << level_ << " time = " << timer_.GetElapsedSeconds() - lastTime << "\n";
         // lastTime = timer_.GetElapsedSeconds();
     }
+    // std::cout << time1 << " " << time2 << " " << time3 << std::endl;
 
     timer_.Stop();
 
@@ -129,12 +133,13 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
               << "ODs found: " << fd_count_ + ocd_count_ << '\n'
               << "FDs found: " << fd_count_ << '\n'
               << "OCDs found: " << ocd_count_ << '\n';
-
+    // std::cout << StrippedPartition::time1 << " " << StrippedPartition::time2 << " " << StrippedPartition::time3 << std::endl;
     return result_;
 }
 
 void Fastod::ComputeODs() noexcept {
     const auto& context_this_level = context_in_each_level_[level_];
+    Timer timer(true);
     for (size_t context : context_this_level) {
         if (IsTimeUp()) {
             is_complete_ = false;
@@ -142,16 +147,15 @@ void Fastod::ComputeODs() noexcept {
         }
 
         size_t context_cc = schema_;
-
         for (ASIterator it = attrsBegin(context); it != attrsEnd(context); ++it) {
-            context_cc = intersect(context_cc, CCGet(deleteAttribute(context, *it)));
+            context_cc &= intersect(context_cc, CCGet(deleteAttribute(context, *it)));
         }
 
         CCPut(context, context_cc);
 
         if (level_ == 2) {
-            for (int i = 0; i < data_.GetColumnCount(); i++) {
-                for (int j = 0; j < data_.GetColumnCount(); j++) {
+            for (size_t i = 0; i < data_.GetColumnCount(); i++) {
+                for (size_t j = 0; j < data_.GetColumnCount(); j++) {
                     if (i == j) {
                         continue;
                     }
@@ -163,12 +167,9 @@ void Fastod::ComputeODs() noexcept {
             }
         } else if (level_ > 2) {
             std::unordered_set<AttributePair> candidate_cs_pair_set;
-            
             for (ASIterator attr = attrsBegin(context); attr != attrsEnd(context); ++attr) {
-                const auto& cs = CSGet(deleteAttribute(context, *attr));
-
-                for (const AttributePair& pair : cs) {
-                    candidate_cs_pair_set.insert(pair);
+                for (const AttributePair& pair : CSGet(deleteAttribute(context, *attr))) {
+                    candidate_cs_pair_set.emplace(pair);
                 }
             }
 
@@ -199,7 +200,7 @@ void Fastod::ComputeODs() noexcept {
         }
 
         size_t context_intersect_cc_context = intersect(context, CCGet(context));
-        
+        // Timer timer(true);
         for (ASIterator attr = attrsBegin(context_intersect_cc_context);
             attr != attrsEnd(context_intersect_cc_context); ++attr) {
             CanonicalOD od(deleteAttribute(context, *attr), *attr);
@@ -216,49 +217,55 @@ void Fastod::ComputeODs() noexcept {
                 //PrintStatistics();
             }
         }
+        
 
         auto& cs_for_con = CSGet(context);
         for (auto it = cs_for_con.begin(); it != cs_for_con.end();) {
-            int a = it->GetLeft().GetAttribute();
-            int b = it->GetRight();
+            size_t a = it->GetLeft().GetAttribute();
+            size_t b = it->GetRight();
 
             if (containsAttribute(CCGet(deleteAttribute(context, b)), a) &&
                 containsAttribute(CCGet(deleteAttribute(context, a)), b)) {
+                // timer.Start();
                 CanonicalOD od(deleteAttribute(deleteAttribute(context, a), b), it->GetLeft(), b);
-                if (od.IsValid(data_, error_rate_threshold_)) {
+                // time1 += timer.GetElapsedSeconds();
+                // timer.Start();
+                
+                bool isValid = od.IsValid(data_, error_rate_threshold_);
+                // time2 += timer.GetElapsedSeconds();
+                // timer.Start();
+                if (isValid) {
                     ++ocd_count_;
                     result_.emplace_back(std::move(od));
                     cs_for_con.erase(it++);
                 } else {
                     ++it;
                 }
+                // time3 += timer.GetElapsedSeconds();
             } else {
                 cs_for_con.erase(it++);
             }
         }
+        // time2 += timer.GetElapsedSeconds();
     }
 }
 
 void Fastod::PruneLevels() noexcept {
     if (level_ >= 2) {
-        std::vector<size_t> nodes_to_remove;
-
         auto& contexts = context_in_each_level_[level_];
 
-        for (size_t attribute_set : contexts) {
-            if (isEmptyAS(CCGet(attribute_set)) && CSGet(attribute_set).empty()) {
-                nodes_to_remove.push_back(attribute_set);
-            }
-        }
-        
-        for (size_t attribute_set : nodes_to_remove) {
-            contexts.erase(attribute_set);
+        for (auto attribute_set_it = contexts.begin();
+            attribute_set_it != contexts.end();) {
+            if (isEmptyAS(CCGet(*attribute_set_it)) && CSGet(*attribute_set_it).empty())
+                contexts.erase(attribute_set_it++);
+            else
+                ++attribute_set_it;
         }
     }
 }
 
 void Fastod::CalculateNextLevel() noexcept {
-    std::unordered_map<size_t, std::vector<int>> prefix_blocks;
+    std::unordered_map<size_t, std::vector<size_t>> prefix_blocks;
     std::unordered_set<size_t> context_next_level;
 
     const auto& context_this_level = context_in_each_level_[level_];
@@ -269,7 +276,7 @@ void Fastod::CalculateNextLevel() noexcept {
             size_t prefix = deleteAttribute(attribute_set, *attr);
 
             if (prefix_blocks.count(prefix) == 0)
-                prefix_blocks[prefix] = std::vector<int>();
+                prefix_blocks[prefix] = std::vector<size_t>();
 
             prefix_blocks[prefix].push_back(*attr);
         }
@@ -284,14 +291,14 @@ void Fastod::CalculateNextLevel() noexcept {
         if (single_attributes.size() <= 1)
             continue;
 
-        for (int i = 0; i < single_attributes.size(); ++i) {
-            for (int j = i + 1; j < single_attributes.size(); ++j) {
+        for (size_t i = 0; i < single_attributes.size(); ++i) {
+            for (size_t j = i + 1; j < single_attributes.size(); ++j) {
                 bool create_context = true;
                 size_t candidate = addAttribute(addAttribute(prefix,
                     single_attributes[i]), single_attributes[j]);
                 for (ASIterator attr = attrsBegin(candidate); 
                     attr != attrsEnd(candidate); ++attr) {
-                    if (context_this_level.find(deleteAttribute(candidate, *attr)) == context_this_level.end()) {
+                    if (context_this_level.count(deleteAttribute(candidate, *attr)) == 0) {
                         create_context = false;
                         break;
                     }

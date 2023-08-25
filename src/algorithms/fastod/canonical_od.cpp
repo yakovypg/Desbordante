@@ -26,9 +26,7 @@ bool CanonicalOD::IsValid(const DataFrame& data, double error_rate_threshold) co
     if (error_rate_threshold == -1) {
         if (!left_) {
             split_check_count_++;
-            // timer1.Start();
             bool res = !sp.Split(right_);
-            // timeSplit += timer1.GetElapsedSeconds();
             return res;
         }
 

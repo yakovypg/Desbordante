@@ -11,10 +11,10 @@ using namespace algos::fastod;
 
 std::vector<std::vector<SingleAttributePredicate>> SingleAttributePredicate::cache_;
 
-SingleAttributePredicate::SingleAttributePredicate(int attribute, Operator const& op) noexcept
-    : attribute_(attribute), operator_(std::move(op)) { }
+SingleAttributePredicate::SingleAttributePredicate(size_t attribute, Operator const& op) noexcept
+    : attribute_(attribute), operator_(op) { }
 
-int SingleAttributePredicate::GetAttribute() const noexcept {
+size_t SingleAttributePredicate::GetAttribute() const noexcept {
     return attribute_;
 }
 
@@ -26,20 +26,20 @@ std::string SingleAttributePredicate::ToString() const {
     return std::to_string(attribute_ + 1) + operator_.ToString();
 }
 
-int SingleAttributePredicate::GetHashCode() const noexcept {
+size_t SingleAttributePredicate::GetHashCode() const noexcept {
     return attribute_;
 }
 
 bool SingleAttributePredicate::Violate(DataFrame const& data,
-                                       int first_tuple_index,
-                                       int second_tuple_index) const noexcept {
+                                       size_t first_tuple_index,
+                                       size_t second_tuple_index) const noexcept {
     SchemaValue const& first_value = data.GetValue(first_tuple_index, attribute_);
     SchemaValue const& second_value = data.GetValue(second_tuple_index, attribute_);
     
     return operator_.Violate(first_value, second_value);
 }
 
-SingleAttributePredicate SingleAttributePredicate::GetInstance(int attribute, Operator const& op) {
+SingleAttributePredicate SingleAttributePredicate::GetInstance(size_t attribute, Operator const& op) {
     while (attribute >= cache_.size()) {
         std::vector<SingleAttributePredicate> predicates;
 
@@ -51,7 +51,7 @@ SingleAttributePredicate SingleAttributePredicate::GetInstance(int attribute, Op
     }
 
     std::vector<SingleAttributePredicate> const& predicates = cache_[attribute];
-    int predicate_index = op.GetTypeAsInt();
+    size_t predicate_index = op.GetTypeAsInt();
     
     return predicates[predicate_index];
 }

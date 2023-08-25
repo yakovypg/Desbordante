@@ -9,6 +9,7 @@
 
 #include "data_frame.h"
 #include "schema_value.h"
+#include "attribute_set.h"
 
 using namespace algos::fastod;
 
@@ -22,6 +23,7 @@ DataFrame::DataFrame(std::vector<model::TypedColumnData> columns_data) noexcept 
             data_.back()[col] = SchemaValue::FromTypedColumnData(columns_data_[col], i);
         }
     }
+    ASIterator::MAX_COLS = columns_data_.size();
 }
 
 const SchemaValue& DataFrame::GetValue(int tuple_index, int attribute_index) const noexcept {

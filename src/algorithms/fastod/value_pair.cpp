@@ -38,4 +38,8 @@ bool operator<(const ValuePair& x, const ValuePair& y) {
     return x.GetFirst() < y.GetFirst();
 }
 
+bool operator>(const ValuePair& x, const ValuePair& y) {
+    return y.GetFirst() < x.GetFirst();
+}
+
 } // namespace algos::fastod
