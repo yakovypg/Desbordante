@@ -7,13 +7,11 @@
 
 namespace algos::fastod {
 
-constexpr int MAX_COLS = 8 * sizeof(uint32_t);
-
 class ASIterator;
 
-size_t attributeSet(const std::initializer_list<int>&& attributes) noexcept;
+size_t attributeSet(const std::initializer_list<size_t>&& attributes) noexcept;
 bool containsAttribute(size_t value, size_t attribute) noexcept;
-size_t addAttribute(size_t value, int attribute) noexcept;
+size_t addAttribute(size_t value, size_t attribute) noexcept;
 size_t deleteAttribute(size_t value, size_t attribute) noexcept;
 size_t intersect(size_t value1, size_t value2) noexcept;
 size_t difference(size_t value1, size_t value2) noexcept;
@@ -27,12 +25,13 @@ ASIterator attrsEnd(size_t value) noexcept;
 struct ASIterator {
     using iterator_category = std::forward_iterator_tag;
     using difference_type   = std::ptrdiff_t;
-    using value_type        = int;
-    using pointer           = int*;
-    using reference         = int&;
+    using value_type        = size_t;
+    using pointer           = size_t*;
+    using reference         = size_t&;
+    static size_t MAX_COLS;
 
     ASIterator(const ASIterator&) = default;
-    ASIterator(size_t value, int pos = 0);
+    ASIterator(size_t value, size_t pos = 0);
 
     reference operator*();
     pointer operator->();
@@ -43,7 +42,7 @@ struct ASIterator {
 
 private:
     size_t value_;
-    int pos_;
+    size_t pos_;
 };
 
 } // namespace algos::fastod
