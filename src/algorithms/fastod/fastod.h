@@ -18,11 +18,11 @@ class Fastod/*: public Algorithm*/ {
 private:
     const long time_limit_;
     bool is_complete_ = true;
-    int level_;
+    size_t level_;
     double error_rate_threshold_ = -1;
-    int od_count_ = 0;
-    int fd_count_ = 0;
-    int ocd_count_ = 0;
+    size_t od_count_ = 0;
+    size_t fd_count_ = 0;
+    size_t ocd_count_ = 0;
 
     std::vector<CanonicalOD> result_;
     std::vector<std::unordered_set<size_t>> context_in_each_level_;
@@ -39,9 +39,9 @@ private:
     bool IsTimeUp() const noexcept;
     
     void CCPut(size_t key, size_t attribute_set) noexcept;
-    void CCPut(size_t key, int attribute) noexcept;
     size_t CCGet(size_t key) noexcept;
     void CSPut(size_t key, const AttributePair& value) noexcept;
+    void CSPut(size_t key, AttributePair&& value) noexcept;
     std::unordered_set<AttributePair>& CSGet(size_t key) noexcept;
 
     void Initialize() noexcept;
@@ -49,6 +49,8 @@ private:
     void ComputeODs() noexcept;
     void PruneLevels() noexcept;
     void CalculateNextLevel() noexcept;
+
+    double time1 = 0, time2 = 0, time3 = 0;
 
 public:
     Fastod(const DataFrame& data, long time_limit, double error_rate_threshold) noexcept;

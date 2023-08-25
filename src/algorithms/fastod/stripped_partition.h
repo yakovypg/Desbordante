@@ -15,10 +15,6 @@ private:
     std::vector<int> indexes_;
     std::vector<int> begins_;
     const DataFrame& data_;
-
-    static double merge_time_;
-    static double validate_time_;
-    static double clone_time_;
     static CacheWithLimit<size_t, StrippedPartition> cache_;
     
 public:

@@ -7,16 +7,18 @@
 
 namespace algos::fastod {
 
-size_t attributeSet(const std::initializer_list<int>&& attributes) noexcept {
+size_t ASIterator::MAX_COLS = 32;
+
+size_t attributeSet(const std::initializer_list<size_t>&& attributes) noexcept {
     return std::accumulate(attributes.begin(), attributes.end(), 0, 
-        [](const uint32_t& acc, const int curr){ return acc + (1 << curr); });
+        [](size_t acc, size_t curr){ return acc + (1 << curr); });
 }
 
 bool containsAttribute(size_t value, size_t attribute) noexcept {
     return (value & (1 << attribute)) != 0;
 }
 
-size_t addAttribute(size_t value, int attribute) noexcept {
+size_t addAttribute(size_t value, size_t attribute) noexcept {
     if(containsAttribute(value, attribute)){
         return value;
     }
@@ -65,7 +67,7 @@ std::size_t getAttributeCount(size_t value) noexcept {
     return count;
 }
 
-ASIterator::ASIterator(size_t value, int pos) : value_(value), pos_(pos) {
+ASIterator::ASIterator(size_t value, size_t pos) : value_(value), pos_(pos) {
     while (pos_ < MAX_COLS && !containsAttribute(value_, pos_))
         ++pos_;
 }
@@ -75,17 +77,14 @@ ASIterator attrsBegin(size_t value) noexcept {
 }
 
 ASIterator attrsEnd(size_t value) noexcept {
-    return ASIterator(value, MAX_COLS);
+    return ASIterator(value, ASIterator::MAX_COLS);
 }
 
 ASIterator::reference ASIterator::operator*() { return pos_; }
 ASIterator::pointer ASIterator::operator->() { return &pos_; }
 ASIterator& ASIterator::operator++() {
-    if (pos_ < MAX_COLS) {
-        ++pos_;
-        while (pos_ < MAX_COLS && !containsAttribute(value_, pos_))
-            ++pos_;
-    }
+    if (pos_ < MAX_COLS)
+        while ((++pos_) < MAX_COLS && (value_ & (1 << pos_)) == 0);
     return *this;
 }  
 ASIterator ASIterator::operator++(int) {
@@ -95,7 +94,7 @@ ASIterator ASIterator::operator++(int) {
 }
 
 bool operator==(const ASIterator& a, const ASIterator& b) { 
-    return a.value_ == b.value_ && a.pos_ == b.pos_; 
+    return a.pos_ == b.pos_ && a.value_ == b.value_; 
 };
 
 bool operator!=(const ASIterator& a, const ASIterator& b) {

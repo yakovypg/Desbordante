@@ -21,6 +21,7 @@ public:
 
     std::string ToString() const noexcept;
     friend bool operator<(const ValuePair& x, const ValuePair& y);
+    friend bool operator>(const ValuePair& x, const ValuePair& y);
 };
 
 } //namespace algos::fastod
