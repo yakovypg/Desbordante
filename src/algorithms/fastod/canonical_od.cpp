@@ -16,12 +16,8 @@ CanonicalOD::CanonicalOD(size_t context, const SingleAttributePredicate& left, i
 CanonicalOD::CanonicalOD(size_t context, int right) noexcept : context_(context), left_({}), right_(right) {}
 
 bool CanonicalOD::IsValid(const DataFrame& data, double error_rate_threshold) const noexcept {
-    // static double timeStripped = 0, timeSwap = 0;
-    // std::cout << timeStripped << " " << timeSwap << std::endl;
-    // Timer timer1 = Timer(true);
     // important
     StrippedPartition sp = StrippedPartition::GetStrippedPartition(context_, data);
-    // timeStripped += timer1.GetElapsedSeconds();
 
     if (error_rate_threshold == -1) {
         if (!left_) {
@@ -31,11 +27,8 @@ bool CanonicalOD::IsValid(const DataFrame& data, double error_rate_threshold) co
         }
 
         swap_check_count_++;
-
-        // timer1.Start();
         // important
         bool res = !sp.Swap(*left_, right_);
-        // timeSwap += timer1.GetElapsedSeconds();
         return res;
     }
 

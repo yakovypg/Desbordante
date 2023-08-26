@@ -50,8 +50,6 @@ private:
     void PruneLevels() noexcept;
     void CalculateNextLevel() noexcept;
 
-    double time1 = 0, time2 = 0, time3 = 0;
-
 public:
     Fastod(const DataFrame& data, long time_limit, double error_rate_threshold) noexcept;
     Fastod(const DataFrame& data, long time_limit) noexcept;
