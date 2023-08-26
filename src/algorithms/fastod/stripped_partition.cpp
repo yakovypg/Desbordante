@@ -14,12 +14,7 @@
 
 using namespace algos::fastod;
 
-// double StrippedPartition::merge_time_ = 0;
-// double StrippedPartition::validate_time_ = 0;
-// double StrippedPartition::clone_time_ = 0;
-// double StrippedPartition::time1 = 0;
-// double StrippedPartition::time2 = 0;
-// double StrippedPartition::time3 = 0;
+// important
 CacheWithLimit<size_t, StrippedPartition> StrippedPartition::cache_(1e8);
 
 StrippedPartition::StrippedPartition() : indexes_({}), begins_({}), data_(DataFrame()) { }
@@ -43,7 +38,6 @@ StrippedPartition::StrippedPartition(StrippedPartition const &origin) noexcept :
 }
 
 void StrippedPartition::Product(int attribute) noexcept {
-    // Timer timer = Timer(true);
 
     std::vector<int> new_indexes;
     std::vector<int> new_begins;
@@ -78,13 +72,10 @@ void StrippedPartition::Product(int attribute) noexcept {
     indexes_ = std::move(new_indexes);
     begins_ = std::move(new_begins);
     begins_.push_back(indexes_.size());
-
-    // merge_time_ += timer.GetElapsedSeconds();
 }
 
 
 bool StrippedPartition::Split(int right) noexcept {
-    // Timer timer = Timer(true);
 
     for (int begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
         int group_begin = begins_[begin_pointer];
@@ -96,14 +87,11 @@ bool StrippedPartition::Split(int right) noexcept {
             const auto& value = data_.GetValue(index, right);
 
             if (value != group_value) {
-                // validate_time_ += timer.GetElapsedSeconds();
 
                 return true;
             }
         }
     }
-
-    // validate_time_ += timer.GetElapsedSeconds();
 
     return false;
 }
@@ -129,10 +117,6 @@ bool StrippedPartition::Swap(const SingleAttributePredicate& left, int right) no
             std::sort(values.begin(), values.end());
         else
             std::sort(values.begin(), values.end(), std::greater<>());
-        // const auto& op = left.GetOperator();
-        // std::sort(values.begin(), values.end(), [&op](const ValuePair& a, const ValuePair& b) {
-        //     return op.Satisfy(a.GetFirst(), b.GetFirst()) && a.GetFirst() != b.GetFirst();
-        // });
 
         int prev_group_max_index = 0;
         int current_group_max_index = 0;
@@ -193,14 +177,9 @@ std::string StrippedPartition::ToString() const noexcept {
 }
 
 StrippedPartition StrippedPartition::DeepClone() const noexcept {
-    // Timer timer = Timer(true);
     StrippedPartition result(data_);
-
     result.indexes_ = indexes_;
     result.begins_ = begins_;
-
-    // clone_time_ += timer.GetElapsedSeconds();
-    
     return result;
 }
 
@@ -234,7 +213,6 @@ StrippedPartition StrippedPartition::GetStrippedPartition(size_t attribute_set, 
 }
 
 long StrippedPartition::SplitRemoveCount(int right) noexcept {
-    // Timer timer = Timer(true);
     long result = 0;
 
     for (int begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
@@ -262,8 +240,6 @@ long StrippedPartition::SplitRemoveCount(int right) noexcept {
 
         result += group_length - max;
     }
-    
-    // validate_time_ += timer.GetElapsedSeconds();
 
     return result;
 }
@@ -350,9 +326,6 @@ StrippedPartition& StrippedPartition::operator=(const StrippedPartition& other) 
     
     indexes_ = other.indexes_;
     begins_ = other.begins_;
-    // merge_time_ = other.merge_time_;
-    // validate_time_ = other.validate_time_;
-    // clone_time_ = other.clone_time_;
 
     return *this;
 }
