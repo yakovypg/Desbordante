@@ -102,8 +102,6 @@ void Fastod::Initialize() noexcept {
 std::vector<CanonicalOD> Fastod::Discover() noexcept {
     Initialize();
 
-    // static double lastTime = 0;
-
     while (!context_in_each_level_[level_].empty()) {
         ComputeODs();
         if (IsTimeUp()) {
@@ -116,10 +114,7 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
         }
 
         level_++;
-        // std::cout << "level = " << level_ << " time = " << timer_.GetElapsedSeconds() - lastTime << "\n";
-        // lastTime = timer_.GetElapsedSeconds();
     }
-    // std::cout << time1 << " " << time2 << " " << time3 << std::endl;
 
     timer_.Stop();
 
@@ -133,7 +128,6 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
               << "ODs found: " << fd_count_ + ocd_count_ << '\n'
               << "FDs found: " << fd_count_ << '\n'
               << "OCDs found: " << ocd_count_ << '\n';
-    // std::cout << StrippedPartition::time1 << " " << StrippedPartition::time2 << " " << StrippedPartition::time3 << std::endl;
     return result_;
 }
 
@@ -148,7 +142,7 @@ void Fastod::ComputeODs() noexcept {
 
         size_t context_cc = schema_;
         for (ASIterator it = attrsBegin(context); it != attrsEnd(context); ++it) {
-            context_cc &= intersect(context_cc, CCGet(deleteAttribute(context, *it)));
+            context_cc = intersect(context_cc, CCGet(deleteAttribute(context, *it)));
         }
 
         CCPut(context, context_cc);
@@ -200,7 +194,6 @@ void Fastod::ComputeODs() noexcept {
         }
 
         size_t context_intersect_cc_context = intersect(context, CCGet(context));
-        // Timer timer(true);
         for (ASIterator attr = attrsBegin(context_intersect_cc_context);
             attr != attrsEnd(context_intersect_cc_context); ++attr) {
             CanonicalOD od(deleteAttribute(context, *attr), *attr);
@@ -226,27 +219,19 @@ void Fastod::ComputeODs() noexcept {
 
             if (containsAttribute(CCGet(deleteAttribute(context, b)), a) &&
                 containsAttribute(CCGet(deleteAttribute(context, a)), b)) {
-                // timer.Start();
                 CanonicalOD od(deleteAttribute(deleteAttribute(context, a), b), it->GetLeft(), b);
-                // time1 += timer.GetElapsedSeconds();
-                // timer.Start();
                 
-                bool isValid = od.IsValid(data_, error_rate_threshold_);
-                // time2 += timer.GetElapsedSeconds();
-                // timer.Start();
-                if (isValid) {
+                if (od.IsValid(data_, error_rate_threshold_)) {
                     ++ocd_count_;
                     result_.emplace_back(std::move(od));
                     cs_for_con.erase(it++);
                 } else {
                     ++it;
                 }
-                // time3 += timer.GetElapsedSeconds();
             } else {
                 cs_for_con.erase(it++);
             }
         }
-        // time2 += timer.GetElapsedSeconds();
     }
 }
 
