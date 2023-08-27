@@ -23,6 +23,10 @@ private:
 public:
     SchemaValue() noexcept;
     SchemaValue(model::TypeId type_id, model::Type const* type, std::byte const* value) noexcept;
+    SchemaValue(const SchemaValue&) = default;
+    SchemaValue &operator=(const SchemaValue&) = default;
+    SchemaValue(SchemaValue&&) noexcept = default;
+    SchemaValue &operator=(SchemaValue&&) noexcept = default;
 
     model::TypeId GetTypeId() const noexcept;
     std::byte const* GetValue() const noexcept;
