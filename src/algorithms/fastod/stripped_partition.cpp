@@ -15,11 +15,11 @@
 using namespace algos::fastod;
 
 // important
-CacheWithLimit<size_t, StrippedPartition> StrippedPartition::cache_(1e8);
+CacheWithLimit<size_t, StrippedPartition> StrippedPartition::cache_(1e4);
 
 StrippedPartition::StrippedPartition() : indexes_({}), begins_({}), data_(DataFrame()) { }
 
-StrippedPartition::StrippedPartition(const DataFrame& data) noexcept : data_(std::move(data)) {
+StrippedPartition::StrippedPartition(const DataFrame& data) : data_(std::move(data)) {
     indexes_.reserve(data.GetTupleCount());
     for (int i = 0; i < data.GetTupleCount(); i++) {
         indexes_.push_back(i);
@@ -30,11 +30,6 @@ StrippedPartition::StrippedPartition(const DataFrame& data) noexcept : data_(std
     }
 
     begins_.push_back(data.GetTupleCount());
-}
-
-StrippedPartition::StrippedPartition(StrippedPartition const &origin) noexcept : data_(origin.data_) {
-    indexes_ = origin.indexes_;
-    begins_ = origin.begins_;
 }
 
 void StrippedPartition::Product(int attribute) noexcept {
@@ -60,8 +55,8 @@ void StrippedPartition::Product(int attribute) noexcept {
         }
 
         new_begins.reserve(new_begins.size() + subgroups.size());
-        for (auto& [_, new_group]: subgroups){
-            if (new_group.size() > 1){
+        for (auto& [_, new_group]: subgroups) {
+            if (new_group.size() > 1) {
                 new_begins.push_back(fill_pointer);
                 fill_pointer += new_group.size();
                 new_indexes.insert(new_indexes.end(), new_group.begin(), new_group.end());
@@ -96,6 +91,7 @@ bool StrippedPartition::Split(int right) noexcept {
     return false;
 }
 
+// template <typename T1, typename T2>
 bool StrippedPartition::Swap(const SingleAttributePredicate& left, int right) noexcept {
     for (int begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
         int group_begin = begins_[begin_pointer];
@@ -132,16 +128,14 @@ bool StrippedPartition::Swap(const SingleAttributePredicate& left, int right) no
                 is_first_group = false;
                 prev_group_max_index = current_group_max_index;
                 current_group_max_index = i;
-            }
-
-            if (values[current_group_max_index].GetSecond() <= second) {
+            } else if (values[current_group_max_index].GetSecond() <= second) {
                 current_group_max_index = i;
             }
 
             if (!is_first_group && values[prev_group_max_index].GetSecond() > second) {
                 return true;
             }
-        }     
+        }
     }
 
     return false;
@@ -177,10 +171,7 @@ std::string StrippedPartition::ToString() const noexcept {
 }
 
 StrippedPartition StrippedPartition::DeepClone() const noexcept {
-    StrippedPartition result(data_);
-    result.indexes_ = indexes_;
-    result.begins_ = begins_;
-    return result;
+    return StrippedPartition(*this);
 }
 
 StrippedPartition StrippedPartition::GetStrippedPartition(size_t attribute_set, const DataFrame& data) noexcept {
@@ -192,7 +183,7 @@ StrippedPartition StrippedPartition::GetStrippedPartition(size_t attribute_set, 
 
     for (ASIterator attr = attrsBegin(attribute_set); attr != attrsEnd(attribute_set); ++attr) {
         size_t one_less = deleteAttribute(attribute_set, *attr);
-        
+
         if (StrippedPartition::cache_.Contains(one_less)) {
             result = StrippedPartition::cache_.Get(one_less).DeepClone();
             result->Product(*attr);

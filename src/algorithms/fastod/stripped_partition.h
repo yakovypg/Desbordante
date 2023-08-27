@@ -19,8 +19,8 @@ private:
     
 public:
     StrippedPartition();
-    explicit StrippedPartition(const DataFrame& data) noexcept;
-    StrippedPartition(const StrippedPartition& origin) noexcept;
+    explicit StrippedPartition(const DataFrame& data);
+    StrippedPartition(const StrippedPartition& origin) = default;
 
     void Product(int attribute) noexcept;
 
