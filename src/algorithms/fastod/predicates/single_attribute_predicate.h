@@ -23,6 +23,7 @@ public:
     std::string ToString() const;
     size_t GetHashCode() const noexcept;
 
+    template <typename T>
     bool Violate(DataFrame const& data,
                  size_t first_tuple_index,
                  size_t second_tuple_index) const noexcept;
