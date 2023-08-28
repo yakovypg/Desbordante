@@ -30,13 +30,14 @@ size_t SingleAttributePredicate::GetHashCode() const noexcept {
     return attribute_;
 }
 
+template <typename T>
 bool SingleAttributePredicate::Violate(DataFrame const& data,
                                        size_t first_tuple_index,
                                        size_t second_tuple_index) const noexcept {
-    SchemaValue const& first_value = data.GetValue(first_tuple_index, attribute_);
-    SchemaValue const& second_value = data.GetValue(second_tuple_index, attribute_);
+    T const& first_value = data.GetValue<T>(first_tuple_index, attribute_);
+    T const& second_value = data.GetValue<T>(second_tuple_index, attribute_);
     
-    return operator_.Violate(first_value, second_value);
+    return operator_.Violate<T>(first_value, second_value);
 }
 
 SingleAttributePredicate SingleAttributePredicate::GetInstance(size_t attribute, Operator const& op) {

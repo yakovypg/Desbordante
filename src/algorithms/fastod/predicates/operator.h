@@ -22,8 +22,24 @@ public:
 
     bool Oppose(Operator const& other) const noexcept;
     bool Imply(Operator const& other) const noexcept;
-    bool Satisfy(SchemaValue const& first, SchemaValue const& second) const noexcept;
-    bool Violate(SchemaValue const& first, SchemaValue const& second) const noexcept;
+    template <typename T>
+    bool Satisfy(T const& first, T const& second) const noexcept {
+        return !Violate<T>(first, second);
+    }
+
+    template <typename T>
+    bool Violate(T const& first, T const& second) const noexcept {
+        switch (type_) {
+            case OperatorType::Equal: return first != second;
+            case OperatorType::Less: return first >= second;
+            case OperatorType::Greater: return first <= second;
+            case OperatorType::LessOrEqual: return first > second;
+            case OperatorType::GreaterOrEqual: return first < second;
+            case OperatorType::NotEqual: return first == second;
+
+            default: return false;
+        }
+    }
 
     bool IsLessOrGreater() const noexcept;
 
@@ -31,7 +47,10 @@ public:
 
     friend bool operator==(Operator const& x, Operator const& y);
     friend bool operator!=(Operator const& x, Operator const& y);
-    bool operator()(SchemaValue const& first, SchemaValue const& second);
+    template <typename T>
+    bool operator()(T const& first, T const& second) {
+        return Satisfy<T>(first, second);
+    }
 };
 
 } // namespace algos::fatod
