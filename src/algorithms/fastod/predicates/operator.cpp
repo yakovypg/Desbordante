@@ -114,23 +114,6 @@ bool Operator::Imply(Operator const& other) const noexcept {
     return false;
 }
 
-bool Operator::Satisfy(SchemaValue const& first, SchemaValue const& second) const noexcept {
-    return !Violate(first, second);
-}
-
-bool Operator::Violate(SchemaValue const& first, SchemaValue const& second) const noexcept {
-    switch (type_) {
-        case OperatorType::Equal: return first != second;
-        case OperatorType::Less: return first >= second;
-        case OperatorType::Greater: return first <= second;
-        case OperatorType::LessOrEqual: return first > second;
-        case OperatorType::GreaterOrEqual: return first < second;
-        case OperatorType::NotEqual: return first == second;
-
-        default: return false;
-    }
-}
-
 bool Operator::IsLessOrGreater() const noexcept {
     return type_ == OperatorType::Less
         || type_ == OperatorType::Greater
@@ -147,10 +130,6 @@ std::vector<Operator> Operator::SupportedOperators() noexcept {
         Operator(OperatorType::GreaterOrEqual),
         Operator(OperatorType::NotEqual)
     };
-}
-
-bool Operator::operator()(SchemaValue const& first, SchemaValue const& second) {
-    return Satisfy(first, second);
 }
 
 namespace algos::fastod {

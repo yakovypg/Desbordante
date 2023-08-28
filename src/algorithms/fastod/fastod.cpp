@@ -13,14 +13,13 @@ using namespace algos::fastod;
 
 Fastod::Fastod(const DataFrame& data, long time_limit, double error_rate_threshold) noexcept :
     //Algorithm({"Mining ODs"}),
-    data_(std::move(data)),
     time_limit_(time_limit),
-    error_rate_threshold_(error_rate_threshold) {}
+    error_rate_threshold_(error_rate_threshold),
+    data_(std::move(data)) {}
 
 Fastod::Fastod(const DataFrame& data, long time_limit) noexcept :
     //Algorithm({"Mining ODs"}),
-    data_(std::move(data)),
-    time_limit_(time_limit) {}
+    time_limit_(time_limit), data_(std::move(data)) {}
 
 bool Fastod::IsTimeUp() const noexcept {
     return timer_.GetElapsedSeconds() >= time_limit_;
@@ -187,6 +186,32 @@ void Fastod::ComputeODs() noexcept {
         }
     }
 
+    auto getIsValid = [this](const CanonicalOD& od, size_t attrL, size_t attrR) {
+        model::TypeId typeIdL = data_.GetColTypeId(attrL);
+        model::TypeId typeIdR = data_.GetColTypeId(attrR);
+        if (typeIdL == +model::TypeId::kInt) {
+            if (typeIdR == +model::TypeId::kInt)
+                return od.IsValid<int, int>(data_, error_rate_threshold_);
+            else if (typeIdR == +model::TypeId::kDouble)
+                return od.IsValid<int, double>(data_, error_rate_threshold_);
+            else
+                return od.IsValid<int, std::string>(data_, error_rate_threshold_);
+        } else if (typeIdL == +model::TypeId::kDouble) {
+            if (typeIdR == +model::TypeId::kInt)
+                return od.IsValid<double, int>(data_, error_rate_threshold_);
+            else if (typeIdR == +model::TypeId::kDouble)
+                return od.IsValid<double, double>(data_, error_rate_threshold_);
+            else
+                return od.IsValid<double, std::string>(data_, error_rate_threshold_);
+        }
+        if (typeIdR == +model::TypeId::kInt)
+            return od.IsValid<std::string, int>(data_, error_rate_threshold_);
+        else if (typeIdR == +model::TypeId::kDouble)
+            return od.IsValid<std::string, double>(data_, error_rate_threshold_);
+        else
+            return od.IsValid<std::string, std::string>(data_, error_rate_threshold_);
+    };
+
     for (size_t context : context_this_level) {
         if (IsTimeUp()) {
             is_complete_ = false;
@@ -198,7 +223,7 @@ void Fastod::ComputeODs() noexcept {
             attr != attrsEnd(context_intersect_cc_context); ++attr) {
             CanonicalOD od(deleteAttribute(context, *attr), *attr);
 
-            if (od.IsValid(data_, error_rate_threshold_)) {
+            if (getIsValid(od, *attr, *attr)) {
                 result_.emplace_back(std::move(od));
                 fd_count_++;
                 CCPut(context, deleteAttribute(CCGet(context), *attr));
@@ -220,8 +245,7 @@ void Fastod::ComputeODs() noexcept {
             if (containsAttribute(CCGet(deleteAttribute(context, b)), a) &&
                 containsAttribute(CCGet(deleteAttribute(context, a)), b)) {
                 CanonicalOD od(deleteAttribute(deleteAttribute(context, a), b), it->GetLeft(), b);
-                
-                if (od.IsValid(data_, error_rate_threshold_)) {
+                if (getIsValid(od, it->GetLeft().GetAttribute(), b)) {
                     ++ocd_count_;
                     result_.emplace_back(std::move(od));
                     cs_for_con.erase(it++);
