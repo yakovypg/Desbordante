@@ -18,21 +18,6 @@
 
 INITIALIZE_EASYLOGGINGPP
 
-namespace {
-constexpr auto kHelp = "help";
-constexpr auto kAlgorithm = "algorithm";
-constexpr auto kDHelp = "print the help message and exit";
-
-boost::program_options::options_description InfoOptions() {
-    namespace po = boost::program_options;
-    po::options_description info_options("Desbordante information options");
-    info_options.add_options()(kHelp, kDHelp)
-            // --version, if needed, goes here too
-            ;
-    return info_options;
-}
-}  // namespace
-
 int main(int argc, char const* argv[]) {
     std::string path_to_dataset = std::string("");
     std::string output_path = std::string("");  
@@ -64,7 +49,7 @@ int main(int argc, char const* argv[]) {
     if (output_path.size() == 0) {
         std::cout << "Found ODs: " << ods.size() << '\n';
 
-        for (int i = 0; i < ods.size(); ++i) {
+        for (size_t i = 0; i < ods.size(); ++i) {
             std::string od = ods[i].ToString();
             std::cout << i + 1 << ":\t" << od << '\n';
         }
@@ -78,7 +63,7 @@ int main(int argc, char const* argv[]) {
             return 2;
         }
 
-        for (int i = 0; i < ods.size(); ++i) {
+        for (size_t i = 0; i < ods.size(); ++i) {
             std::string od = ods[i].ToString();
             file << od << '\n';
         }

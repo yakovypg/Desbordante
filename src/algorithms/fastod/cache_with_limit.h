@@ -24,14 +24,13 @@ public:
         return entries_.at(key);
     }
     void Set(const K& key, const V& value) {
-        if (Contains(key)) {
-            throw std::logic_error("Updaing a cache entry is not supported");
-        }
+        // if (Contains(key)) {
+        //     throw std::logic_error("Updaing a cache entry is not supported");
+        // }
 
         if (keys_in_order_.size() >= max_size_) {
-            auto oldest_element_key = keys_in_order_.front();
+            entries_.erase(keys_in_order_.front());
             keys_in_order_.pop();
-            entries_.erase(oldest_element_key);
         }
 
         keys_in_order_.push(key);

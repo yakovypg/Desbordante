@@ -1,21 +1,17 @@
 #pragma once
 
-#include "single_attribute_predicate.h"
+#include "predicates/single_attribute_predicate.h"
 
 namespace algos::fastod {
 
-class AttributePair {
-private:
-    const std::pair<SingleAttributePredicate, size_t> pair_;
-
+struct AttributePair {
 public:
-    AttributePair(const SingleAttributePredicate& left, size_t right) noexcept;
-    const SingleAttributePredicate& GetLeft() const noexcept;
-    size_t GetRight() const noexcept;
+    SingleAttributePredicate left;
+    size_t right;
+    AttributePair(SingleAttributePredicate&& left, size_t right) noexcept;
     std::string ToString() const;
-
-    friend bool operator==(const AttributePair& x, const AttributePair& y);
 };
+bool operator==(const AttributePair& x, const AttributePair& y);
 
 } // namespace algos::fastod 
 
@@ -24,7 +20,7 @@ namespace std {
 template <>
 struct hash<algos::fastod::AttributePair> {
     std::size_t operator()(const algos::fastod::AttributePair& pair) const {
-        return std::hash<size_t>()(pair.GetLeft().GetAttribute() * 32 + pair.GetRight());
+        return std::hash<size_t>()((pair.left.attribute << 8) + pair.right);
     }
 };
 
