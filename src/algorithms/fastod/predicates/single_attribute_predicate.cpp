@@ -1,63 +1,24 @@
-#include <vector>
-#include <string>
-#include <utility>
-
-#include "operator.h"
-#include "data_frame.h"
-#include "schema_value.h"
 #include "single_attribute_predicate.h"
 
-using namespace algos::fastod;
+namespace algos::fastod {
 
-std::vector<std::vector<SingleAttributePredicate>> SingleAttributePredicate::cache_;
-
-SingleAttributePredicate::SingleAttributePredicate(size_t attribute, Operator const& op) noexcept
-    : attribute_(attribute), operator_(op) { }
+SingleAttributePredicate::SingleAttributePredicate(size_t attribute, bool ascending) noexcept
+    : attribute_(attribute), ascending_(ascending) { }
 
 size_t SingleAttributePredicate::GetAttribute() const noexcept {
     return attribute_;
 }
 
-Operator const& SingleAttributePredicate::GetOperator() const noexcept {
-    return operator_;
+bool SingleAttributePredicate::GetAsc() const noexcept {
+    return ascending_;
 }
 
 std::string SingleAttributePredicate::ToString() const {
-    return std::to_string(attribute_ + 1) + operator_.ToString();
+    return std::to_string(attribute_ + 1) + (ascending_ ? "<=" : ">=");
 }
-
-size_t SingleAttributePredicate::GetHashCode() const noexcept {
-    return attribute_;
-}
-
-template <typename T>
-bool SingleAttributePredicate::Violate(DataFrame const& data,
-                                       size_t first_tuple_index,
-                                       size_t second_tuple_index) const noexcept {
-    T const& first_value = data.GetValue<T>(first_tuple_index, attribute_);
-    T const& second_value = data.GetValue<T>(second_tuple_index, attribute_);
-    
-    return operator_.Violate<T>(first_value, second_value);
-}
-
-SingleAttributePredicate SingleAttributePredicate::GetInstance(size_t attribute, Operator const& op) {
-    while (attribute >= cache_.size()) {
-        std::vector<SingleAttributePredicate> predicates;
-
-        for (Operator const& op : Operator::SupportedOperators()) {
-            predicates.push_back(SingleAttributePredicate(cache_.size(), op));
-        }
-
-        cache_.push_back(predicates);
-    }
-    
-    return cache_[attribute][op.GetTypeAsInt()];
-}
-
-namespace algos::fastod {
 
 bool operator==(SingleAttributePredicate const& x, SingleAttributePredicate const& y) {
-    return x.GetAttribute() == y.GetAttribute() && x.GetOperator() == y.GetOperator();
+    return x.attribute_ == y.attribute_ && x.ascending_ == y.ascending_;
 }
 
 } // namespace algos::fastod

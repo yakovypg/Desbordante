@@ -1,9 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <string>
 
-#include "operator.h"
 #include "data_frame.h"
 
 namespace algos::fastod {
@@ -11,24 +9,31 @@ namespace algos::fastod {
 class SingleAttributePredicate {
 private:
     size_t attribute_;
-    Operator operator_;
-    static std::vector<std::vector<SingleAttributePredicate>> cache_;
+    bool ascending_;
     
 public:
-    SingleAttributePredicate(size_t attribute, Operator const& op) noexcept;
+    SingleAttributePredicate(size_t attribute, bool ascending) noexcept;
 
     size_t GetAttribute() const noexcept;
-    Operator const& GetOperator() const noexcept;
+    bool GetAsc() const noexcept;
 
     std::string ToString() const;
-    size_t GetHashCode() const noexcept;
 
     template <typename T>
-    bool Violate(DataFrame const& data,
+    bool Satisfy(DataFrame const& data,
                  size_t first_tuple_index,
-                 size_t second_tuple_index) const noexcept;
+                 size_t second_tuple_index) const noexcept {
+        if (ascending_)
+            return data.GetValue<T>(first_tuple_index, attribute_) < data.GetValue<T>(second_tuple_index, attribute_);
+        return data.GetValue<T>(second_tuple_index, attribute_) < data.GetValue<T>(first_tuple_index, attribute_);
+    }
 
-    static SingleAttributePredicate GetInstance(size_t attribute, Operator const& op);
+    template <typename T>
+    bool Satisfy(typename constResType<T>::type first, typename constResType<T>::type second) const noexcept {
+        if (ascending_)
+            return first < second;
+        return second < first;
+    }
 
     friend bool operator==(SingleAttributePredicate const& x, SingleAttributePredicate const& y);
 };
