@@ -11,8 +11,6 @@
 #include "cache_with_limit.h"
 #include "attribute_set.h"
 // #include "value_pair.h"
-#include "operator.h"
-#include "operator_type.h"
 
 namespace algos::fastod {
 
@@ -102,7 +100,7 @@ public:
             // CHANGE: utilize operators
             // SCOPE: from here until the end of this loop
 
-            if (left.GetOperator().GetType() != OperatorType::GreaterOrEqual)
+            if (left.GetAsc())
                 std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
                     return p1.first < p2.first;
                 });
@@ -197,8 +195,8 @@ public:
                     // this is needed to get rid of FilteredDataFrameGet
                     if (left_i != left_j
                         && right_i != right_j
-                        && left.GetOperator().Satisfy(left_i, left_j)
-                        && left.GetOperator().Violate(right_i, right_j)
+                        && left.Satisfy<TL>(left_i, left_j)
+                        && left.Satisfy<TR>(right_j, right_i)
                     ) {
                         violations_count[i]++;
                         violations_count[j]++;
@@ -235,8 +233,8 @@ public:
                     // this is needed to get rid of FilteredDataFrameGet
                     if (left_i != left_j
                         && right_i != right_j
-                        && left.GetOperator().Satisfy(left_i, left_j)
-                        && left.GetOperator().Violate(right_i, right_j)
+                        && left.Satisfy<TL>(left_i, left_j)
+                        && left.Satisfy<TR>(right_j, right_i)
                     ) {
                         violations_count[j]--;
                     }

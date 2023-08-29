@@ -5,7 +5,6 @@
 #include <algorithm>
 
 #include "fastod.h"
-#include "operator_type.h"
 #include "single_attribute_predicate.h"
 #include "stripped_partition.h"
 
@@ -37,26 +36,15 @@ size_t Fastod::CCGet(size_t key) noexcept {
 }
 
 void Fastod::CSPut(size_t key, const AttributePair& value) noexcept {
-    const auto it = cs_.find(key);
-    if (it != cs_.cend())
-        it->second.emplace(value);
-    else
-        cs_[key] = {value};
+    cs_[key].emplace(value);
 }
 
 void Fastod::CSPut(size_t key, AttributePair&& value) noexcept {
-    const auto it = cs_.find(key);
-    if (it != cs_.cend())
-        it->second.emplace(std::move(value));
-    else
-        cs_[key] = {std::move(value)};
+    cs_[key].emplace(std::move(value));
 }
 
 std::unordered_set<AttributePair>& Fastod::CSGet(size_t key) noexcept {
-    const auto it = cs_.find(key);
-    if (it != cs_.cend())
-        return it->second;
-    return cs_[key] = {};
+    return cs_[key];
 }
 
 void Fastod::PrintStatistics() const noexcept {
@@ -64,11 +52,16 @@ void Fastod::PrintStatistics() const noexcept {
         ? result_[result_.size() - 1].ToString()
         : std::string("");
     
-    std::cout << "Current time " << timer_.GetElapsedSeconds() << " sec, "
-              << "found od " << fd_count_ + ocd_count_ << " ones, where "
-              << "fd " << fd_count_ << " ones, "
-              << "ocd " << ocd_count_ << " ones, "
-              << "the last od is " << last_od << '\n';
+    // std::cout << "Current time " << timer_.GetElapsedSeconds() << " sec, "
+    //           << "found od " << fd_count_ + ocd_count_ << " ones, where "
+    //           << "fd " << fd_count_ << " ones, "
+    //           << "ocd " << ocd_count_ << " ones, "
+    //           << "the last od is " << last_od << '\n';
+    
+    std::cout << "RESULT: Time=" << timer_.GetElapsedSeconds() << ", "
+              << "OD=" << fd_count_ + ocd_count_ << ", "
+              << "FD=" << fd_count_ << ", "
+              << "OCD=" << ocd_count_ << '\n';
 }
 
 bool Fastod::IsComplete() const noexcept {
@@ -123,10 +116,11 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
         std::cout << "FastOD finished with a time-out" << '\n';
     }
 
-    std::cout << "Seconds elapsed: " << timer_.GetElapsedSeconds() << '\n'
-              << "ODs found: " << fd_count_ + ocd_count_ << '\n'
-              << "FDs found: " << fd_count_ << '\n'
-              << "OCDs found: " << ocd_count_ << '\n';
+    // std::cout << "Seconds elapsed: " << timer_.GetElapsedSeconds() << '\n'
+    //           << "ODs found: " << fd_count_ + ocd_count_ << '\n'
+    //           << "FDs found: " << fd_count_ << '\n'
+    //           << "OCDs found: " << ocd_count_ << '\n';
+    PrintStatistics();
     return result_;
 }
 
@@ -160,8 +154,8 @@ void Fastod::ComputeODs() noexcept {
                     }
                     size_t c = attributeSet({i, j});
 
-                    CSPut(c, AttributePair(SingleAttributePredicate::GetInstance(i, Operator(OperatorType::GreaterOrEqual)), j));
-                    CSPut(c, AttributePair(SingleAttributePredicate::GetInstance(i, Operator(OperatorType::LessOrEqual)), j));
+                    CSPut(c, AttributePair(SingleAttributePredicate(i, false), j));
+                    CSPut(c, AttributePair(SingleAttributePredicate(i, true), j));
                 }
             }
         } else if (level_ > 2) {
@@ -290,12 +284,7 @@ void Fastod::CalculateNextLevel() noexcept {
     for (size_t attribute_set : context_this_level) {
         for (ASIterator attr = attrsBegin(attribute_set); 
             attr != attrsEnd(attribute_set); ++attr) {
-            size_t prefix = deleteAttribute(attribute_set, *attr);
-
-            if (prefix_blocks.count(prefix) == 0)
-                prefix_blocks[prefix] = std::vector<size_t>();
-
-            prefix_blocks[prefix].push_back(*attr);
+            prefix_blocks[deleteAttribute(attribute_set, *attr)].push_back(*attr);
         }
     }
 
