@@ -1,7 +1,6 @@
 #include <sstream>
 
 #include "canonical_od.h"
-#include "operator_type.h"
 #include "single_attribute_predicate.h"
 #include "timer.h"
 
@@ -62,11 +61,11 @@ bool operator<(CanonicalOD const& x, CanonicalOD const& y) {
         return left_difference < 0;
     }
 
-    if (x.left_.value().GetOperator() == y.left_.value().GetOperator()) {
+    if (x.left_.value().GetAsc() == y.left_.value().GetAsc()) {
         return false;
     }
 
-    if (x.left_.value().GetOperator().GetType() == OperatorType::LessOrEqual) {
+    if (x.left_.value().GetAsc()) {
         return true;    //TODO: Make sure -1 in Java code corrensponds to true
     }
 
