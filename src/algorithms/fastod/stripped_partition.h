@@ -31,6 +31,7 @@ public:
     void Product(size_t attribute) noexcept {
 
         std::vector<size_t> new_indexes;
+        new_indexes.reserve(data_.GetColumnCount());
         std::vector<size_t> new_begins;
         size_t fill_pointer = 0;
 
@@ -38,26 +39,32 @@ public:
             size_t group_begin = begins_[begin_pointer];
             size_t group_end = begins_[begin_pointer + 1];
             // CHANGE: utilize column types
-            std::unordered_map<T, std::vector<size_t>> subgroups;
+            std::vector<std::pair<T, size_t>> values(group_end - group_begin);
 
             for (size_t i = group_begin; i < group_end; i++) {
                 size_t index = indexes_[i];
-                typename constResType<T>::type value = data_.GetValue<T>(index, attribute);
-
-                if (subgroups.count(value) == 0)
-                    subgroups[value] = {};
-
-                subgroups[value].push_back(index);
+                values[i - group_begin] = { data_.GetValue<T>(index, attribute), index };
             }
-
-            new_begins.reserve(new_begins.size() + subgroups.size());
-            for (auto& [_, new_group]: subgroups) {
-                if (new_group.size() > 1) {
+            std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
+                return p1.first < p2.first;
+            });
+            size_t group_start = 0;
+            size_t i = 1;
+            auto addGroup = [&]() {
+                size_t group_size = i - group_start;
+                if (group_size > 1) {
                     new_begins.push_back(fill_pointer);
-                    fill_pointer += new_group.size();
-                    new_indexes.insert(new_indexes.end(), new_group.begin(), new_group.end());
+                    fill_pointer += group_size;
+                    for (size_t j = group_start; j < group_start + group_size; ++j)
+                        new_indexes.push_back(values[j].second);
                 }
+                group_start = i;
+            };
+            for (; i < values.size(); ++i) {
+                if (values[i - 1].first != values[i].first)
+                    addGroup();
             }
+            addGroup();
         }
 
         indexes_ = std::move(new_indexes);
@@ -86,14 +93,11 @@ public:
         for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
             size_t group_begin = begins_[begin_pointer];
             size_t group_end = begins_[begin_pointer + 1];
-            std::vector<std::pair<TL, TR>> values;
-            values.reserve(group_end - group_begin);
-            for (size_t i = group_begin; i < group_end; i++) {
+            std::vector<std::pair<TL, TR>> values(group_end - group_begin);
+            for (size_t i = group_begin; i < group_end; ++i) {
                 size_t index = indexes_[i];
-                values.emplace_back(
-                    data_.GetValue<TL>(index, left.GetAttribute()),
-                    data_.GetValue<TR>(index, right)
-                );
+                values[i - group_begin] = { data_.GetValue<TL>(index, left.GetAttribute()), 
+                                            data_.GetValue<TR>(index, right) };
             }
             // CHANGE: utilize operators
             // SCOPE: from here until the end of this loop

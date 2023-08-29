@@ -50,11 +50,8 @@ SingleAttributePredicate SingleAttributePredicate::GetInstance(size_t attribute,
 
         cache_.push_back(predicates);
     }
-
-    std::vector<SingleAttributePredicate> const& predicates = cache_[attribute];
-    size_t predicate_index = op.GetTypeAsInt();
     
-    return predicates[predicate_index];
+    return cache_[attribute][op.GetTypeAsInt()];
 }
 
 namespace algos::fastod {
