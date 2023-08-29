@@ -133,15 +133,21 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
 void Fastod::ComputeODs() noexcept {
     const auto& context_this_level = context_in_each_level_[level_];
     Timer timer(true);
+    std::vector<std::vector<size_t>> deletedAttrs(context_this_level.size());
+    size_t contextInd = 0;
     for (size_t context : context_this_level) {
+        auto& delAttrs = deletedAttrs[contextInd++];
+        delAttrs.reserve(data_.GetColumnCount());
+        for (size_t col = 0; col < data_.GetColumnCount(); ++col)
+            delAttrs.push_back(deleteAttribute(context, col));
         if (IsTimeUp()) {
             is_complete_ = false;
             return;
         }
 
         size_t context_cc = schema_;
-        for (ASIterator it = attrsBegin(context); it != attrsEnd(context); ++it) {
-            context_cc = intersect(context_cc, CCGet(deleteAttribute(context, *it)));
+        for (ASIterator attr = attrsBegin(context); attr != attrsEnd(context); ++attr) {
+            context_cc = intersect(context_cc, CCGet(delAttrs[*attr]));
         }
 
         CCPut(context, context_cc);
@@ -161,19 +167,19 @@ void Fastod::ComputeODs() noexcept {
         } else if (level_ > 2) {
             std::unordered_set<AttributePair> candidate_cs_pair_set;
             for (ASIterator attr = attrsBegin(context); attr != attrsEnd(context); ++attr) {
-                for (const AttributePair& pair : CSGet(deleteAttribute(context, *attr))) {
-                    candidate_cs_pair_set.emplace(pair);
-                }
+                const auto& tmp = CSGet(delAttrs[*attr]);
+                candidate_cs_pair_set.insert(tmp.cbegin(), tmp.cend());
             }
 
             for (AttributePair const& attribute_pair : candidate_cs_pair_set) {
-                size_t context_delete_ab = deleteAttribute(deleteAttribute(context,
-                    attribute_pair.GetLeft().GetAttribute()), attribute_pair.GetRight());
+                size_t context_delete_ab = deleteAttribute(
+                    delAttrs[attribute_pair.GetLeft().GetAttribute()],
+                    attribute_pair.GetRight());
 
                 bool add_context = true;
                 for (ASIterator attr = attrsBegin(context_delete_ab);
                     attr != attrsEnd(context_delete_ab); ++attr) {
-                    if (CSGet(deleteAttribute(context, *attr)).count(attribute_pair) == 0) {
+                    if (CSGet(delAttrs[*attr]).count(attribute_pair) == 0) {
                         add_context = false;
                         break;
                     }
@@ -212,7 +218,9 @@ void Fastod::ComputeODs() noexcept {
             return od.IsValid<std::string, std::string>(data_, error_rate_threshold_);
     };
 
+    contextInd = 0;
     for (size_t context : context_this_level) {
+        auto& delAttrs = deletedAttrs[contextInd++];
         if (IsTimeUp()) {
             is_complete_ = false;
             return;
@@ -221,7 +229,7 @@ void Fastod::ComputeODs() noexcept {
         size_t context_intersect_cc_context = intersect(context, CCGet(context));
         for (ASIterator attr = attrsBegin(context_intersect_cc_context);
             attr != attrsEnd(context_intersect_cc_context); ++attr) {
-            CanonicalOD od(deleteAttribute(context, *attr), *attr);
+            CanonicalOD od(delAttrs[*attr], *attr);
 
             if (getIsValid(od, *attr, *attr)) {
                 result_.emplace_back(std::move(od));
@@ -242,9 +250,9 @@ void Fastod::ComputeODs() noexcept {
             size_t a = it->GetLeft().GetAttribute();
             size_t b = it->GetRight();
 
-            if (containsAttribute(CCGet(deleteAttribute(context, b)), a) &&
-                containsAttribute(CCGet(deleteAttribute(context, a)), b)) {
-                CanonicalOD od(deleteAttribute(deleteAttribute(context, a), b), it->GetLeft(), b);
+            if (containsAttribute(CCGet(delAttrs[b]), a) &&
+                containsAttribute(CCGet(delAttrs[a]), b)) {
+                CanonicalOD od(deleteAttribute(delAttrs[a], b), it->GetLeft(), b);
                 if (getIsValid(od, it->GetLeft().GetAttribute(), b)) {
                     ++ocd_count_;
                     result_.emplace_back(std::move(od));
