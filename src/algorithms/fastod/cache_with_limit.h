@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <queue>
 #include <cstddef>
+#include <stdexcept>
 
 namespace algos::fastod {
 
@@ -14,13 +15,28 @@ private:
     const std::size_t max_size_;
 
 public:
-    explicit CacheWithLimit(std::size_t max_size) noexcept;
+    explicit CacheWithLimit(std::size_t max_size) noexcept : max_size_(max_size) {};
     
-    bool Contains(const K& key) const noexcept;
-    const V& Get(const K& key) const noexcept;
-    void Set(const K& key, const V& value);
+    bool Contains(const K& key) const noexcept {
+        return entries_.count(key) != 0;
+    }
+    const V& Get(const K& key) const noexcept {
+        return entries_.at(key);
+    }
+    void Set(const K& key, const V& value) {
+        if (Contains(key)) {
+            throw std::logic_error("Updaing a cache entry is not supported");
+        }
+
+        if (keys_in_order_.size() >= max_size_) {
+            auto oldest_element_key = keys_in_order_.front();
+            keys_in_order_.pop();
+            entries_.erase(oldest_element_key);
+        }
+
+        keys_in_order_.push(key);
+        entries_.emplace(key, value);
+    }
 };
 
 } // namespace algos::fastod;
-
-#include "cache_with_limit.tpp"

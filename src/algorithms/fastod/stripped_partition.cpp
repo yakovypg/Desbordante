@@ -6,7 +6,7 @@
 using namespace algos::fastod;
 
 // important
-CacheWithLimit<size_t, StrippedPartition> StrippedPartition::cache_(1e4);
+CacheWithLimit<size_t, StrippedPartition> StrippedPartition::cache_(100);
 
 StrippedPartition::StrippedPartition(const DataFrame& data) : data_(std::move(data)) {
     indexes_.reserve(data.GetTupleCount());
@@ -85,7 +85,7 @@ StrippedPartition StrippedPartition::GetStrippedPartition(size_t attribute_set, 
 
     StrippedPartition::cache_.Set(attribute_set, *result);
 
-    return result.value();
+    return std::move(result.value());
 }
 
 StrippedPartition& StrippedPartition::operator=(const StrippedPartition& other) {
