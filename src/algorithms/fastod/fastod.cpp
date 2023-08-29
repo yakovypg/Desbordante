@@ -167,8 +167,8 @@ void Fastod::ComputeODs() noexcept {
 
             for (AttributePair const& attribute_pair : candidate_cs_pair_set) {
                 size_t context_delete_ab = deleteAttribute(
-                    delAttrs[attribute_pair.GetLeft().GetAttribute()],
-                    attribute_pair.GetRight());
+                    delAttrs[attribute_pair.left.attribute],
+                    attribute_pair.right);
 
                 bool add_context = true;
                 for (ASIterator attr = attrsBegin(context_delete_ab);
@@ -241,13 +241,13 @@ void Fastod::ComputeODs() noexcept {
 
         auto& cs_for_con = CSGet(context);
         for (auto it = cs_for_con.begin(); it != cs_for_con.end();) {
-            size_t a = it->GetLeft().GetAttribute();
-            size_t b = it->GetRight();
+            size_t a = it->left.attribute;
+            size_t b = it->right;
 
             if (containsAttribute(CCGet(delAttrs[b]), a) &&
                 containsAttribute(CCGet(delAttrs[a]), b)) {
-                CanonicalOD od(deleteAttribute(delAttrs[a], b), it->GetLeft(), b);
-                if (getIsValid(od, it->GetLeft().GetAttribute(), b)) {
+                CanonicalOD od(deleteAttribute(delAttrs[a], b), it->left, b);
+                if (getIsValid(od, it->left.attribute, b)) {
                     ++ocd_count_;
                     result_.emplace_back(std::move(od));
                     cs_for_con.erase(it++);

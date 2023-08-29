@@ -1,3 +1,4 @@
+#! /usr/bin/bash
 if [[ -z $1 ]]; then
 	echo 'ERROR: Path to the Java algorithm implementation (bin directory) is not specified'
 	exit 1

@@ -44,9 +44,6 @@ public:
         return error_rate < error_rate_threshold;
     }
     std::string ToString() const noexcept;
-
-    friend bool operator==(CanonicalOD const& x, CanonicalOD const& y);
-    friend bool operator<(CanonicalOD const& x, CanonicalOD const& y);
 };
 
 } // namespace algos::fatod

@@ -57,7 +57,7 @@ def parse_algorithm_output(output: str) -> AlgorithmResult:
     result_line = list(filter(lambda t: t.startswith(result_prefix), lines))[0].replace(result_prefix, '')
 
     data = result_line.split(', ')
-    time_data = list(filter(lambda t: t.startswith(time_prefix), data))[0].replace(time_prefix, '')
+    time_data = list(filter(lambda t: t.startswith(time_prefix), data))[0].replace(time_prefix, '').replace(',', '.')
     od_data = list(filter(lambda t: t.startswith(od_prefix), data))[0].replace(od_prefix, '')
     fd_data = list(filter(lambda t: t.startswith(fd_prefix), data))[0].replace(fd_prefix, '')
     ocd_data = list(filter(lambda t: t.startswith(ocd_prefix), data))[0].replace(ocd_prefix, '')

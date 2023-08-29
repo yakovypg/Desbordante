@@ -63,6 +63,21 @@ public:
                     addGroup();
             }
             addGroup();
+
+            // std::unordered_map<T, std::vector<size_t>> subgroups;
+
+            // for (size_t i = group_begin; i < group_end; i++) {
+            //     size_t index = indexes_[i];
+            //     subgroups[data_.GetValue<T>(index, attribute)].push_back(index);
+            // }
+            // new_begins.reserve(new_begins.size() + subgroups.size());
+            // for (auto& [_, new_group]: subgroups) {
+            //     if (new_group.size() > 1) {
+            //         new_begins.push_back(fill_pointer);
+            //         fill_pointer += new_group.size();
+            //         new_indexes.insert(new_indexes.end(), new_group.begin(), new_group.end());
+            //     }
+            // }
         }
 
         indexes_ = std::move(new_indexes);
@@ -94,13 +109,13 @@ public:
             std::vector<std::pair<TL, TR>> values(group_end - group_begin);
             for (size_t i = group_begin; i < group_end; ++i) {
                 size_t index = indexes_[i];
-                values[i - group_begin] = { data_.GetValue<TL>(index, left.GetAttribute()), 
+                values[i - group_begin] = { data_.GetValue<TL>(index, left.attribute), 
                                             data_.GetValue<TR>(index, right) };
             }
             // CHANGE: utilize operators
             // SCOPE: from here until the end of this loop
 
-            if (left.GetAsc())
+            if (left.ascending)
                 std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
                     return p1.first < p2.first;
                 });
@@ -183,12 +198,12 @@ public:
 
             for (size_t i = group_begin; i < group_end; i++) {
                 // CHANGE: was FiltereDataFrameGet
-                typename constResType<TL>::type left_i = data_.GetValue<TL>(indexes_[i], left.GetAttribute());
+                typename constResType<TL>::type left_i = data_.GetValue<TL>(indexes_[i], left.attribute);
                 typename constResType<TR>::type right_i = data_.GetValue<TR>(indexes_[i], right);
 
                 for (size_t j = i + 1; j < group_end; j++) {
                     // CHANGE: was FiltereDataFrameGet
-                    typename constResType<TL>::type left_j = data_.GetValue<TL>(indexes_[j], left.GetAttribute());
+                    typename constResType<TL>::type left_j = data_.GetValue<TL>(indexes_[j], left.attribute);
                     typename constResType<TR>::type right_j = data_.GetValue<TR>(indexes_[j], right);
 
                     // CHANGE: this comparison now uses operators
@@ -221,12 +236,12 @@ public:
                 deleted[delete_index] = true;
 
                 // CHANGE: was FiltereDataFrameGet
-                typename constResType<TL>::type left_i = data_.GetValue<TL>(indexes_[delete_index], left.GetAttribute());
+                typename constResType<TL>::type left_i = data_.GetValue<TL>(indexes_[delete_index], left.attribute);
                 typename constResType<TR>::type right_i = data_.GetValue<TR>(indexes_[delete_index], right);
 
                 for (size_t j = group_begin; j < group_end; j++) {
                     // CHANGE: was FiltereDataFrameGet
-                    typename constResType<TL>::type left_j = data_.GetValue<TL>(indexes_[j], left.GetAttribute());
+                    typename constResType<TL>::type left_j = data_.GetValue<TL>(indexes_[j], left.attribute);
                     typename constResType<TR>::type right_j = data_.GetValue<TR>(indexes_[j], right);
 
                     // CHANGE: this comparison now uses operators
