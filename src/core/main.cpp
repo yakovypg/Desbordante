@@ -18,33 +18,12 @@
 
 INITIALIZE_EASYLOGGINGPP
 
-int main(int argc, char const* argv[]) {
-    std::string path_to_dataset = std::string("");
-    std::string output_path = std::string("");  
-    int max_time = INT_MAX;
-
-    if (argc <= 1) {
-        std::cout << "Error: Dataset not specified\n";
-        return 1; 
-    }
-    if (argc > 4) {
-        std::cout << "Error: Too many arguments entered\n";
-        return 1;
-    }
-
-    if (argc >= 2)
-        path_to_dataset = std::string(argv[1]);
-    
-    if (argc >= 3)
-        output_path = std::string(argv[2]);
-
-    if (argc >= 4) {
-        max_time = std::stoi(argv[3]);
-    }
-
-    algos::fastod::DataFrame data = algos::fastod::DataFrame::FromCsv(std::filesystem::path(path_to_dataset));
-    algos::fastod::Fastod fastod = algos::fastod::Fastod(data, max_time);
-    std::vector<algos::fastod::CanonicalOD> ods = fastod.Discover();
+template <bool multithread>
+int findAndPrintOD(algos::fastod::DataFrame&& data, size_t max_time, 
+    size_t threads, const std::string& output_path) {
+        
+    algos::fastod::Fastod<multithread> fastod(data, max_time, threads);
+    std::vector<algos::fastod::CanonicalOD<multithread>> ods = fastod.Discover();
 
     if (output_path.size() == 0) {
         std::cout << "Found ODs: " << ods.size() << '\n';
@@ -70,6 +49,43 @@ int main(int argc, char const* argv[]) {
 
         file.close();
     }
+    return 0;
+}
+
+int main(int argc, char const* argv[]) {
+    std::string path_to_dataset = std::string("");
+    std::string output_path = std::string("");  
+    int max_time = INT_MAX;
+    size_t threads = 1;
+
+    if (argc <= 1) {
+        std::cout << "Error: Dataset not specified\n";
+        return 1; 
+    }
+    if (argc > 4) {
+        std::cout << "Error: Too many arguments entered\n";
+        return 1;
+    }
+
+    if (argc >= 2)
+        path_to_dataset = std::string(argv[1]);
+    
+    if (argc >= 3)
+        output_path = std::string(argv[2]);
+
+    if (argc >= 4) {
+        threads = std::stoi(argv[3]);
+    }
+
+    if (argc >= 5) {
+        max_time = std::stoi(argv[4]);
+    }
+    algos::fastod::DataFrame data = algos::fastod::DataFrame::FromCsv(std::filesystem::path(path_to_dataset));
+
+    if (threads > 1)
+        return findAndPrintOD<true>(std::move(data), max_time, threads, output_path);
+    else
+        return findAndPrintOD<false>(std::move(data), max_time, threads, output_path);
 }
 
 /*

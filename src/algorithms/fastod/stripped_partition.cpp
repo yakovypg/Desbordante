@@ -1,14 +1,13 @@
 #include <cstdint>
 #include <sstream>
 #include "stripped_partition.h"
+#include "cache_with_limit.h"
 // #include "timer.h"
 
-using namespace algos::fastod;
+namespace algos::fastod {
 
-// important
-CacheWithLimit<size_t, StrippedPartition> StrippedPartition::cache_(50);
-
-StrippedPartition::StrippedPartition(const DataFrame& data) : data_(std::move(data)) {
+template <bool multithread>
+StrippedPartition<multithread>::StrippedPartition(const DataFrame& data) : data_(std::move(data)) {
     indexes_.reserve(data.GetTupleCount());
     for (size_t i = 0; i < data.GetTupleCount(); i++) {
         indexes_.push_back(i);
@@ -21,7 +20,8 @@ StrippedPartition::StrippedPartition(const DataFrame& data) : data_(std::move(da
     begins_.push_back(data.GetTupleCount());
 }
 
-std::string StrippedPartition::ToString() const noexcept {
+template <bool multithread>
+std::string StrippedPartition<multithread>::ToString() const noexcept {
     std::stringstream ss;
     std::string indexes_string;
 
@@ -50,45 +50,48 @@ std::string StrippedPartition::ToString() const noexcept {
     return ss.str();
 }
 
-StrippedPartition StrippedPartition::GetStrippedPartition(size_t attribute_set, const DataFrame& data) noexcept {
-    if (StrippedPartition::cache_.Contains(attribute_set)) {
-        return StrippedPartition::cache_.Get(attribute_set);
+template <bool multithread>
+StrippedPartition<multithread> StrippedPartition<multithread>::GetStrippedPartition(size_t attribute_set, const DataFrame& data) noexcept {
+    static CacheWithLimit<size_t, StrippedPartition<multithread>, multithread> cache_(1e8);
+    if (cache_.Contains(attribute_set)) {
+        return cache_.Get(attribute_set);
     }
 
-    std::optional<StrippedPartition> result;
+    std::optional<StrippedPartition<multithread>> result;
 
     auto callProduct = [&result, &data](size_t attr) {
         if (data.GetColTypeId(attr) == +model::TypeId::kInt)
-            result->Product<int>(attr);
+            result->template Product<int>(attr);
         else if (data.GetColTypeId(attr) == +model::TypeId::kDouble)
-            result->Product<double>(attr);
+            result->template Product<double>(attr);
         else
-            result->Product<std::string>(attr);
+            result->template Product<std::string>(attr);
     };
 
     for (ASIterator attr = attrsBegin(attribute_set); attr != attrsEnd(attribute_set); ++attr) {
         size_t one_less = deleteAttribute(attribute_set, *attr);
 
-        if (StrippedPartition::cache_.Contains(one_less)) {
-            result = StrippedPartition::cache_.Get(one_less);
+        if (cache_.Contains(one_less)) {
+            result = cache_.Get(one_less);
             callProduct(*attr);
         }
     }
 
     if (!result) {
-        result = StrippedPartition(data);
+        result = StrippedPartition<multithread>(data);
 
         for (ASIterator attr = attrsBegin(attribute_set); attr != attrsEnd(attribute_set); ++attr) {
             callProduct(*attr);
         }
     }
 
-    StrippedPartition::cache_.Set(attribute_set, *result);
+    cache_.Set(attribute_set, *result);
 
     return std::move(result.value());
 }
 
-StrippedPartition& StrippedPartition::operator=(const StrippedPartition& other) {
+template <bool multithread>
+StrippedPartition<multithread>& StrippedPartition<multithread>::operator=(const StrippedPartition& other) {
     if (this == &other) {
         return *this;
     }
@@ -99,3 +102,6 @@ StrippedPartition& StrippedPartition::operator=(const StrippedPartition& other) 
     return *this;
 }
 
+template class StrippedPartition<false>;
+template class StrippedPartition<true>;
+}
