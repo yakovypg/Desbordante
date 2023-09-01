@@ -4,37 +4,55 @@
 #include <queue>
 #include <cstddef>
 #include <stdexcept>
+#include <shared_mutex>
+#include <mutex>
 
 namespace algos::fastod {
 
-template <typename K, typename V>
+template <typename K, typename V, bool multithread>
 class CacheWithLimit {
 private:
     std::unordered_map<K, V> entries_;
     std::queue<K> keys_in_order_;
     const std::size_t max_size_;
+    mutable std::shared_mutex mutex_;
 
 public:
     explicit CacheWithLimit(std::size_t max_size) noexcept : max_size_(max_size) {};
     
     bool Contains(const K& key) const noexcept {
-        return entries_.count(key) != 0;
+        if constexpr (multithread) {
+            std::shared_lock lock(mutex_);
+            return entries_.count(key) != 0;
+        } else {
+            return entries_.count(key) != 0;
+        }
     }
     const V& Get(const K& key) const noexcept {
-        return entries_.at(key);
+        if constexpr (multithread) {
+            std::shared_lock lock(mutex_);
+            return entries_.at(key);
+        } else {
+            return entries_.at(key);
+        }
     }
     void Set(const K& key, const V& value) {
-        // if (Contains(key)) {
-        //     throw std::logic_error("Updaing a cache entry is not supported");
-        // }
+        if constexpr (multithread) {
+            std::unique_lock lock(mutex_);
+            // if (Contains(key)) {
+            //     throw std::logic_error("Updaing a cache entry is not supported");
+            // }
 
-        if (keys_in_order_.size() >= max_size_) {
-            entries_.erase(keys_in_order_.front());
-            keys_in_order_.pop();
+            // if (keys_in_order_.size() >= max_size_) {
+            //     entries_.erase(keys_in_order_.front());
+            //     keys_in_order_.pop();
+            // }
+
+            // keys_in_order_.push(key);
+            entries_.emplace(key, value);
+        } else {
+            entries_.emplace(key, value);
         }
-
-        keys_in_order_.push(key);
-        entries_.emplace(key, value);
     }
 };
 
