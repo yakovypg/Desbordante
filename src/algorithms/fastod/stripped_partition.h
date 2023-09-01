@@ -8,18 +8,23 @@
 #include "data_frame.h"
 #include "schema_value.h"
 #include "single_attribute_predicate.h"
-#include "cache_with_limit.h"
 #include "attribute_set.h"
 // #include "value_pair.h"
 
 namespace algos::fastod {
 
+template <bool multithread>
+class StrippedPartition;
+
+using SingleStrippedPartition = StrippedPartition<false>;
+using MultiStrippedPartition = StrippedPartition<true>;
+
+template <bool multithread>
 class StrippedPartition {
 private:
     std::vector<size_t> indexes_;
     std::vector<size_t> begins_;
     const DataFrame& data_;
-    static CacheWithLimit<size_t, StrippedPartition> cache_;
     
 public:
     explicit StrippedPartition(const DataFrame& data);

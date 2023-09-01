@@ -9,11 +9,12 @@
 
 namespace algos::fastod {
 
+template <bool multithread>
 class CanonicalOD {
 private:
     size_t context_;
     std::optional<SingleAttributePredicate> const left_;
-    int const right_;
+    size_t const right_;
 
 public:
     CanonicalOD(size_t context, const SingleAttributePredicate& left, int right) noexcept;
@@ -22,22 +23,22 @@ public:
     template <typename TL, typename TR>
     bool IsValid(const DataFrame& data, double error_rate_threshold) const noexcept {
         // important
-        StrippedPartition sp = StrippedPartition::GetStrippedPartition(context_, data);
+        StrippedPartition<multithread> sp = StrippedPartition<multithread>::GetStrippedPartition(context_, data);
 
         if (error_rate_threshold == -1) {
             if (!left_)
-                return !sp.Split<TR>(right_);
+                return !(sp.template Split<TR>(right_));
 
             // important
-            return !sp.Swap<TL, TR>(*left_, right_);
+            return !(sp.template Swap<TL, TR>(*left_, right_));
         }
 
         long violation_count;
 
         if (!left_)
-            violation_count = sp.SplitRemoveCount<TR>(right_);
+            violation_count = sp.template SplitRemoveCount<TR>(right_);
         else
-            violation_count = sp.SwapRemoveCount<TL, TR>(left_.value(), right_);
+            violation_count = sp.template SwapRemoveCount<TL, TR>(left_.value(), right_);
 
         double error_rate = (double)violation_count / data.GetTupleCount();
 
@@ -45,5 +46,8 @@ public:
     }
     std::string ToString() const noexcept;
 };
+
+using SimpleCanonicalOD = CanonicalOD<false>;
+using MultiCanonicalOD = CanonicalOD<true>;
 
 } // namespace algos::fatod
