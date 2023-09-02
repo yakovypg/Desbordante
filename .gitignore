@@ -11,3 +11,5 @@ lib/
 .vscode/
 **/myeasylog.log
 dist
+src/tests/fastod/results
+src/tests/fastod/myeasylog.log

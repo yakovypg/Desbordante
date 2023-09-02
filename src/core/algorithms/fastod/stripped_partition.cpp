@@ -2,7 +2,6 @@
 #include <sstream>
 #include "stripped_partition.h"
 #include "cache_with_limit.h"
-// #include "timer.h"
 
 namespace algos::fastod {
 

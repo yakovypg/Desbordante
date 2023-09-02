@@ -1,6 +1,4 @@
 #include <numeric>
-#include <vector>
-#include <algorithm>
 #include <sstream>
 
 #include "attribute_set.h"

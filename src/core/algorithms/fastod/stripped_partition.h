@@ -3,13 +3,9 @@
 #include <vector>
 #include <unordered_map>
 #include <algorithm>
-#include <optional>
 
-#include "data_frame.h"
-#include "schema_value.h"
 #include "single_attribute_predicate.h"
 #include "attribute_set.h"
-// #include "value_pair.h"
 
 namespace algos::fastod {
 

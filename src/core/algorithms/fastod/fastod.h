@@ -1,20 +1,13 @@
 #pragma once
 
-#include <iostream>
 #include <unordered_map>
-#include <set>
 #include <unordered_set>
 #include <vector>
 #include <algorithm>
 
-#include "algorithm.h"
-#include "attribute_pair.h"
-#include "attribute_set.h"
 #include "canonical_od.h"
-#include "data_frame.h"
+#include "attribute_pair.h"
 #include "timer.h"
-#include "single_attribute_predicate.h"
-#include "stripped_partition.h"
 
 #include <mutex>
 #include <shared_mutex>
