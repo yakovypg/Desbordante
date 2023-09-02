@@ -13,4 +13,8 @@ bool operator==(SingleAttributePredicate const& x, SingleAttributePredicate cons
     return x.attribute == y.attribute && x.ascending == y.ascending;
 }
 
+size_t SingleAttributePredicate::hash() const noexcept {
+    return attribute << (ascending ? 0 : 5);
+}
+
 } // namespace algos::fastod

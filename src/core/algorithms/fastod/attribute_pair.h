@@ -20,7 +20,7 @@ namespace std {
 template <>
 struct hash<algos::fastod::AttributePair> {
     std::size_t operator()(const algos::fastod::AttributePair& pair) const {
-        return std::hash<size_t>()((pair.left.attribute << 8) + pair.right);
+        return std::hash<size_t>()((pair.left.hash() << 10) + pair.right);
     }
 };
 

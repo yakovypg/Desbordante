@@ -28,6 +28,8 @@ struct SingleAttributePredicate {
             return first < second;
         return second < first;
     }
+
+    size_t hash() const noexcept;
 };
 
 bool operator==(SingleAttributePredicate const& x, SingleAttributePredicate const& y);
