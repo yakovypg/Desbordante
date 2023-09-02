@@ -1,10 +1,5 @@
 #pragma once
 
-#include <optional>
-
-#include "data_frame.h"
-#include "single_attribute_predicate.h"
-#include "attribute_set.h"
 #include "stripped_partition.h"
 
 namespace algos::fastod {
