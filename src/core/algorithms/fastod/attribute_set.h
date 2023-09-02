@@ -1,10 +1,5 @@
 #pragma once
 
-#include <set>
-#include <vector>
-#include <string>
-#include <iostream>
-
 namespace algos::fastod {
 
 class ASIterator;

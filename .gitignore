@@ -9,3 +9,5 @@ lib/
 .csv
 .idea/
 .vscode/
+src/tests/fastod/results
+src/tests/fastod/myeasylog.log

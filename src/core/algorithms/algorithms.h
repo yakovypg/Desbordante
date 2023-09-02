@@ -30,3 +30,6 @@
 
 /* Algebraic constraints*/
 #include "algorithms/algebraic_constraints/ac_algorithm.h"
+
+/* Algebraic constraints*/
+#include "algorithms/fastod/fastod.h"
