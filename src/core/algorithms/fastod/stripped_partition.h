@@ -153,7 +153,6 @@ public:
     }
 
     std::string ToString() const noexcept;
-    static StrippedPartition GetStrippedPartition(size_t attribute_set, const DataFrame& data) noexcept;
 
     template <typename TR>
     long SplitRemoveCount(size_t right) noexcept {
