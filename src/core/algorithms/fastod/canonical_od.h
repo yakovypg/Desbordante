@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stripped_partition.h"
+#include "stripped_partition_cache.h"
 
 namespace algos::fastod {
 
@@ -16,9 +17,10 @@ public:
     CanonicalOD(size_t context, int right) noexcept;
 
     template <typename TL, typename TR>
-    bool IsValid(const DataFrame& data, double error_rate_threshold) const noexcept {
+    bool IsValid(const DataFrame& data, double error_rate_threshold,
+                 StrippedPartitionCache<multithread>& cache) const noexcept {
         // important
-        StrippedPartition<multithread> sp = StrippedPartition<multithread>::GetStrippedPartition(context_, data);
+        StrippedPartition<multithread> sp = cache.GetStrippedPartition(context_, data);
 
         if (error_rate_threshold == -1) {
             if (!left_)

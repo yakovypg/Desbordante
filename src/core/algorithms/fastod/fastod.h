@@ -8,13 +8,14 @@
 #include "canonical_od.h"
 #include "attribute_pair.h"
 #include "timer.h"
+#include "stripped_partition_cache.h"
 
 #include <mutex>
 #include <shared_mutex>
 
 namespace algos::fastod {
 
-template <bool mutithread>
+template <bool multithread>
 class Fastod/*: public Algorithm*/ {
 private:
     const long time_limit_;
@@ -29,10 +30,11 @@ private:
     std::mutex m_result_;
     std::shared_mutex m_cc_, m_cs_;
 
-    std::vector<CanonicalOD<mutithread>> result_;
+    std::vector<CanonicalOD<multithread>> result_;
     std::vector<std::unordered_set<size_t>> context_in_each_level_;
     std::unordered_map<size_t, size_t> cc_;
     std::unordered_map<size_t, std::unordered_set<AttributePair>> cs_;
+    StrippedPartitionCache<multithread> partition_cache_;
 
     size_t schema_;
     const DataFrame& data_;
@@ -41,7 +43,7 @@ private:
 
     // void PrintState() const noexcept;
 
-    void addToRes(CanonicalOD<mutithread>&& od);
+    void addToRes(CanonicalOD<multithread>&& od);
     bool IsTimeUp() const noexcept;
     
     void CCPut(size_t key, size_t attribute_set) noexcept;
@@ -65,7 +67,7 @@ public:
 
     void PrintStatistics() const noexcept;
     bool IsComplete() const noexcept;
-    std::vector<CanonicalOD<mutithread>> Discover() noexcept;
+    std::vector<CanonicalOD<multithread>> Discover() noexcept;
 };
 
 using SimpleFastOD = Fastod<false>;
