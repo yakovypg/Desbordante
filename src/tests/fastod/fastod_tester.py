@@ -64,13 +64,11 @@ def parse_algorithm_output(output: str) -> AlgorithmResult:
 
     return AlgorithmResult(float(time_data), int(od_data), int(fd_data), int(ocd_data), None)
 
-def execute_algorithm(dataset_path: str, algorithm_execute_args: list[str], algorithm_name: str, output_dir: str = './', numThreads = None) -> AlgorithmResult:
+def execute_algorithm(dataset_path: str, algorithm_execute_args: list[str], algorithm_name: str, output_dir: str = './') -> AlgorithmResult:
     dataset_name = os.path.basename(dataset_path)
     output_file_path = os.path.join(output_dir, f'res_{algorithm_name}_{dataset_name}.txt')
 
     args = [dataset_path, output_file_path]
-    if numThreads != None:
-        args.append(numThreads)
     result = subprocess.run(algorithm_execute_args + args, stdout=subprocess.PIPE)
     output = result.stdout.decode('utf-8')
 
@@ -89,7 +87,7 @@ def test_algorithms(c_impl_path: str, java_impl_path: str, java_impl_class, comp
     java_impl_start = ['java', '-classpath', java_impl_path, java_impl_class]
 
     for dataset in datasets:
-        c_impl_res = execute_algorithm(dataset, c_impl_start, 'c++', output_dir, '1')
+        c_impl_res = execute_algorithm(dataset, c_impl_start, 'c++', output_dir)
         java_impl_res = execute_algorithm(dataset, java_impl_start, 'java', output_dir)
         compare_res = c_impl_res.equal_to(java_impl_res, comparer_path)
 

@@ -6,15 +6,12 @@
 
 namespace algos::fastod {
 
-template <bool multithread>
-CanonicalOD<multithread>::CanonicalOD(size_t context, const SingleAttributePredicate& left, int right) noexcept :
+CanonicalOD::CanonicalOD(size_t context, const SingleAttributePredicate& left, int right) noexcept :
     context_(context), left_(left), right_(right) {}
 
-template <bool multithread>
-CanonicalOD<multithread>::CanonicalOD(size_t context, int right) noexcept : context_(context), right_(right) {}
+CanonicalOD::CanonicalOD(size_t context, int right) noexcept : context_(context), right_(right) {}
 
-template <bool multithread>
-std::string CanonicalOD<multithread>::ToString() const noexcept {
+std::string CanonicalOD::ToString() const noexcept {
     std::stringstream ss;
 
     ss << ASToString(context_) << " : ";
@@ -28,8 +25,5 @@ std::string CanonicalOD<multithread>::ToString() const noexcept {
 
     return ss.str();
 }
-
-template class CanonicalOD<false>;
-template class CanonicalOD<true>;
 
 } // namespace algos::fastod
