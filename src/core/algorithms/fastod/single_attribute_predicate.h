@@ -13,17 +13,15 @@ struct SingleAttributePredicate {
     SingleAttributePredicate(size_t attribute, bool ascending) noexcept;
     std::string ToString() const;
 
-    template <typename T>
     bool Satisfy(DataFrame const& data,
                  size_t first_tuple_index,
                  size_t second_tuple_index) const noexcept {
         if (ascending)
-            return data.GetValue<T>(first_tuple_index, attribute) < data.GetValue<T>(second_tuple_index, attribute);
-        return data.GetValue<T>(second_tuple_index, attribute) < data.GetValue<T>(first_tuple_index, attribute);
+            return data.GetValue(first_tuple_index, attribute) < data.GetValue(second_tuple_index, attribute);
+        return data.GetValue(second_tuple_index, attribute) < data.GetValue(first_tuple_index, attribute);
     }
 
-    template <typename T>
-    bool Satisfy(typename constResType<T>::type first, typename constResType<T>::type second) const noexcept {
+    bool Satisfy(int first, int second) const noexcept {
         if (ascending)
             return first < second;
         return second < first;

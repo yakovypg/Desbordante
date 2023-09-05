@@ -26,7 +26,6 @@ public:
     explicit StrippedPartition(const DataFrame& data);
     StrippedPartition(const StrippedPartition& origin) = default;
 
-    template <typename T>
     void Product(size_t attribute) noexcept {
 
         std::vector<size_t> new_indexes;
@@ -38,11 +37,11 @@ public:
             size_t group_begin = begins_[begin_pointer];
             size_t group_end = begins_[begin_pointer + 1];
             // CHANGE: utilize column types
-            std::vector<std::pair<T, size_t>> values(group_end - group_begin);
+            std::vector<std::pair<int, size_t>> values(group_end - group_begin);
 
             for (size_t i = group_begin; i < group_end; i++) {
                 size_t index = indexes_[i];
-                values[i - group_begin] = { data_.GetValue<T>(index, attribute), index };
+                values[i - group_begin] = { data_.GetValue(index, attribute), index };
             }
             std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
                 return p1.first < p2.first;
@@ -86,15 +85,14 @@ public:
         begins_.push_back(indexes_.size());
     }
 
-    template <typename TR>
     bool Split(size_t right) noexcept {
 
         for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
             size_t group_begin = begins_[begin_pointer];
             size_t group_end = begins_[begin_pointer + 1];
-            typename constResType<TR>::type group_value = data_.GetValue<TR>(indexes_[group_begin], right);
+            int group_value = data_.GetValue(indexes_[group_begin], right);
             for (size_t i = group_begin + 1; i < group_end; i++) {
-                if (data_.GetValue<TR>(indexes_[i], right) != group_value)
+                if (data_.GetValue(indexes_[i], right) != group_value)
                     return true;
             }
         }
@@ -102,16 +100,15 @@ public:
         return false;
     }
 
-    template <typename TL, typename TR>
     bool Swap(const SingleAttributePredicate& left, size_t right) noexcept {
         for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
             size_t group_begin = begins_[begin_pointer];
             size_t group_end = begins_[begin_pointer + 1];
-            std::vector<std::pair<TL, TR>> values(group_end - group_begin);
+            std::vector<std::pair<int, int>> values(group_end - group_begin);
             for (size_t i = group_begin; i < group_end; ++i) {
                 size_t index = indexes_[i];
-                values[i - group_begin] = { data_.GetValue<TL>(index, left.attribute), 
-                                            data_.GetValue<TR>(index, right) };
+                values[i - group_begin] = { data_.GetValue(index, left.attribute), 
+                                            data_.GetValue(index, right) };
             }
             // CHANGE: utilize operators
             // SCOPE: from here until the end of this loop
@@ -154,7 +151,6 @@ public:
 
     std::string ToString() const noexcept;
 
-    template <typename TR>
     long SplitRemoveCount(size_t right) noexcept {
         long result = 0;
 
@@ -163,10 +159,10 @@ public:
             size_t group_end = begins_[begin_pointer + 1];
             size_t group_length = group_end - group_begin;
             // CHANGE: key type according to column types
-            std::unordered_map<TR, size_t> group_int_2_count;
+            std::unordered_map<int, size_t> group_int_2_count;
 
             for (size_t i = group_begin; i < group_end; i++) {
-                typename constResType<TR>::type right_value = data_.GetValue<TR>(indexes_[i], right);
+                int right_value = data_.GetValue(indexes_[i], right);
                 
                 if (group_int_2_count.count(right_value) != 0)
                     ++group_int_2_count[right_value];
@@ -184,7 +180,7 @@ public:
 
         return result;
     }
-    template <typename TL, typename TR>
+
     long SwapRemoveCount(const SingleAttributePredicate& left, size_t right) noexcept {
         std::size_t length = indexes_.size();
         std::vector<size_t> violations_count(length);
@@ -198,20 +194,20 @@ public:
 
             for (size_t i = group_begin; i < group_end; i++) {
                 // CHANGE: was FiltereDataFrameGet
-                typename constResType<TL>::type left_i = data_.GetValue<TL>(indexes_[i], left.attribute);
-                typename constResType<TR>::type right_i = data_.GetValue<TR>(indexes_[i], right);
+                int left_i = data_.GetValue(indexes_[i], left.attribute);
+                int right_i = data_.GetValue(indexes_[i], right);
 
                 for (size_t j = i + 1; j < group_end; j++) {
                     // CHANGE: was FiltereDataFrameGet
-                    typename constResType<TL>::type left_j = data_.GetValue<TL>(indexes_[j], left.attribute);
-                    typename constResType<TR>::type right_j = data_.GetValue<TR>(indexes_[j], right);
+                    int left_j = data_.GetValue(indexes_[j], left.attribute);
+                    int right_j = data_.GetValue(indexes_[j], right);
 
                     // CHANGE: this comparison now uses operators
                     // this is needed to get rid of FilteredDataFrameGet
                     if (left_i != left_j
                         && right_i != right_j
-                        && left.Satisfy<TL>(left_i, left_j)
-                        && left.Satisfy<TR>(right_j, right_i)
+                        && left.Satisfy(left_i, left_j)
+                        && left.Satisfy(right_j, right_i)
                     ) {
                         violations_count[i]++;
                         violations_count[j]++;
@@ -236,20 +232,20 @@ public:
                 deleted[delete_index] = true;
 
                 // CHANGE: was FiltereDataFrameGet
-                typename constResType<TL>::type left_i = data_.GetValue<TL>(indexes_[delete_index], left.attribute);
-                typename constResType<TR>::type right_i = data_.GetValue<TR>(indexes_[delete_index], right);
+                int left_i = data_.GetValue(indexes_[delete_index], left.attribute);
+                int right_i = data_.GetValue(indexes_[delete_index], right);
 
                 for (size_t j = group_begin; j < group_end; j++) {
                     // CHANGE: was FiltereDataFrameGet
-                    typename constResType<TL>::type left_j = data_.GetValue<TL>(indexes_[j], left.attribute);
-                    typename constResType<TR>::type right_j = data_.GetValue<TR>(indexes_[j], right);
+                    int left_j = data_.GetValue(indexes_[j], left.attribute);
+                    int right_j = data_.GetValue(indexes_[j], right);
 
                     // CHANGE: this comparison now uses operators
                     // this is needed to get rid of FilteredDataFrameGet
                     if (left_i != left_j
                         && right_i != right_j
-                        && left.Satisfy<TL>(left_i, left_j)
-                        && left.Satisfy<TR>(right_j, right_i)
+                        && left.Satisfy(left_i, left_j)
+                        && left.Satisfy(right_j, right_i)
                     ) {
                         violations_count[j]--;
                     }

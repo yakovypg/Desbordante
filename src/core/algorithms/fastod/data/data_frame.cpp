@@ -8,49 +8,57 @@
 
 using namespace algos::fastod;
 
-DataFrame::DataFrame(std::vector<model::TypedColumnData> columns_data) noexcept : columns_data_(std::move(columns_data)), dataInt(columns_data_.size()), dataDouble(columns_data_.size()), dataString(columns_data_.size()) {
-    assert(columns_data_.size() != 0);
-    size_t numRows = columns_data_[0].GetNumRows();
-    data_.reserve(numRows);
-    for (size_t i = 0; i < numRows; ++i) {
-        data_.emplace_back(columns_data_.size());
-        for (size_t col = 0; col < columns_data_.size(); ++col) {
-            data_.back()[col] = SchemaValue::FromTypedColumnData(columns_data_[col], i);
-        }
-    }
-    for (size_t i = 0; i < columns_data_.size(); ++i) {
-        if (columns_data_[i].GetTypeId() == +model::TypeId::kInt) {
-            dataInt[i].reserve(numRows);
-            for (size_t j = 0; j < numRows; ++j)
-                dataInt[i].push_back(data_[j][i].AsInt());
-        } else if (columns_data_[i].GetTypeId() == +model::TypeId::kDouble) {
-            dataDouble[i].reserve(numRows);
-            for (size_t j = 0; j < numRows; ++j)
-                dataDouble[i].push_back(data_[j][i].AsDouble());
-        } else {
-            dataString[i].reserve(numRows);
-            for (size_t j = 0; j < numRows; ++j)
-                dataString[i].push_back(data_[j][i].AsString());
-        }
-    }
-    ASIterator::MAX_COLS = columns_data_.size();
+#include <iostream>
+
+DataFrame::DataFrame(const std::vector<model::TypedColumnData>& columns_data) noexcept {
+    std::size_t cols_num = columns_data.size();  
+    assert(cols_num != 0);
+
+    std::transform(columns_data.cbegin(), columns_data.cend(),
+        std::back_inserter(data_), ConvertColumnDataToIntegers);
+
+    // data_ = std::vector<std::vector<int>>(cols_num);
+
+    // for (std::size_t i = 0; i < cols_num; ++i) {
+    //     auto v = ConvertColumnDataToIntegers(columns_data[i]);
+    //     data_[i] = v;
+    // }
+
+    // std::cout << "\nTEST START\n\n";
+
+    // std::vector<std::string> vect(data_.size());
+
+    // for (std::size_t i = 0; i < data_.size(); ++i) {
+    //     for (std::size_t j = 0; j < data_[0].size(); ++j) {
+    //         vect[j] += std::to_string(data_[i][j]);
+
+    //         if (i < data_.size() - 1)
+    //             vect[j] += ",";
+    //         else
+    //             vect[j] += '\n';
+    //     }
+    // }
+
+    // for (std::size_t i = 0; i < vect.size(); ++i) {
+    //     std::cout << vect[i];
+    // }
+
+    // std::cout << "\nTEST END\n";
+
+    ASIterator::MAX_COLS = cols_num;
 }
 
-// const SchemaValue& DataFrame::GetValue(int tuple_index, int attribute_index) const noexcept {
-//     return data_[tuple_index][attribute_index];
-// }
-
-// SchemaValue& DataFrame::GetValue(int tuple_index, int attribute_index) noexcept {
-//     return data_[tuple_index][attribute_index];
-// }
+int DataFrame::GetValue(int tuple_index, int attribute_index) const noexcept {
+    return data_[attribute_index][tuple_index];
+}
 
 std::size_t DataFrame::GetColumnCount() const noexcept {
-    return columns_data_.size();
+    return data_.size();
 }
 
 std::size_t DataFrame::GetTupleCount() const noexcept {
-    return columns_data_.size() > 0
-        ? columns_data_.at(0).GetNumRows()
+    return data_.size() > 0
+        ? data_.at(0).size()
         : 0;
 }
 
@@ -68,6 +76,54 @@ DataFrame DataFrame::FromCsv(std::filesystem::path const& path,
     return DataFrame(std::move(columns_data));
 }
 
-model::TypeId DataFrame::GetColTypeId(size_t col) const noexcept {
-    return columns_data_[col].GetTypeId();
+std::vector<std::pair<const std::byte*, int>> DataFrame::CreateIndexedColumnData(const model::TypedColumnData& column) {
+    std::vector<const std::byte*> data = column.GetData();
+    std::vector<std::pair<const std::byte*, int>> indexed_column_data(data.size());
+
+    for (std::size_t i = 0; i < data.size(); ++i) {
+        indexed_column_data[i] = std::make_pair(data[i], i);
+    }
+
+    return std::move(indexed_column_data);
+}
+
+std::vector<int> DataFrame::ConvertColumnDataToIntegers(const model::TypedColumnData& column) {
+    std::vector<std::pair<const std::byte*, int>> indexed_column_data = CreateIndexedColumnData(column);
+
+    auto less = [&column](std::pair<const std::byte*, int> l, std::pair<const std::byte*, int> r) {
+        if (column.IsMixed()) {
+            const model::MixedType* mixed_type = column.GetIfMixed();
+            return mixed_type->ValueToString(l.first) < mixed_type->ValueToString(r.first);
+        }
+
+        const model::Type& type = column.GetType();
+        return type.Compare(l.first, r.first) == model::CompareResult::kLess;
+    };
+
+    auto equal = [&column](std::pair<const std::byte*, int> l, std::pair<const std::byte*, int> r) {
+        if (column.IsMixed()) {
+            const model::MixedType* mixed_type = column.GetIfMixed();
+            return mixed_type->ValueToString(l.first) == mixed_type->ValueToString(r.first);
+        }
+
+        const model::Type& type = column.GetType();
+        return type.Compare(l.first, r.first) == model::CompareResult::kEqual;
+    };
+
+    std::sort(indexed_column_data.begin(), indexed_column_data.end(), less);
+    std::vector<int> converted_column(indexed_column_data.size());
+
+    int current_value = 0;
+    converted_column[indexed_column_data[0].second] = current_value;
+    
+    for (std::size_t i = 1; i < indexed_column_data.size(); ++i) {
+        const std::pair<const std::byte*, int>& prev = indexed_column_data[i - 1];
+        const std::pair<const std::byte*, int>& curr = indexed_column_data[i];
+
+        converted_column[curr.second] = equal(prev, curr)
+            ? current_value
+            : ++current_value;
+    }
+
+    return std::move(converted_column);
 }
