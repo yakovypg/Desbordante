@@ -3,7 +3,7 @@
 
 namespace algos::fastod {
 
-AttributePair::AttributePair(SingleAttributePredicate&& left, size_t right) noexcept :
+AttributePair::AttributePair(SingleAttributePredicate&& left, size_t right) :
     left(left), right(right) {}
 
 std::string AttributePair::ToString() const {

@@ -8,15 +8,15 @@
 
 namespace algos::fastod {
 
-bool Fastod::IsTimeUp() const noexcept {
+bool Fastod::IsTimeUp() const {
     return timer_.GetElapsedSeconds() >= time_limit_;
 }
 
-void Fastod::CCPut(size_t key, size_t attribute_set) noexcept {
+void Fastod::CCPut(size_t key, size_t attribute_set) {
     cc_[key] = attribute_set;
 }
 
-size_t Fastod::CCGet(size_t key) noexcept {
+size_t Fastod::CCGet(size_t key) {
     const auto it = cc_.find(key);
     if (it != cc_.cend())
         return it->second;
@@ -27,19 +27,19 @@ void Fastod::addToRes(CanonicalOD&& od) {
     result_.emplace_back(std::move(od));
 }
 
-void Fastod::CSPut(size_t key, const AttributePair& value) noexcept {
+void Fastod::CSPut(size_t key, const AttributePair& value) {
     cs_[key].emplace(value);
 }
 
-void Fastod::CSPut(size_t key, AttributePair&& value) noexcept {
+void Fastod::CSPut(size_t key, AttributePair&& value) {
     cs_[key].emplace(std::move(value));
 }
 
-std::unordered_set<AttributePair>& Fastod::CSGet(size_t key) noexcept {
+std::unordered_set<AttributePair>& Fastod::CSGet(size_t key) {
     return cs_[key];
 }
 
-void Fastod::PrintStatistics() const noexcept {
+void Fastod::PrintStatistics() const {
     std::string last_od = result_.size() > 0
         ? result_[result_.size() - 1].ToString()
         : std::string("");
@@ -56,11 +56,11 @@ void Fastod::PrintStatistics() const noexcept {
               << "OCD=" << ocd_count_ << '\n';
 }
 
-bool Fastod::IsComplete() const noexcept {
+bool Fastod::IsComplete() const {
     return is_complete_;
 }
 
-void Fastod::Initialize() noexcept {
+void Fastod::Initialize() {
     timer_.Start();
 
     size_t empty_set = 0;
@@ -83,7 +83,7 @@ void Fastod::Initialize() noexcept {
     context_in_each_level_.emplace_back(std::move(level_1_candidates));
 }
 
-std::vector<CanonicalOD> Fastod::Discover() noexcept {
+std::vector<CanonicalOD> Fastod::Discover() {
     Initialize();
 
     while (!context_in_each_level_[level_].empty()) {
@@ -116,7 +116,7 @@ std::vector<CanonicalOD> Fastod::Discover() noexcept {
     return result_;
 }
 
-void Fastod::ComputeODs() noexcept {
+void Fastod::ComputeODs() {
     const auto& context_this_level = context_in_each_level_[level_];
     Timer timer(true);
     std::vector<std::vector<size_t>> deletedAttrs(context_this_level.size());
@@ -226,7 +226,7 @@ void Fastod::ComputeODs() noexcept {
     }
 }
 
-void Fastod::PruneLevels() noexcept {
+void Fastod::PruneLevels() {
     if (level_ >= 2) {
         auto& contexts = context_in_each_level_[level_];
 
@@ -240,7 +240,7 @@ void Fastod::PruneLevels() noexcept {
     }
 }
 
-void Fastod::CalculateNextLevel() noexcept {
+void Fastod::CalculateNextLevel() {
     std::unordered_map<size_t, std::vector<size_t>> prefix_blocks;
     std::unordered_set<size_t> context_next_level;
 

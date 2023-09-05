@@ -19,7 +19,7 @@ public:
     explicit StrippedPartition(const DataFrame& data);
     StrippedPartition(const StrippedPartition& origin) = default;
 
-    void Product(size_t attribute) noexcept {
+    void Product(size_t attribute) {
 
         std::vector<size_t> new_indexes;
         new_indexes.reserve(data_.GetColumnCount());
@@ -78,7 +78,7 @@ public:
         begins_.push_back(indexes_.size());
     }
 
-    bool Split(size_t right) noexcept {
+    bool Split(size_t right) {
 
         for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
             size_t group_begin = begins_[begin_pointer];
@@ -93,7 +93,7 @@ public:
         return false;
     }
 
-    bool Swap(const SingleAttributePredicate& left, size_t right) noexcept {
+    bool Swap(const SingleAttributePredicate& left, size_t right) {
         for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
             size_t group_begin = begins_[begin_pointer];
             size_t group_end = begins_[begin_pointer + 1];
@@ -142,9 +142,9 @@ public:
         return false;
     }
 
-    std::string ToString() const noexcept;
+    std::string ToString() const;
 
-    long SplitRemoveCount(size_t right) noexcept {
+    long SplitRemoveCount(size_t right) {
         long result = 0;
 
         for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
@@ -174,7 +174,7 @@ public:
         return result;
     }
 
-    long SwapRemoveCount(const SingleAttributePredicate& left, size_t right) noexcept {
+    long SwapRemoveCount(const SingleAttributePredicate& left, size_t right) {
         std::size_t length = indexes_.size();
         std::vector<size_t> violations_count(length);
         std::vector<bool> deleted(length);

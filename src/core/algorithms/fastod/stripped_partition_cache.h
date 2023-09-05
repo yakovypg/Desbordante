@@ -11,7 +11,7 @@ private:
 
 public:
     StrippedPartition GetStrippedPartition(size_t attribute_set,
-                                                        const DataFrame& data) noexcept {
+                                                        const DataFrame& data) {
         if (cache_.Contains(attribute_set)) {
             return cache_.Get(attribute_set);
         }
