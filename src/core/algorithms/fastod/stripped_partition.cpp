@@ -5,8 +5,7 @@
 
 namespace algos::fastod {
 
-template <bool multithread>
-StrippedPartition<multithread>::StrippedPartition(const DataFrame& data) : data_(std::move(data)) {
+StrippedPartition::StrippedPartition(const DataFrame& data) : data_(std::move(data)) {
     indexes_.reserve(data.GetTupleCount());
     for (size_t i = 0; i < data.GetTupleCount(); i++) {
         indexes_.push_back(i);
@@ -19,8 +18,7 @@ StrippedPartition<multithread>::StrippedPartition(const DataFrame& data) : data_
     begins_.push_back(data.GetTupleCount());
 }
 
-template <bool multithread>
-std::string StrippedPartition<multithread>::ToString() const noexcept {
+std::string StrippedPartition::ToString() const noexcept {
     std::stringstream ss;
     std::string indexes_string;
 
@@ -49,8 +47,7 @@ std::string StrippedPartition<multithread>::ToString() const noexcept {
     return ss.str();
 }
 
-template <bool multithread>
-StrippedPartition<multithread>& StrippedPartition<multithread>::operator=(const StrippedPartition& other) {
+StrippedPartition& StrippedPartition::operator=(const StrippedPartition& other) {
     if (this == &other) {
         return *this;
     }
@@ -61,6 +58,4 @@ StrippedPartition<multithread>& StrippedPartition<multithread>::operator=(const 
     return *this;
 }
 
-template class StrippedPartition<false>;
-template class StrippedPartition<true>;
 }

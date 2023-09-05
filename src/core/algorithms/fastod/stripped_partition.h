@@ -9,13 +9,6 @@
 
 namespace algos::fastod {
 
-template <bool multithread>
-class StrippedPartition;
-
-using SingleStrippedPartition = StrippedPartition<false>;
-using MultiStrippedPartition = StrippedPartition<true>;
-
-template <bool multithread>
 class StrippedPartition {
 private:
     std::vector<size_t> indexes_;

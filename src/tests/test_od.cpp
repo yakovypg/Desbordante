@@ -16,8 +16,8 @@ size_t RunFastOdOn(std::string dataset) {
         algos::fastod::DataFrame::FromCsv(d);
 
     size_t threads = 1;
-    algos::fastod::Fastod<false> fastod(data, std::numeric_limits<long>::max(), threads);
-    std::vector<algos::fastod::CanonicalOD<false>> ods = fastod.Discover();
+    algos::fastod::Fastod fastod(data, std::numeric_limits<long>::max(), threads);
+    std::vector<algos::fastod::CanonicalOD> ods = fastod.Discover();
     std::vector<std::string> string_ods;
     string_ods.reserve(ods.size());
     std::transform(std::begin(ods), std::end(ods), std::back_inserter(string_ods),

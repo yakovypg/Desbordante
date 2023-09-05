@@ -5,7 +5,6 @@
 
 namespace algos::fastod {
 
-template <bool multithread>
 class CanonicalOD {
 private:
     size_t context_;
@@ -17,24 +16,24 @@ public:
     CanonicalOD(size_t context, int right) noexcept;
 
     bool IsValid(const DataFrame& data, double error_rate_threshold,
-                 StrippedPartitionCache<multithread>& cache) const noexcept {
+                 StrippedPartitionCache& cache) const noexcept {
         // important
-        StrippedPartition<multithread> sp = cache.GetStrippedPartition(context_, data);
+        StrippedPartition sp = cache.GetStrippedPartition(context_, data);
 
         if (error_rate_threshold == -1) {
             if (!left_)
-                return !(sp.template Split(right_));
+                return !(sp.Split(right_));
 
             // important
-            return !(sp.template Swap(*left_, right_));
+            return !(sp.Swap(*left_, right_));
         }
 
         long violation_count;
 
         if (!left_)
-            violation_count = sp.template SplitRemoveCount(right_);
+            violation_count = sp.SplitRemoveCount(right_);
         else
-            violation_count = sp.template SwapRemoveCount(left_.value(), right_);
+            violation_count = sp.SwapRemoveCount(left_.value(), right_);
 
         double error_rate = (double)violation_count / data.GetTupleCount();
 
@@ -42,8 +41,5 @@ public:
     }
     std::string ToString() const noexcept;
 };
-
-using SimpleCanonicalOD = CanonicalOD<false>;
-using MultiCanonicalOD = CanonicalOD<true>;
 
 } // namespace algos::fatod
