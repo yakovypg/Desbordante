@@ -15,8 +15,6 @@ DataFrame::DataFrame(const std::vector<model::TypedColumnData>& columns_data) {
 
     std::transform(columns_data.cbegin(), columns_data.cend(),
         std::back_inserter(data_), ConvertColumnDataToIntegers);
-
-    ASIterator::MAX_COLS = cols_num;
 }
 
 int DataFrame::GetValue(int tuple_index, int attribute_index) const {
