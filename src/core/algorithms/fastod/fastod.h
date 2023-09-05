@@ -5,6 +5,7 @@
 #include <vector>
 #include <algorithm>
 
+#include "attribute_set.h"
 #include "canonical_od.h"
 #include "attribute_pair.h"
 #include "timer.h"
@@ -23,12 +24,12 @@ private:
     size_t ocd_count_ = 0;
 
     std::vector<CanonicalOD> result_;
-    std::vector<std::unordered_set<size_t>> context_in_each_level_;
-    std::unordered_map<size_t, size_t> cc_;
-    std::unordered_map<size_t, std::unordered_set<AttributePair>> cs_;
+    std::vector<std::unordered_set<AttributeSet>> context_in_each_level_;
+    std::unordered_map<AttributeSet, AttributeSet> cc_;
+    std::unordered_map<AttributeSet, std::unordered_set<AttributePair>> cs_;
     StrippedPartitionCache partition_cache_;
 
-    size_t schema_;
+    AttributeSet schema_;
     DataFrame data_;
 
     Timer timer_;
@@ -36,11 +37,11 @@ private:
     void addToRes(CanonicalOD&& od);
     bool IsTimeUp() const;
     
-    void CCPut(size_t key, size_t attribute_set);
-    size_t CCGet(size_t key);
-    void CSPut(size_t key, const AttributePair& value);
-    void CSPut(size_t key, AttributePair&& value);
-    std::unordered_set<AttributePair>& CSGet(size_t key);
+    void CCPut(AttributeSet const& key, AttributeSet attribute_set);
+    AttributeSet const& CCGet(AttributeSet const& key);
+    void CSPut(AttributeSet const& key, const AttributePair& value);
+    void CSPut(AttributeSet const& key, AttributePair&& value);
+    std::unordered_set<AttributePair>& CSGet(AttributeSet const& key);
 
     void Initialize();
 

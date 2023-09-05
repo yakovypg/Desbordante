@@ -12,30 +12,30 @@ bool Fastod::IsTimeUp() const {
     return timer_.GetElapsedSeconds() >= time_limit_;
 }
 
-void Fastod::CCPut(size_t key, size_t attribute_set) {
-    cc_[key] = attribute_set;
+void Fastod::CCPut(AttributeSet const& key, AttributeSet attribute_set) {
+    cc_[key] = std::move(attribute_set);
 }
 
-size_t Fastod::CCGet(size_t key) {
+AttributeSet const& Fastod::CCGet(AttributeSet const& key) {
     const auto it = cc_.find(key);
     if (it != cc_.cend())
         return it->second;
-    return cc_[key] = 0;
+    return cc_[key] = AttributeSet(data_.GetColumnCount());
 }
 
 void Fastod::addToRes(CanonicalOD&& od) {
     result_.emplace_back(std::move(od));
 }
 
-void Fastod::CSPut(size_t key, const AttributePair& value) {
+void Fastod::CSPut(AttributeSet const& key, const AttributePair& value) {
     cs_[key].emplace(value);
 }
 
-void Fastod::CSPut(size_t key, AttributePair&& value) {
+void Fastod::CSPut(AttributeSet const& key, AttributePair&& value) {
     cs_[key].emplace(std::move(value));
 }
 
-std::unordered_set<AttributePair>& Fastod::CSGet(size_t key) {
+std::unordered_set<AttributePair>& Fastod::CSGet(AttributeSet const& key) {
     return cs_[key];
 }
 
@@ -63,20 +63,20 @@ bool Fastod::IsComplete() const {
 void Fastod::Initialize() {
     timer_.Start();
 
-    size_t empty_set = 0;
+    AttributeSet empty_set(data_.GetColumnCount());
 
     context_in_each_level_.push_back({});
     context_in_each_level_[0].insert(empty_set);
-    schema_ = ~((~0) << data_.GetColumnCount());
+    schema_ = AttributeSet(data_.GetColumnCount(), (1 << data_.GetColumnCount()) - 1);
     CCPut(empty_set, schema_);
 
     level_ = 1;
-    std::unordered_set<size_t> level_1_candidates;
+    std::unordered_set<AttributeSet> level_1_candidates;
 
     for (size_t i = 0; i < data_.GetColumnCount(); i++)
-        level_1_candidates.emplace(1 << i);
+        level_1_candidates.emplace(data_.GetColumnCount(), 1 << i);
 
-    context_in_each_level_.emplace_back(std::move(level_1_candidates));
+    context_in_each_level_.push_back(std::move(level_1_candidates));
 }
 
 std::vector<CanonicalOD> Fastod::Discover() {
@@ -115,9 +115,9 @@ std::vector<CanonicalOD> Fastod::Discover() {
 void Fastod::ComputeODs() {
     const auto& context_this_level = context_in_each_level_[level_];
     Timer timer(true);
-    std::vector<std::vector<size_t>> deletedAttrs(context_this_level.size());
+    std::vector<std::vector<AttributeSet>> deletedAttrs(context_this_level.size());
     size_t contextInd = 0;
-    for (size_t context : context_this_level) {
+    for (AttributeSet const& context : context_this_level) {
         auto& delAttrs = deletedAttrs[contextInd++];
         delAttrs.reserve(data_.GetColumnCount());
         for (size_t col = 0; col < data_.GetColumnCount(); ++col)
@@ -127,9 +127,10 @@ void Fastod::ComputeODs() {
             return;
         }
 
-        size_t context_cc = schema_;
-        for (ASIterator attr = attrsBegin(context); attr != attrsEnd(context); ++attr) {
-            context_cc = intersect(context_cc, CCGet(delAttrs[*attr]));
+        AttributeSet context_cc = schema_;
+        for (AttributeSet::size_type attr = context.find_first(); attr != AttributeSet::npos;
+             attr = context.find_next(attr)) {
+            context_cc = intersect(context_cc, CCGet(delAttrs[attr]));
         }
 
         CCPut(context, context_cc);
@@ -140,7 +141,7 @@ void Fastod::ComputeODs() {
                     if (i == j) {
                         continue;
                     }
-                    size_t c = attributeSet({i, j});
+                    AttributeSet c = attributeSet({i, j}, data_.GetColumnCount());
 
                     CSPut(c, AttributePair(SingleAttributePredicate(i, false), j));
                     CSPut(c, AttributePair(SingleAttributePredicate(i, true), j));
@@ -148,20 +149,20 @@ void Fastod::ComputeODs() {
             }
         } else if (level_ > 2) {
             std::unordered_set<AttributePair> candidate_cs_pair_set;
-            for (ASIterator attr = attrsBegin(context); attr != attrsEnd(context); ++attr) {
-                const auto& tmp = CSGet(delAttrs[*attr]);
+            for (AttributeSet::size_type attr = context.find_first(); attr != AttributeSet::npos;
+                 attr = context.find_next(attr)) {
+                const auto& tmp = CSGet(delAttrs[attr]);
                 candidate_cs_pair_set.insert(tmp.cbegin(), tmp.cend());
             }
 
             for (AttributePair const& attribute_pair : candidate_cs_pair_set) {
-                size_t context_delete_ab = deleteAttribute(
-                    delAttrs[attribute_pair.left.attribute],
-                    attribute_pair.right);
+                AttributeSet context_delete_ab = deleteAttribute(
+                    delAttrs[attribute_pair.left.attribute], attribute_pair.right);
 
                 bool add_context = true;
-                for (ASIterator attr = attrsBegin(context_delete_ab);
-                    attr != attrsEnd(context_delete_ab); ++attr) {
-                    if (CSGet(delAttrs[*attr]).count(attribute_pair) == 0) {
+                for (AttributeSet::size_type attr = context_delete_ab.find_first();
+                    attr != AttributeSet::npos; attr = context_delete_ab.find_next(attr)) {
+                    if (CSGet(delAttrs[attr]).count(attribute_pair) == 0) {
                         add_context = false;
                         break;
                     }
@@ -174,31 +175,30 @@ void Fastod::ComputeODs() {
         }
     }
     size_t condInd = 0;
-    for (size_t context : context_this_level) {
+    for (AttributeSet const& context : context_this_level) {
         const auto& delAttrs = deletedAttrs[condInd++];
         if (IsTimeUp()) {
             is_complete_ = false;
             return;
         }
 
-        size_t context_intersect_cc_context = intersect(context, CCGet(context));
-        for (ASIterator attr = attrsBegin(context_intersect_cc_context);
-            attr != attrsEnd(context_intersect_cc_context); ++attr) {
-            CanonicalOD od(delAttrs[*attr], *attr);
+        AttributeSet context_intersect_cc_context = intersect(context, CCGet(context));
+        for (AttributeSet::size_type attr = context_intersect_cc_context.find_first();
+            attr != AttributeSet::npos; attr = context_intersect_cc_context.find_next(attr)) {
+            CanonicalOD od(delAttrs[attr], attr);
 
             if (od.IsValid(data_, error_rate_threshold_, partition_cache_)) {
                 addToRes(std::move(od));
                 fd_count_++;
-                CCPut(context, deleteAttribute(CCGet(context), *attr));
+                CCPut(context, deleteAttribute(CCGet(context), attr));
 
-                size_t diff = difference(schema_, context);
-                for (ASIterator i = attrsBegin(diff); i != attrsEnd(diff); ++i)
-                    CCPut(context, deleteAttribute(CCGet(context), *i));
-
+                AttributeSet diff = difference(schema_, context);
+                for (AttributeSet::size_type i = diff.find_first(); i != AttributeSet::npos;
+                     i = diff.find_next(i))
+                    CCPut(context, deleteAttribute(CCGet(context), i));
                 //PrintStatistics();
             }
         }
-        
 
         auto& cs_for_con = CSGet(context);
         for (auto it = cs_for_con.begin(); it != cs_for_con.end();) {
@@ -237,15 +237,15 @@ void Fastod::PruneLevels() {
 }
 
 void Fastod::CalculateNextLevel() {
-    std::unordered_map<size_t, std::vector<size_t>> prefix_blocks;
-    std::unordered_set<size_t> context_next_level;
+    std::unordered_map<AttributeSet, std::vector<size_t>> prefix_blocks;
+    std::unordered_set<AttributeSet> context_next_level;
 
     const auto& context_this_level = context_in_each_level_[level_];
 
-    for (size_t attribute_set : context_this_level) {
-        for (ASIterator attr = attrsBegin(attribute_set); 
-            attr != attrsEnd(attribute_set); ++attr) {
-            prefix_blocks[deleteAttribute(attribute_set, *attr)].push_back(*attr);
+    for (AttributeSet const& attribute_set : context_this_level) {
+        for (AttributeSet::size_type attr = attribute_set.find_first();
+            attr != AttributeSet::npos; attr = attribute_set.find_next(attr)) {
+            prefix_blocks[deleteAttribute(attribute_set, attr)].push_back(attr);
         }
     }
 
@@ -261,11 +261,11 @@ void Fastod::CalculateNextLevel() {
         for (size_t i = 0; i < single_attributes.size(); ++i) {
             for (size_t j = i + 1; j < single_attributes.size(); ++j) {
                 bool create_context = true;
-                size_t candidate = addAttribute(addAttribute(prefix,
+                AttributeSet candidate = addAttribute(addAttribute(prefix,
                     single_attributes[i]), single_attributes[j]);
-                for (ASIterator attr = attrsBegin(candidate); 
-                    attr != attrsEnd(candidate); ++attr) {
-                    if (context_this_level.count(deleteAttribute(candidate, *attr)) == 0) {
+                for (AttributeSet::size_type attr = candidate.find_first();
+                    attr != AttributeSet::npos; attr = candidate.find_next(attr)) {
+                    if (context_this_level.count(deleteAttribute(candidate, attr)) == 0) {
                         create_context = false;
                         break;
                     }
@@ -278,7 +278,7 @@ void Fastod::CalculateNextLevel() {
         }
     }
 
-    context_in_each_level_.emplace_back(std::move(context_next_level));
+    context_in_each_level_.push_back(std::move(context_next_level));
 }
 
 }
