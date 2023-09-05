@@ -18,7 +18,7 @@ StrippedPartition::StrippedPartition(const DataFrame& data) : data_(std::move(da
     begins_.push_back(data.GetTupleCount());
 }
 
-std::string StrippedPartition::ToString() const noexcept {
+std::string StrippedPartition::ToString() const {
     std::stringstream ss;
     std::string indexes_string;
 

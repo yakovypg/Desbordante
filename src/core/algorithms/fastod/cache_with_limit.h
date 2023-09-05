@@ -17,12 +17,12 @@ private:
     const std::size_t max_size_;
 
 public:
-    explicit CacheWithLimit(std::size_t max_size) noexcept : max_size_(max_size) {};
+    explicit CacheWithLimit(std::size_t max_size) : max_size_(max_size) {};
     
-    bool Contains(const K& key) const noexcept {
+    bool Contains(const K& key) const {
         return entries_.count(key) != 0;
     }
-    const V& Get(const K& key) const noexcept {
+    const V& Get(const K& key) const {
         return entries_.at(key);
     }
     void Set(const K& key, const V& value) {

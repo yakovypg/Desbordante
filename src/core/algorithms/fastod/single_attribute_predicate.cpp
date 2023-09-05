@@ -2,7 +2,7 @@
 
 namespace algos::fastod {
 
-SingleAttributePredicate::SingleAttributePredicate(size_t attribute, bool ascending) noexcept
+SingleAttributePredicate::SingleAttributePredicate(size_t attribute, bool ascending)
     : attribute(attribute), ascending(ascending) { }
 
 std::string SingleAttributePredicate::ToString() const {
@@ -13,7 +13,7 @@ bool operator==(SingleAttributePredicate const& x, SingleAttributePredicate cons
     return x.attribute == y.attribute && x.ascending == y.ascending;
 }
 
-size_t SingleAttributePredicate::hash() const noexcept {
+size_t SingleAttributePredicate::hash() const {
     return attribute << (ascending ? 0 : 5);
 }
 

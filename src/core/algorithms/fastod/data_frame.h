@@ -5,7 +5,8 @@
 #include <filesystem>
 #include <type_traits>
 
-#include "schema_value.h"
+#include "config/equal_nulls/type.h"
+#include "table/column_layout_typed_relation_data.h"
 
 namespace algos::fastod {
 
@@ -19,12 +20,12 @@ private:
 public:
     DataFrame() = default;
     DataFrame(const DataFrame&) = delete;
-    explicit DataFrame(const std::vector<model::TypedColumnData>& columns_data) noexcept;
+    explicit DataFrame(const std::vector<model::TypedColumnData>& columns_data);
 
-    int GetValue(int tuple_index, int attribute_index) const noexcept;
+    int GetValue(int tuple_index, int attribute_index) const;
     
-    std::size_t GetColumnCount() const noexcept;
-    std::size_t GetTupleCount() const noexcept;
+    std::size_t GetColumnCount() const;
+    std::size_t GetTupleCount() const;
 
     static DataFrame FromCsv(std::filesystem::path const& path);
 
