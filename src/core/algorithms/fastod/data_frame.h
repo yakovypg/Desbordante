@@ -20,6 +20,11 @@ private:
 public:
     DataFrame() = default;
     DataFrame(const DataFrame&) = delete;
+    DataFrame& operator=(const DataFrame&) = delete;
+    DataFrame(DataFrame&&) noexcept = default;
+    DataFrame& operator=(DataFrame&&) = default;
+    ~DataFrame() noexcept = default;
+
     explicit DataFrame(const std::vector<model::TypedColumnData>& columns_data);
 
     int GetValue(int tuple_index, int attribute_index) const;
