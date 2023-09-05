@@ -231,29 +231,7 @@ void Fastod<mutithread>::ComputeODs() noexcept {
             std::unordered_set<size_t>::const_iterator>& contexts) {
         auto [startPos, endPos, startIt, endIt] = contexts;
         auto getIsValid = [this](const CanonicalOD<mutithread>& od, size_t attrL, size_t attrR) {
-            model::TypeId typeIdL = data_.GetColTypeId(attrL);
-            model::TypeId typeIdR = data_.GetColTypeId(attrR);
-            if (typeIdL == +model::TypeId::kInt) {
-                if (typeIdR == +model::TypeId::kInt)
-                    return od.template IsValid<int, int>(data_, error_rate_threshold_, partition_cache_);
-                else if (typeIdR == +model::TypeId::kDouble)
-                    return od.template IsValid<int, double>(data_, error_rate_threshold_, partition_cache_);
-                else
-                    return od.template IsValid<int, std::string>(data_, error_rate_threshold_, partition_cache_);
-            } else if (typeIdL == +model::TypeId::kDouble) {
-                if (typeIdR == +model::TypeId::kInt)
-                    return od.template IsValid<double, int>(data_, error_rate_threshold_, partition_cache_);
-                else if (typeIdR == +model::TypeId::kDouble)
-                    return od.template IsValid<double, double>(data_, error_rate_threshold_, partition_cache_);
-                else
-                    return od.template IsValid<double, std::string>(data_, error_rate_threshold_, partition_cache_);
-            }
-            if (typeIdR == +model::TypeId::kInt)
-                return od.template IsValid<std::string, int>(data_, error_rate_threshold_, partition_cache_);
-            else if (typeIdR == +model::TypeId::kDouble)
-                return od.template IsValid<std::string, double>(data_, error_rate_threshold_, partition_cache_);
-            else
-                return od.template IsValid<std::string, std::string>(data_, error_rate_threshold_, partition_cache_);
+            return od.IsValid(data_, error_rate_threshold_, partition_cache_);
         };
         for (size_t condInd = startPos; condInd < endPos; ++condInd, ++startIt) {
             size_t context = *startIt;
