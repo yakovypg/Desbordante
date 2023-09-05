@@ -87,20 +87,31 @@ public:
     }
 
     size_type find_first() const noexcept {
-        for (size_type i = 0; i != bitset_.size(); ++i) {
-            if (bitset_[i] == 1) {
-                return i;
+        if constexpr (sizeof(unsigned long long) <= kBitsNum) {
+            // relying on the fact that npos == -1
+            return __builtin_ffsll(bitset_.to_ullong()) - 1;
+        } else {
+            for (size_type i = 0; i != bitset_.size(); ++i) {
+                if (bitset_[i] == 1) {
+                    return i;
+                }
             }
+            return npos;
         }
-        return npos;
     }
     size_type find_next(size_type pos) const noexcept {
-        for (size_type i = pos + 1; i != bitset_.size(); ++i) {
-            if (bitset_[i] == 1) {
-                return i;
+        if constexpr (sizeof(unsigned long long) <= kBitsNum) {
+            unsigned long long mask = ~((1 << (pos + 1)) - 1);
+            unsigned long long value = bitset_.to_ullong() & mask;
+            return __builtin_ffsll(value) - 1;
+        } else {
+            for (size_type i = pos + 1; i != bitset_.size(); ++i) {
+                if (bitset_[i] == 1) {
+                    return i;
+                }
             }
+            return npos;
         }
-        return npos;
     }
 
     friend AttributeSet operator&(const AttributeSet& b1, const AttributeSet& b2) noexcept;
