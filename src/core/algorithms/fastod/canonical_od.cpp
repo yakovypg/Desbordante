@@ -6,11 +6,6 @@
 
 namespace algos::fastod {
 
-CanonicalOD::CanonicalOD(size_t context, const SingleAttributePredicate& left, int right) :
-    context_(context), left_(left), right_(right) {}
-
-CanonicalOD::CanonicalOD(size_t context, int right) : context_(context), right_(right) {}
-
 std::string CanonicalOD::ToString() const {
     std::stringstream ss;
 

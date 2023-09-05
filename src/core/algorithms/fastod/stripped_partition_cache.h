@@ -7,11 +7,11 @@ namespace algos::fastod {
 
 class StrippedPartitionCache {
 private:
-    CacheWithLimit<size_t, StrippedPartition> cache_{static_cast<size_t>(1e8)};
+    CacheWithLimit<AttributeSet, StrippedPartition> cache_{static_cast<size_t>(1e8)};
 
 public:
-    StrippedPartition GetStrippedPartition(size_t attribute_set,
-                                                        const DataFrame& data) {
+    StrippedPartition GetStrippedPartition(AttributeSet const& attribute_set,
+                                           DataFrame const& data) {
         if (cache_.Contains(attribute_set)) {
             return cache_.Get(attribute_set);
         }
@@ -22,20 +22,22 @@ public:
             result->Product(attr);
         };
 
-        for (ASIterator attr = attrsBegin(attribute_set); attr != attrsEnd(attribute_set); ++attr) {
-            size_t one_less = deleteAttribute(attribute_set, *attr);
+        for (AttributeSet::size_type attr = attribute_set.find_first(); attr != AttributeSet::npos;
+             attr = attribute_set.find_next(attr)) {
+            AttributeSet one_less = deleteAttribute(attribute_set, attr);
 
             if (cache_.Contains(one_less)) {
                 result = cache_.Get(one_less);
-                callProduct(*attr);
+                callProduct(attr);
             }
         }
 
         if (!result) {
             result = StrippedPartition(data);
 
-            for (ASIterator attr = attrsBegin(attribute_set); attr != attrsEnd(attribute_set); ++attr) {
-                callProduct(*attr);
+            for (AttributeSet::size_type attr = attribute_set.find_first(); attr != AttributeSet::npos;
+                 attr = attribute_set.find_next(attr)) {
+                callProduct(attr);
             }
         }
 
