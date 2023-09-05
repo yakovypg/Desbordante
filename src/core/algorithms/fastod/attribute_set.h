@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstddef>
+#include <string>
+
 namespace algos::fastod {
 
 class ASIterator;
