@@ -29,7 +29,7 @@ private:
     StrippedPartitionCache partition_cache_;
 
     size_t schema_;
-    const DataFrame& data_;
+    DataFrame data_;
 
     Timer timer_;
 
@@ -49,9 +49,9 @@ private:
     void CalculateNextLevel();
 
 public:
-    Fastod(const DataFrame& data, long time_limit, double error_rate_threshold) :
+    Fastod(DataFrame data, long time_limit, double error_rate_threshold) :
         time_limit_(time_limit), error_rate_threshold_(error_rate_threshold), data_(std::move(data)) {}
-    Fastod(const DataFrame& data, long time_limit) :
+    Fastod(DataFrame data, long time_limit) :
         time_limit_(time_limit), data_(std::move(data)) {}
 
     void PrintStatistics() const;
