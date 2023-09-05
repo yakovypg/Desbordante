@@ -51,7 +51,7 @@ private:
 public:
     Fastod(const DataFrame& data, long time_limit, double error_rate_threshold) :
         time_limit_(time_limit), error_rate_threshold_(error_rate_threshold), data_(std::move(data)) {}
-    Fastod(const DataFrame& data, long time_limit, size_t threads = 1) :
+    Fastod(const DataFrame& data, long time_limit) :
         time_limit_(time_limit), data_(std::move(data)) {}
 
     void PrintStatistics() const;
