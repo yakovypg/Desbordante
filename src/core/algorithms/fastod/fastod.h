@@ -10,12 +10,8 @@
 #include "timer.h"
 #include "stripped_partition_cache.h"
 
-#include <mutex>
-#include <shared_mutex>
-
 namespace algos::fastod {
 
-template <bool multithread>
 class Fastod/*: public Algorithm*/ {
 private:
     const long time_limit_;
@@ -25,16 +21,12 @@ private:
     size_t od_count_ = 0;
     size_t fd_count_ = 0;
     size_t ocd_count_ = 0;
-    size_t threads_num_ = 1;
 
-    std::mutex m_result_;
-    std::shared_mutex m_cc_, m_cs_;
-
-    std::vector<CanonicalOD<multithread>> result_;
+    std::vector<CanonicalOD> result_;
     std::vector<std::unordered_set<size_t>> context_in_each_level_;
     std::unordered_map<size_t, size_t> cc_;
     std::unordered_map<size_t, std::unordered_set<AttributePair>> cs_;
-    StrippedPartitionCache<multithread> partition_cache_;
+    StrippedPartitionCache partition_cache_;
 
     size_t schema_;
     const DataFrame& data_;
@@ -43,7 +35,7 @@ private:
 
     // void PrintState() const noexcept;
 
-    void addToRes(CanonicalOD<multithread>&& od);
+    void addToRes(CanonicalOD&& od);
     bool IsTimeUp() const noexcept;
     
     void CCPut(size_t key, size_t attribute_set) noexcept;
@@ -59,18 +51,14 @@ private:
     void CalculateNextLevel() noexcept;
 
 public:
-    Fastod(const DataFrame& data, long time_limit, double error_rate_threshold, size_t threads = 1) noexcept :
-        time_limit_(time_limit), error_rate_threshold_(error_rate_threshold),
-        threads_num_(threads), data_(std::move(data)) {}
+    Fastod(const DataFrame& data, long time_limit, double error_rate_threshold) noexcept :
+        time_limit_(time_limit), error_rate_threshold_(error_rate_threshold), data_(std::move(data)) {}
     Fastod(const DataFrame& data, long time_limit, size_t threads = 1) noexcept :
-        time_limit_(time_limit), threads_num_(threads), data_(std::move(data)) {}
+        time_limit_(time_limit), data_(std::move(data)) {}
 
     void PrintStatistics() const noexcept;
     bool IsComplete() const noexcept;
-    std::vector<CanonicalOD<multithread>> Discover() noexcept;
+    std::vector<CanonicalOD> Discover() noexcept;
 };
-
-using SimpleFastOD = Fastod<false>;
-using MutiFastOD = Fastod<true>;
 
 } // namespace algos::fatod

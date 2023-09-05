@@ -18,12 +18,10 @@
 
 INITIALIZE_EASYLOGGINGPP
 
-template <bool multithread>
-int findAndPrintOD(algos::fastod::DataFrame&& data, size_t max_time, 
-    size_t threads, const std::string& output_path) {
+int findAndPrintOD(algos::fastod::DataFrame&& data, size_t max_time, const std::string& output_path) {
         
-    algos::fastod::Fastod<multithread> fastod(data, max_time, threads);
-    std::vector<algos::fastod::CanonicalOD<multithread>> ods = fastod.Discover();
+    algos::fastod::Fastod fastod(data, max_time);
+    std::vector<algos::fastod::CanonicalOD> ods = fastod.Discover();
 
     if (output_path.size() == 0) {
         std::cout << "Found ODs: " << ods.size() << '\n';
@@ -56,7 +54,6 @@ int main(int argc, char const* argv[]) {
     std::string path_to_dataset = std::string("");
     std::string output_path = std::string("");  
     int max_time = INT_MAX;
-    size_t threads = 1;
 
     if (argc <= 1) {
         std::cout << "Error: Dataset not specified\n";
@@ -74,18 +71,11 @@ int main(int argc, char const* argv[]) {
         output_path = std::string(argv[2]);
 
     if (argc >= 4) {
-        threads = std::stoi(argv[3]);
-    }
-
-    if (argc >= 5) {
-        max_time = std::stoi(argv[4]);
+        max_time = std::stoi(argv[3]);
     }
     algos::fastod::DataFrame data = algos::fastod::DataFrame::FromCsv(std::filesystem::path(path_to_dataset));
 
-    if (threads > 1)
-        return findAndPrintOD<true>(std::move(data), max_time, threads, output_path);
-    else
-        return findAndPrintOD<false>(std::move(data), max_time, threads, output_path);
+    return findAndPrintOD(std::move(data), max_time, output_path);
 }
 
 /*
