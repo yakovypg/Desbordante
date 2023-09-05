@@ -8,8 +8,8 @@ namespace algos::fastod {
 class CanonicalOD {
 private:
     size_t context_;
-    std::optional<SingleAttributePredicate> const left_;
-    size_t const right_;
+    std::optional<SingleAttributePredicate> left_;
+    size_t right_;
 
 public:
     CanonicalOD(size_t context, const SingleAttributePredicate& left, int right);
