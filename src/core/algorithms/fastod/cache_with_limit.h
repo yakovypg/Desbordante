@@ -19,7 +19,7 @@ private:
 public:
     explicit CacheWithLimit(std::size_t max_size) : max_size_(max_size) {};
     
-    bool Contains(const K& key) const {
+    bool Contains(const K& key) const noexcept {
         return entries_.count(key) != 0;
     }
     const V& Get(const K& key) const {
