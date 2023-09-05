@@ -20,13 +20,8 @@ public:
 
         std::optional<StrippedPartition<multithread>> result;
 
-        auto callProduct = [&result, &data](size_t attr) {
-            if (data.GetColTypeId(attr) == +model::TypeId::kInt)
-                result->template Product<int>(attr);
-            else if (data.GetColTypeId(attr) == +model::TypeId::kDouble)
-                result->template Product<double>(attr);
-            else
-                result->template Product<std::string>(attr);
+        auto callProduct = [&result](size_t attr) {
+            result->Product(attr);
         };
 
         for (ASIterator attr = attrsBegin(attribute_set); attr != attrsEnd(attribute_set); ++attr) {
