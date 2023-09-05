@@ -12,11 +12,11 @@ private:
     size_t const right_;
 
 public:
-    CanonicalOD(size_t context, const SingleAttributePredicate& left, int right) noexcept;
-    CanonicalOD(size_t context, int right) noexcept;
+    CanonicalOD(size_t context, const SingleAttributePredicate& left, int right);
+    CanonicalOD(size_t context, int right);
 
     bool IsValid(const DataFrame& data, double error_rate_threshold,
-                 StrippedPartitionCache& cache) const noexcept {
+                 StrippedPartitionCache& cache) const {
         // important
         StrippedPartition sp = cache.GetStrippedPartition(context_, data);
 
@@ -39,7 +39,7 @@ public:
 
         return error_rate < error_rate_threshold;
     }
-    std::string ToString() const noexcept;
+    std::string ToString() const;
 };
 
 } // namespace algos::fatod

@@ -8,7 +8,7 @@ struct AttributePair {
 public:
     SingleAttributePredicate left;
     size_t right;
-    AttributePair(SingleAttributePredicate&& left, size_t right) noexcept;
+    AttributePair(SingleAttributePredicate&& left, size_t right);
     std::string ToString() const;
 };
 bool operator==(const AttributePair& x, const AttributePair& y);

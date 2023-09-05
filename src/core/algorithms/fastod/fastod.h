@@ -12,7 +12,7 @@
 
 namespace algos::fastod {
 
-class Fastod/*: public Algorithm*/ {
+class Fastod {
 private:
     const long time_limit_;
     bool is_complete_ = true;
@@ -33,32 +33,30 @@ private:
 
     Timer timer_;
 
-    // void PrintState() const noexcept;
-
     void addToRes(CanonicalOD&& od);
-    bool IsTimeUp() const noexcept;
+    bool IsTimeUp() const;
     
-    void CCPut(size_t key, size_t attribute_set) noexcept;
-    size_t CCGet(size_t key) noexcept;
-    void CSPut(size_t key, const AttributePair& value) noexcept;
-    void CSPut(size_t key, AttributePair&& value) noexcept;
-    std::unordered_set<AttributePair>& CSGet(size_t key) noexcept;
+    void CCPut(size_t key, size_t attribute_set);
+    size_t CCGet(size_t key);
+    void CSPut(size_t key, const AttributePair& value);
+    void CSPut(size_t key, AttributePair&& value);
+    std::unordered_set<AttributePair>& CSGet(size_t key);
 
-    void Initialize() noexcept;
+    void Initialize();
 
-    void ComputeODs() noexcept;
-    void PruneLevels() noexcept;
-    void CalculateNextLevel() noexcept;
+    void ComputeODs();
+    void PruneLevels();
+    void CalculateNextLevel();
 
 public:
-    Fastod(const DataFrame& data, long time_limit, double error_rate_threshold) noexcept :
+    Fastod(const DataFrame& data, long time_limit, double error_rate_threshold) :
         time_limit_(time_limit), error_rate_threshold_(error_rate_threshold), data_(std::move(data)) {}
-    Fastod(const DataFrame& data, long time_limit, size_t threads = 1) noexcept :
+    Fastod(const DataFrame& data, long time_limit, size_t threads = 1) :
         time_limit_(time_limit), data_(std::move(data)) {}
 
-    void PrintStatistics() const noexcept;
-    bool IsComplete() const noexcept;
-    std::vector<CanonicalOD> Discover() noexcept;
+    void PrintStatistics() const;
+    bool IsComplete() const;
+    std::vector<CanonicalOD> Discover();
 };
 
 } // namespace algos::fatod

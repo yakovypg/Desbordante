@@ -6,12 +6,12 @@
 
 namespace algos::fastod {
 
-CanonicalOD::CanonicalOD(size_t context, const SingleAttributePredicate& left, int right) noexcept :
+CanonicalOD::CanonicalOD(size_t context, const SingleAttributePredicate& left, int right) :
     context_(context), left_(left), right_(right) {}
 
-CanonicalOD::CanonicalOD(size_t context, int right) noexcept : context_(context), right_(right) {}
+CanonicalOD::CanonicalOD(size_t context, int right) : context_(context), right_(right) {}
 
-std::string CanonicalOD::ToString() const noexcept {
+std::string CanonicalOD::ToString() const {
     std::stringstream ss;
 
     ss << ASToString(context_) << " : ";

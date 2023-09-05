@@ -7,41 +7,41 @@ namespace algos::fastod {
 
 size_t ASIterator::MAX_COLS = 32;
 
-size_t attributeSet(const std::initializer_list<size_t>&& attributes) noexcept {
+size_t attributeSet(const std::initializer_list<size_t>&& attributes) {
     return std::accumulate(attributes.begin(), attributes.end(), 0, 
         [](size_t acc, size_t curr){ return acc + (1 << curr); });
 }
 
-bool containsAttribute(size_t value, size_t attribute) noexcept {
+bool containsAttribute(size_t value, size_t attribute) {
     return (value & (1 << attribute)) != 0;
 }
 
-size_t addAttribute(size_t value, size_t attribute) noexcept {
+size_t addAttribute(size_t value, size_t attribute) {
     if(containsAttribute(value, attribute)){
         return value;
     }
     return value | (1 << attribute);
 }
 
-size_t deleteAttribute(size_t value, size_t attribute) noexcept {
+size_t deleteAttribute(size_t value, size_t attribute) {
     if(containsAttribute(value, attribute))
         return value ^ (1 << attribute);
     return value;
 }
 
-size_t intersect(size_t value1, size_t value2) noexcept {
+size_t intersect(size_t value1, size_t value2) {
     return value1 & value2;
 }
 
-size_t difference(size_t value1, size_t value2) noexcept {
+size_t difference(size_t value1, size_t value2) {
     return value1 & ( ~0 ^ value2);
 }
 
-bool isEmptyAS(size_t value) noexcept {
+bool isEmptyAS(size_t value) {
     return value == 0;
 }
 
-std::string ASToString(size_t value) noexcept {
+std::string ASToString(size_t value) {
     std::stringstream ss;
    ss << "{";
    bool first = true;
@@ -56,7 +56,7 @@ std::string ASToString(size_t value) noexcept {
    return ss.str();
 }
 
-std::size_t getAttributeCount(size_t value) noexcept {
+std::size_t getAttributeCount(size_t value) {
     size_t count = 0;
     while (value > 0) {
         ++count;
@@ -70,11 +70,11 @@ ASIterator::ASIterator(size_t value, size_t pos) : value_(value), pos_(pos) {
         ++pos_;
 }
 
-ASIterator attrsBegin(size_t value) noexcept {
+ASIterator attrsBegin(size_t value) {
     return ASIterator(value);
 }
 
-ASIterator attrsEnd(size_t value) noexcept {
+ASIterator attrsEnd(size_t value) {
     return ASIterator(value, ASIterator::MAX_COLS);
 }
 

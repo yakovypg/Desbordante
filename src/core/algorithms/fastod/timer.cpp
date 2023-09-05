@@ -2,17 +2,17 @@
 
 using namespace algos::fastod;
 
-Timer::Timer(bool start) noexcept { 
+Timer::Timer(bool start) { 
     if (start)
         Start();
 }
 
-void Timer::Start() noexcept {  
+void Timer::Start() {  
     start_time_ = end_time_ = std::chrono::high_resolution_clock::now();
     is_started_ = true;
 }
 
-void Timer::Stop() noexcept {
+void Timer::Stop() {
     if (!is_started_)
         return;
     
@@ -20,7 +20,7 @@ void Timer::Stop() noexcept {
     is_started_ = false;
 }
 
-bool Timer::IsStarted() const noexcept {
+bool Timer::IsStarted() const {
     return is_started_;
 }
 

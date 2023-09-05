@@ -4,18 +4,18 @@ namespace algos::fastod {
 
 class ASIterator;
 
-size_t attributeSet(const std::initializer_list<size_t>&& attributes) noexcept;
-bool containsAttribute(size_t value, size_t attribute) noexcept;
-size_t addAttribute(size_t value, size_t attribute) noexcept;
-size_t deleteAttribute(size_t value, size_t attribute) noexcept;
-size_t intersect(size_t value1, size_t value2) noexcept;
-size_t difference(size_t value1, size_t value2) noexcept;
-bool isEmptyAS(size_t value) noexcept;
-std::string ASToString(size_t value) noexcept;
-std::size_t getAttributeCount(size_t value) noexcept;
+size_t attributeSet(const std::initializer_list<size_t>&& attributes);
+bool containsAttribute(size_t value, size_t attribute);
+size_t addAttribute(size_t value, size_t attribute);
+size_t deleteAttribute(size_t value, size_t attribute);
+size_t intersect(size_t value1, size_t value2);
+size_t difference(size_t value1, size_t value2);
+bool isEmptyAS(size_t value);
+std::string ASToString(size_t value);
+std::size_t getAttributeCount(size_t value);
 
-ASIterator attrsBegin(size_t value) noexcept;
-ASIterator attrsEnd(size_t value) noexcept;
+ASIterator attrsBegin(size_t value);
+ASIterator attrsEnd(size_t value);
 
 struct ASIterator {
     using iterator_category = std::forward_iterator_tag;

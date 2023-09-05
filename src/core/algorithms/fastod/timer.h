@@ -13,12 +13,12 @@ private:
     TimePoint end_time_;
 
 public:
-    explicit Timer(bool start = false) noexcept;
+    explicit Timer(bool start = false);
 
-    void Start() noexcept;
-    void Stop() noexcept;
+    void Start();
+    void Stop();
 
-    bool IsStarted() const noexcept;
+    bool IsStarted() const;
     double GetElapsedSeconds() const;
 };
 
