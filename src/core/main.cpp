@@ -19,7 +19,7 @@ INITIALIZE_EASYLOGGINGPP
 
 int findAndPrintOD(algos::fastod::DataFrame&& data, size_t max_time, const std::string& output_path) {
         
-    algos::fastod::Fastod fastod(data, max_time);
+    algos::fastod::Fastod fastod(std::move(data), max_time);
     std::vector<algos::fastod::CanonicalOD> ods = fastod.Discover();
 
     if (output_path.size() == 0) {
