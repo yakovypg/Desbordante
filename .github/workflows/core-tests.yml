@@ -4,7 +4,7 @@ on:
     types: [opened, synchronize, reopened]
   push:
     branches:
-      - main
+      - fastod2
   workflow_dispatch:
 jobs:
   run_tests:
