@@ -55,7 +55,7 @@ std::vector<std::pair<const std::byte*, int>> DataFrame::CreateIndexedColumnData
         indexed_column_data[i] = std::make_pair(data[i], i);
     }
 
-    return std::move(indexed_column_data);
+    return indexed_column_data;
 }
 
 std::vector<int> DataFrame::ConvertColumnDataToIntegers(const model::TypedColumnData& column) {
@@ -96,5 +96,5 @@ std::vector<int> DataFrame::ConvertColumnDataToIntegers(const model::TypedColumn
             : ++current_value;
     }
 
-    return std::move(converted_column);
+    return converted_column;
 }
