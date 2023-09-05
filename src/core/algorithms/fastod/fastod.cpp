@@ -67,12 +67,8 @@ void Fastod::Initialize() {
 
     context_in_each_level_.push_back({});
     context_in_each_level_[0].insert(empty_set);
-    size_t put_value = 0;
-    for (size_t i = 0; i < data_.GetColumnCount(); i++) {
-        schema_ = addAttribute(schema_, i);
-        put_value += 1 << i;
-    }
-    CCPut(empty_set, put_value);
+    schema_ = ~((~0) << data_.GetColumnCount());
+    CCPut(empty_set, schema_);
 
     level_ = 1;
     std::unordered_set<size_t> level_1_candidates;
