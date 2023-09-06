@@ -103,14 +103,19 @@ def execute_algorithm(dataset_path: str, algorithm_execute_args: list[str], algo
 
     return algorith_result
 
-def test_algorithms(c_impl_path: str, java_impl_path: str, java_impl_class, comparer_path: str, datasets: list[str]) -> None:
+def test_algorithms(c_impl_path: str, 
+                    java_impl_path: str, 
+                    java_impl_class, 
+                    comparer_path: str, 
+                    datasets: list[str],
+                    java_max_heap_size: str = '12g') -> None:
     output_dir = create_results_directory()
 
     passed_tests = 0
     failed_tests = 0
 
     c_impl_start = [c_impl_path]
-    java_impl_start = ['java', '-classpath', java_impl_path, java_impl_class]
+    java_impl_start = ['java', f'-Xmx{java_max_heap_size}', '-classpath', java_impl_path, java_impl_class]
 
     c_impl_name = 'C++'
     java_impl_name = 'Java'
@@ -158,10 +163,11 @@ def configure_parser() -> argparse.ArgumentParser:
     parser.add_argument('-p', '--package', type=str, required=True, help='Name of the Java algorithm implementation class')
     parser.add_argument('-C', '--comparer', type=str, required=True, help='Path to the algorithm results comparer')
     parser.add_argument('-d', '--datasets', required=True, nargs='+', help='Paths to the datasets')
+    parser.add_argument('--heap', type=str, required=False, default='12g', help='Maximum java heap size')
 
     return parser
 
 if __name__ == '__main__':
     parser = configure_parser()
     args = parser.parse_args()
-    test_algorithms(args.c, args.java, args.package, args.comparer, args.datasets)
+    test_algorithms(args.c, args.java, args.package, args.comparer, args.datasets, args.heap)
