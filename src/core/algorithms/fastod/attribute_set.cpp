@@ -5,98 +5,20 @@
 
 namespace algos::fastod {
 
-size_t ASIterator::MAX_COLS = 32;
-
-size_t attributeSet(const std::initializer_list<size_t>&& attributes) {
-    return std::accumulate(attributes.begin(), attributes.end(), 0, 
-        [](size_t acc, size_t curr){ return acc + (1 << curr); });
-}
-
-bool containsAttribute(size_t value, size_t attribute) {
-    return (value & (1 << attribute)) != 0;
-}
-
-size_t addAttribute(size_t value, size_t attribute) {
-    if(containsAttribute(value, attribute)){
-        return value;
-    }
-    return value | (1 << attribute);
-}
-
-size_t deleteAttribute(size_t value, size_t attribute) {
-    if(containsAttribute(value, attribute))
-        return value ^ (1 << attribute);
-    return value;
-}
-
-size_t intersect(size_t value1, size_t value2) {
-    return value1 & value2;
-}
-
-size_t difference(size_t value1, size_t value2) {
-    return value1 & ( ~0 ^ value2);
-}
-
-bool isEmptyAS(size_t value) {
-    return value == 0;
-}
-
-std::string ASToString(size_t value) {
+std::string ASToString(AttributeSet const& value) {
     std::stringstream ss;
-   ss << "{";
-   bool first = true;
-   for (ASIterator it = attrsBegin(value); it != attrsEnd(value); ++it) {
-        if (first)
-            first = false;
-        else
-            ss << ",";
-        ss << *it + 1;
-   }
-   ss << "}";
-   return ss.str();
-}
-
-std::size_t getAttributeCount(size_t value) {
-    size_t count = 0;
-    while (value > 0) {
-        ++count;
-        value = value & (value - 1);
+    ss << "{";
+    bool first = true;
+    for (AttributeSet::size_type i = value.find_first();
+            i != AttributeSet::npos; i = value.find_next(i)) {
+         if (first)
+             first = false;
+         else
+             ss << ",";
+         ss << i + 1;
     }
-    return count;
+    ss << "}";
+    return ss.str();
 }
-
-ASIterator::ASIterator(size_t value, size_t pos) : value_(value), pos_(pos) {
-    while (pos_ < MAX_COLS && !containsAttribute(value_, pos_))
-        ++pos_;
-}
-
-ASIterator attrsBegin(size_t value) {
-    return ASIterator(value);
-}
-
-ASIterator attrsEnd(size_t value) {
-    return ASIterator(value, ASIterator::MAX_COLS);
-}
-
-ASIterator::reference ASIterator::operator*() { return pos_; }
-ASIterator::pointer ASIterator::operator->() { return &pos_; }
-ASIterator& ASIterator::operator++() {
-    if (pos_ < MAX_COLS)
-        while ((++pos_) < MAX_COLS && (value_ & (1 << pos_)) == 0);
-    return *this;
-}  
-ASIterator ASIterator::operator++(int) {
-    ASIterator tmp = *this;
-    ++(*this);
-    return tmp; 
-}
-
-bool operator==(const ASIterator& a, const ASIterator& b) { 
-    return a.pos_ == b.pos_ && a.value_ == b.value_; 
-};
-
-bool operator!=(const ASIterator& a, const ASIterator& b) {
-    return !(a == b);
-};
 
 } // namespace algos::fastod

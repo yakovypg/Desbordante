@@ -1,5 +1,6 @@
 #pragma once
 
+#include "attribute_set.h"
 #include "stripped_partition.h"
 #include "stripped_partition_cache.h"
 
@@ -7,13 +8,14 @@ namespace algos::fastod {
 
 class CanonicalOD {
 private:
-    size_t context_;
-    std::optional<SingleAttributePredicate> const left_;
-    size_t const right_;
+    AttributeSet context_;
+    std::optional<SingleAttributePredicate> left_;
+    size_t right_;
 
 public:
-    CanonicalOD(size_t context, const SingleAttributePredicate& left, int right);
-    CanonicalOD(size_t context, int right);
+    CanonicalOD(AttributeSet context, const SingleAttributePredicate& left, int right)
+        : context_(std::move(context)), left_(left), right_(right) {}
+    CanonicalOD(AttributeSet context, int right) : context_(std::move(context)), right_(right) {}
 
     bool IsValid(const DataFrame& data, double error_rate_threshold,
                  StrippedPartitionCache& cache) const {

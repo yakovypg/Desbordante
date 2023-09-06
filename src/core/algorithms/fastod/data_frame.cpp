@@ -15,8 +15,6 @@ DataFrame::DataFrame(const std::vector<model::TypedColumnData>& columns_data) {
 
     std::transform(columns_data.cbegin(), columns_data.cend(),
         std::back_inserter(data_), ConvertColumnDataToIntegers);
-
-    ASIterator::MAX_COLS = cols_num;
 }
 
 int DataFrame::GetValue(int tuple_index, int attribute_index) const {
@@ -55,7 +53,7 @@ std::vector<std::pair<const std::byte*, int>> DataFrame::CreateIndexedColumnData
         indexed_column_data[i] = std::make_pair(data[i], i);
     }
 
-    return std::move(indexed_column_data);
+    return indexed_column_data;
 }
 
 std::vector<int> DataFrame::ConvertColumnDataToIntegers(const model::TypedColumnData& column) {
@@ -96,5 +94,5 @@ std::vector<int> DataFrame::ConvertColumnDataToIntegers(const model::TypedColumn
             : ++current_value;
     }
 
-    return std::move(converted_column);
+    return converted_column;
 }
