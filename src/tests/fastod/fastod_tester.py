@@ -27,6 +27,32 @@ class AlgorithmResult(object):
     def get_table_header(self) -> list[str]:
         return ['Algorithm', 'Time', 'Acc factor', 'OD', 'FD', 'OCD']
 
+class AlgorithmResultsSummary(object):
+    def __init__(self, first_alg_name: str, second_alg_name: str):
+        self.first_alg_name = first_alg_name
+        self.second_alg_name = second_alg_name
+
+        self.table = PrettyTable()
+        self.table.field_names = ['Dataset', first_alg_name, second_alg_name, 'Acc factor']
+    
+    def add_result(self, dataset_name: str,
+                   first_alg_result: AlgorithmResult,
+                   second_alg_result: AlgorithmResult,
+                   is_first_alg_current: bool = True) -> None:
+        first_time_str = '%.6f' % first_alg_result.time
+        second_time_str = '%.6f' % second_alg_result.time
+        
+        acc_factor = (second_alg_result.time / first_alg_result.time
+            if is_first_alg_current
+            else first_alg_result.time / second_alg_result.time)
+        
+        acc_factor_str = '%.2fx' % acc_factor
+        
+        self.table.add_row([dataset_name, first_time_str, second_time_str, acc_factor_str])
+    
+    def print_summary(self) -> None:
+        print(self.table)
+
 def create_results_directory() -> str:
     output_dir = 'results'
 
@@ -86,9 +112,14 @@ def test_algorithms(c_impl_path: str, java_impl_path: str, java_impl_class, comp
     c_impl_start = [c_impl_path]
     java_impl_start = ['java', '-classpath', java_impl_path, java_impl_class]
 
+    c_impl_name = 'C++'
+    java_impl_name = 'Java'
+
+    summary = AlgorithmResultsSummary(c_impl_name, java_impl_name)
+
     for dataset in datasets:
-        c_impl_res = execute_algorithm(dataset, c_impl_start, 'c++', output_dir)
-        java_impl_res = execute_algorithm(dataset, java_impl_start, 'java', output_dir)
+        c_impl_res = execute_algorithm(dataset, c_impl_start, c_impl_name, output_dir)
+        java_impl_res = execute_algorithm(dataset, java_impl_start, java_impl_name, output_dir)
         compare_res = c_impl_res.equal_to(java_impl_res, comparer_path)
 
         c_impl_acc_factor = java_impl_res.time / c_impl_res.time
@@ -102,15 +133,20 @@ def test_algorithms(c_impl_path: str, java_impl_path: str, java_impl_class, comp
             passed_tests += 1
         else:
             failed_tests += 1
+        
+        summary.add_result(dataset_name, c_impl_res, java_impl_res)
 
-        table = PrettyTable()
-        table.field_names = c_impl_res.get_table_header()
-        table.add_row(c_impl_res.to_table_row('C++', c_impl_acc_factor))
-        table.add_row(java_impl_res.to_table_row('Java', java_impl_acc_factor))
+        curr_dataset_table = PrettyTable()
+        curr_dataset_table.field_names = c_impl_res.get_table_header()
+        curr_dataset_table.add_row(c_impl_res.to_table_row(c_impl_name, c_impl_acc_factor))
+        curr_dataset_table.add_row(java_impl_res.to_table_row(java_impl_name, java_impl_acc_factor))
 
-        print(table)
+        print(curr_dataset_table)
         print()
 
+    summary.print_summary()
+
+    print()
     print('[Summary]')
     print(f'Passed test: {passed_tests}')
     print(f'Failed test: {failed_tests}')
