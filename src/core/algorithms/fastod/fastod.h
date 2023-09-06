@@ -18,7 +18,6 @@ private:
     const long time_limit_;
     bool is_complete_ = true;
     size_t level_;
-    double error_rate_threshold_ = -1;
     size_t od_count_ = 0;
     size_t fd_count_ = 0;
     size_t ocd_count_ = 0;
@@ -50,10 +49,7 @@ private:
     void CalculateNextLevel();
 
 public:
-    Fastod(DataFrame data, long time_limit, double error_rate_threshold) :
-        time_limit_(time_limit), error_rate_threshold_(error_rate_threshold), data_(std::move(data)) {}
-    Fastod(DataFrame data, long time_limit) :
-        time_limit_(time_limit), data_(std::move(data)) {}
+    Fastod(DataFrame data, long time_limit);
 
     void PrintStatistics() const;
     bool IsComplete() const;

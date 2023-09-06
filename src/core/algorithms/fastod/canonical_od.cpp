@@ -6,6 +6,19 @@
 
 namespace algos::fastod {
 
+CanonicalOD::CanonicalOD(AttributeSet context, const SingleAttributePredicate& left, int right) :
+    context_(std::move(context)), left_(left), right_(right) {}
+CanonicalOD::CanonicalOD(AttributeSet context, int right) :
+    context_(std::move(context)), right_(right) {}
+
+bool CanonicalOD::IsValid(const DataFrame& data, StrippedPartitionCache& cache) const {
+    StrippedPartition sp = cache.GetStrippedPartition(context_, data);
+    if (!left_)
+        return !(sp.Split(right_));
+
+    return !(sp.Swap(*left_, right_));
+}
+
 std::string CanonicalOD::ToString() const {
     std::stringstream ss;
 
