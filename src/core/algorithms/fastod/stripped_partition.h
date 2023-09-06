@@ -25,8 +25,6 @@ public:
     void Product(size_t attribute);
     bool Split(size_t right);
     bool Swap(const SingleAttributePredicate& left, size_t right);
-    long SplitRemoveCount(size_t right);
-    long SwapRemoveCount(const SingleAttributePredicate& left, size_t right);
 };
 
 } // namespace algos::fastod

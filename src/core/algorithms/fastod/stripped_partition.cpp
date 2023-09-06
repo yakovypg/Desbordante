@@ -141,8 +141,6 @@ bool StrippedPartition::Swap(const SingleAttributePredicate& left, size_t right)
             values[i - group_begin] = { data_.GetValue(index, left.attribute), 
                                         data_.GetValue(index, right) };
         }
-        // CHANGE: utilize operators
-        // SCOPE: from here until the end of this loop
 
         if (left.ascending)
             std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
@@ -178,111 +176,6 @@ bool StrippedPartition::Swap(const SingleAttributePredicate& left, size_t right)
     }
 
     return false;
-}
-
-long StrippedPartition::SplitRemoveCount(size_t right) {
-    long result = 0;
-
-    for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
-        size_t group_begin = begins_[begin_pointer];
-        size_t group_end = begins_[begin_pointer + 1];
-        size_t group_length = group_end - group_begin;
-        // CHANGE: key type according to column types
-        std::unordered_map<int, size_t> group_int_2_count;
-
-        for (size_t i = group_begin; i < group_end; i++) {
-            int right_value = data_.GetValue(indexes_[i], right);
-            
-            if (group_int_2_count.count(right_value) != 0)
-                ++group_int_2_count[right_value];
-            else
-                group_int_2_count[right_value] = 1;
-        }
-
-        size_t max = 0;
-        for (auto const& [_, count] : group_int_2_count) {
-            max = std::max(max, count);
-        }
-
-        result += group_length - max;
-    }
-
-    return result;
-}
-
-long StrippedPartition::SwapRemoveCount(const SingleAttributePredicate& left, size_t right) {
-    std::size_t length = indexes_.size();
-    std::vector<size_t> violations_count(length);
-    std::vector<bool> deleted(length);
-    size_t result = 0;
-
-next_class:
-    for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
-        size_t group_begin = begins_[begin_pointer];
-        size_t group_end = begins_[begin_pointer + 1];
-
-        for (size_t i = group_begin; i < group_end; i++) {
-            // CHANGE: was FiltereDataFrameGet
-            int left_i = data_.GetValue(indexes_[i], left.attribute);
-            int right_i = data_.GetValue(indexes_[i], right);
-
-            for (size_t j = i + 1; j < group_end; j++) {
-                // CHANGE: was FiltereDataFrameGet
-                int left_j = data_.GetValue(indexes_[j], left.attribute);
-                int right_j = data_.GetValue(indexes_[j], right);
-
-                // CHANGE: this comparison now uses operators
-                // this is needed to get rid of FilteredDataFrameGet
-                if (left_i != left_j
-                    && right_i != right_j
-                    && left.Satisfy(left_i, left_j)
-                    && left.Satisfy(right_j, right_i)
-                ) {
-                    violations_count[i]++;
-                    violations_count[j]++;
-                }
-            }
-        }
-
-        while (true) {
-            int delete_index = -1;
-
-            for (size_t i = group_begin; i < group_end; i++) {
-                if (!deleted[i] && (delete_index == -1 || violations_count[i] > violations_count[delete_index])) {
-                    delete_index = i;
-                }
-            }
-
-            if (delete_index == -1 || violations_count[delete_index] == 0) {
-                goto next_class;
-            }
-
-            result++;
-            deleted[delete_index] = true;
-
-            // CHANGE: was FiltereDataFrameGet
-            int left_i = data_.GetValue(indexes_[delete_index], left.attribute);
-            int right_i = data_.GetValue(indexes_[delete_index], right);
-
-            for (size_t j = group_begin; j < group_end; j++) {
-                // CHANGE: was FiltereDataFrameGet
-                int left_j = data_.GetValue(indexes_[j], left.attribute);
-                int right_j = data_.GetValue(indexes_[j], right);
-
-                // CHANGE: this comparison now uses operators
-                // this is needed to get rid of FilteredDataFrameGet
-                if (left_i != left_j
-                    && right_i != right_j
-                    && left.Satisfy(left_i, left_j)
-                    && left.Satisfy(right_j, right_i)
-                ) {
-                    violations_count[j]--;
-                }
-            }
-        }
-    }
-
-    return result;
 }
 
 }
