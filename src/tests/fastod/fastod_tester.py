@@ -80,7 +80,12 @@ def parse_algorithm_output(output: str) -> AlgorithmResult:
     ocd_prefix = 'OCD='
 
     lines = output.split('\n')
-    result_line = list(filter(lambda t: t.startswith(result_prefix), lines))[0].replace(result_prefix, '')
+    result_lines = list(filter(lambda t: t.startswith(result_prefix), lines))
+
+    if len(result_lines) == 0:      
+        raise Exception(f'No result line found.')
+
+    result_line = result_lines[0].replace(result_prefix, '')
 
     data = result_line.split(', ')
     time_data = list(filter(lambda t: t.startswith(time_prefix), data))[0].replace(time_prefix, '').replace(',', '.')
@@ -123,12 +128,37 @@ def test_algorithms(c_impl_path: str,
     summary = AlgorithmResultsSummary(c_impl_name, java_impl_name)
 
     for dataset in datasets:
-        c_impl_res = execute_algorithm(dataset, c_impl_start, c_impl_name, output_dir)
-        java_impl_res = execute_algorithm(dataset, java_impl_start, java_impl_name, output_dir)
-        compare_res = c_impl_res.equal_to(java_impl_res, comparer_path)
+        c_impl_res = None
+        java_impl_res = None
 
-        c_impl_acc_factor = java_impl_res.time / c_impl_res.time
-        java_impl_acc_factor = c_impl_res.time / java_impl_res.time
+        compare_res = False
+        c_impl_acc_factor = 0
+        java_impl_acc_factor = 0
+
+        try:
+            c_impl_res = execute_algorithm(dataset, c_impl_start, c_impl_name, output_dir)
+        except Exception as ex:
+            print('Failed to get result from C++ algorithm implementation. Reason:')
+            print(str(ex))
+            print()
+        
+        try:
+            java_impl_res = execute_algorithm(dataset, java_impl_start, java_impl_name, output_dir)
+        except Exception as ex:
+            print('Failed to get result from Java algorithm implementation. Reason:')
+            print(str(ex))
+            print()
+        
+        if (c_impl_res is not None) and (java_impl_res is not None):
+            compare_res = c_impl_res.equal_to(java_impl_res, comparer_path)   
+            c_impl_acc_factor = java_impl_res.time / c_impl_res.time
+            java_impl_acc_factor = c_impl_res.time / java_impl_res.time
+        
+        if c_impl_res is None:
+            c_impl_res = AlgorithmResult(float('inf'), 0, 0, 0, '')
+        
+        if java_impl_res is None:
+            java_impl_res = AlgorithmResult(float('inf'), 0, 0, 0, '')
 
         dataset_name = os.path.basename(dataset)
         print(f'Dataset: {dataset_name}')
