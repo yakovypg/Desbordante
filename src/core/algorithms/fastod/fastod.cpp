@@ -8,6 +8,9 @@
 
 namespace algos::fastod {
 
+Fastod::Fastod(DataFrame data, long time_limit) :
+    time_limit_(time_limit), data_(std::move(data)) {}
+
 bool Fastod::IsTimeUp() const {
     return timer_.GetElapsedSeconds() >= time_limit_;
 }
@@ -43,13 +46,6 @@ void Fastod::PrintStatistics() const {
     std::string last_od = result_.size() > 0
         ? result_[result_.size() - 1].ToString()
         : std::string("");
-    
-    // std::cout << "Current time " << timer_.GetElapsedSeconds() << " sec, "
-    //           << "found od " << fd_count_ + ocd_count_ << " ones, where "
-    //           << "fd " << fd_count_ << " ones, "
-    //           << "ocd " << ocd_count_ << " ones, "
-    //           << "the last od is " << last_od << '\n';
-    
     std::cout << "RESULT: Time=" << timer_.GetElapsedSeconds() << ", "
               << "OD=" << fd_count_ + ocd_count_ << ", "
               << "FD=" << fd_count_ << ", "
@@ -103,11 +99,6 @@ std::vector<CanonicalOD> Fastod::Discover() {
     } else {
         std::cout << "FastOD finished with a time-out" << '\n';
     }
-
-    // std::cout << "Seconds elapsed: " << timer_.GetElapsedSeconds() << '\n'
-    //           << "ODs found: " << fd_count_ + ocd_count_ << '\n'
-    //           << "FDs found: " << fd_count_ << '\n'
-    //           << "OCDs found: " << ocd_count_ << '\n';
     PrintStatistics();
     return result_;
 }
@@ -187,7 +178,7 @@ void Fastod::ComputeODs() {
             attr != AttributeSet::npos; attr = context_intersect_cc_context.find_next(attr)) {
             CanonicalOD od(delAttrs[attr], attr);
 
-            if (od.IsValid(data_, error_rate_threshold_, partition_cache_)) {
+            if (od.IsValid(data_, partition_cache_)) {
                 addToRes(std::move(od));
                 fd_count_++;
                 CCPut(context, deleteAttribute(CCGet(context), attr));
@@ -208,7 +199,7 @@ void Fastod::ComputeODs() {
             if (containsAttribute(CCGet(delAttrs[b]), a) &&
                 containsAttribute(CCGet(delAttrs[a]), b)) {
                 CanonicalOD od(deleteAttribute(delAttrs[a], b), it->left, b);
-                if (od.IsValid(data_, error_rate_threshold_, partition_cache_)) {
+                if (od.IsValid(data_, partition_cache_)) {
                     ++ocd_count_;
                     addToRes(std::move(od));
                     cs_for_con.erase(it++);
