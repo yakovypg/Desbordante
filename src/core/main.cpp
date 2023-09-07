@@ -20,15 +20,13 @@ INITIALIZE_EASYLOGGINGPP
 int findAndPrintOD(algos::fastod::DataFrame&& data, size_t max_time, const std::string& output_path) {
         
     algos::fastod::Fastod fastod(std::move(data), max_time);
-    std::vector<algos::fastod::CanonicalOD> ods = fastod.Discover();
+    std::vector<std::string> ods = fastod.DiscoverAsStrings();
 
     if (output_path.size() == 0) {
         std::cout << "Found ODs: " << ods.size() << '\n';
 
-        for (size_t i = 0; i < ods.size(); ++i) {
-            std::string od = ods[i].ToString();
-            std::cout << i + 1 << ":\t" << od << '\n';
-        }
+        for (size_t i = 0; i < ods.size(); ++i)
+            std::cout << ods[i] << '\n';
     }
     else {
         std::ofstream file;
@@ -39,10 +37,8 @@ int findAndPrintOD(algos::fastod::DataFrame&& data, size_t max_time, const std::
             return 2;
         }
 
-        for (size_t i = 0; i < ods.size(); ++i) {
-            std::string od = ods[i].ToString();
-            file << od << '\n';
-        }
+        for (size_t i = 0; i < ods.size(); ++i)
+            file << ods[i] << '\n';
 
         file.close();
     }
