@@ -1,22 +1,21 @@
 #pragma once
 
 #include <bitset>
-
-#include <bitset>
 #include <cassert>
+#include <climits>
 #include <cstddef>
 #include <string>
 #include <functional>
 
+#include <boost/functional/hash.hpp>
+
 namespace algos::fastod {
 
-#if 0
-using AttributeSet = boost::dynamic_bitset<size_t>;
-#endif
-
 class AttributeSet {
+public:
+    using size_type = size_t;
 private:
-    static constexpr size_t kBitsNum = 64;
+    static constexpr size_type kBitsNum = 64;
 
     std::bitset<kBitsNum> bitset_;
 
@@ -24,8 +23,6 @@ private:
         : bitset_(std::move(bitset)) {}
 
 public:
-    using size_type = size_t;
-
     constexpr static size_type npos = static_cast<size_type>(-1);
 
     AttributeSet() noexcept = default;
@@ -87,7 +84,7 @@ public:
     }
 
     size_type find_first() const noexcept {
-        if constexpr (sizeof(unsigned long long) <= kBitsNum) {
+        if constexpr (kBitsNum <= sizeof(unsigned long long) * CHAR_BIT) {
             // relying on the fact that npos == -1
             return __builtin_ffsll(bitset_.to_ullong()) - 1;
         } else {
@@ -100,7 +97,7 @@ public:
         }
     }
     size_type find_next(size_type pos) const noexcept {
-        if constexpr (sizeof(unsigned long long) <= kBitsNum) {
+        if constexpr (kBitsNum <= sizeof(unsigned long long) * CHAR_BIT) {
             unsigned long long mask = ~((1 << (pos + 1)) - 1);
             unsigned long long value = bitset_.to_ullong() & mask;
             return __builtin_ffsll(value) - 1;
@@ -120,6 +117,7 @@ public:
     friend bool operator==(const AttributeSet& b1, const AttributeSet& b2) noexcept;
     friend bool operator!=(const AttributeSet& b1, const AttributeSet& b2) noexcept;
     friend struct std::hash<AttributeSet>;
+    friend struct boost::hash<AttributeSet>;
 };
 
 inline AttributeSet operator&(const AttributeSet& b1, const AttributeSet& b2) noexcept {
@@ -145,20 +143,28 @@ inline bool operator!=(const AttributeSet& b1, const AttributeSet& b2) noexcept 
     return !(b1 == b2);
 }
 
-}
+}  // namespace algos::fastod
 
 template <>
 struct std::hash<algos::fastod::AttributeSet>
 {
     size_t operator()(algos::fastod::AttributeSet const& x) const noexcept {
-        return std::hash<std::bitset<algos::fastod::AttributeSet::kBitsNum>>()(x.bitset_);
+        return x.bitset_.to_ullong();
+    }
+};
+
+template <>
+struct boost::hash<algos::fastod::AttributeSet>
+{
+    size_t operator()(algos::fastod::AttributeSet const& x) const noexcept {
+        return x.bitset_.to_ullong();
     }
 };
 
 
 namespace algos::fastod {
 
-inline AttributeSet attributeSet(std::initializer_list<size_t> attributes, size_t size) {
+inline AttributeSet attributeSet(std::initializer_list<AttributeSet::size_type> attributes, AttributeSet::size_type size) {
     AttributeSet attr_set(size);
     for (auto attr : attributes) {
         attr_set.set(attr);
@@ -197,8 +203,8 @@ inline bool isEmptyAS(AttributeSet const& value) noexcept {
 }
 
 std::string ASToString(AttributeSet const& value);
-inline std::size_t getAttributeCount(AttributeSet const& value) noexcept {
+inline AttributeSet::size_type getAttributeCount(AttributeSet const& value) noexcept {
     return value.count();
 }
 
-} // namespace algos::fastod
+}  // namespace algos::fastod

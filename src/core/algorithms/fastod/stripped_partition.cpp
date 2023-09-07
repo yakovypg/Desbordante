@@ -58,7 +58,7 @@ StrippedPartition& StrippedPartition::operator=(const StrippedPartition& other) 
     return *this;
 }
 
-void StrippedPartition::Product(size_t attribute) {
+void StrippedPartition::Product(short attribute) {
     std::vector<size_t> new_indexes;
     new_indexes.reserve(data_.GetColumnCount());
     std::vector<size_t> new_begins;
@@ -94,21 +94,6 @@ void StrippedPartition::Product(size_t attribute) {
                 addGroup();
         }
         addGroup();
-
-        // std::unordered_map<T, std::vector<size_t>> subgroups;
-
-        // for (size_t i = group_begin; i < group_end; i++) {
-        //     size_t index = indexes_[i];
-        //     subgroups[data_.GetValue<T>(index, attribute)].push_back(index);
-        // }
-        // new_begins.reserve(new_begins.size() + subgroups.size());
-        // for (auto& [_, new_group]: subgroups) {
-        //     if (new_group.size() > 1) {
-        //         new_begins.push_back(fill_pointer);
-        //         fill_pointer += new_group.size();
-        //         new_indexes.insert(new_indexes.end(), new_group.begin(), new_group.end());
-        //     }
-        // }
     }
 
     indexes_ = std::move(new_indexes);
@@ -116,7 +101,7 @@ void StrippedPartition::Product(size_t attribute) {
     begins_.push_back(indexes_.size());
 }
 
-bool StrippedPartition::Split(size_t right) {
+bool StrippedPartition::Split(short right) {
 
     for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
         size_t group_begin = begins_[begin_pointer];
@@ -125,53 +110,6 @@ bool StrippedPartition::Split(size_t right) {
         for (size_t i = group_begin + 1; i < group_end; i++) {
             if (data_.GetValue(indexes_[i], right) != group_value)
                 return true;
-        }
-    }
-
-    return false;
-}
-
-bool StrippedPartition::Swap(const SingleAttributePredicate& left, size_t right) {
-    for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
-        size_t group_begin = begins_[begin_pointer];
-        size_t group_end = begins_[begin_pointer + 1];
-        std::vector<std::pair<int, int>> values(group_end - group_begin);
-        for (size_t i = group_begin; i < group_end; ++i) {
-            size_t index = indexes_[i];
-            values[i - group_begin] = { data_.GetValue(index, left.attribute), 
-                                        data_.GetValue(index, right) };
-        }
-
-        if (left.ascending)
-            std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
-                return p1.first < p2.first;
-            });
-        else
-            std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
-                return p2.first < p1.first;
-            });
-
-        size_t prev_group_max_index = 0;
-        size_t current_group_max_index = 0;
-        bool is_first_group = true;
-        
-        
-        for (size_t i = 0; i < values.size(); i++) {
-            const auto& first = values[i].first;
-            const auto& second = values[i].second;
-
-            // values are sorted by "first"
-            if (i != 0 && values[i - 1].first != first) {
-                is_first_group = false;
-                prev_group_max_index = current_group_max_index;
-                current_group_max_index = i;
-            } else if (values[current_group_max_index].second <= second) {
-                current_group_max_index = i;
-            }
-
-            if (!is_first_group && values[prev_group_max_index].second > second) {
-                return true;
-            }
         }
     }
 

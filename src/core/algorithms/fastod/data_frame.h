@@ -7,6 +7,7 @@
 
 #include "config/equal_nulls/type.h"
 #include "table/column_layout_typed_relation_data.h"
+#include "attribute_set.h"
 
 namespace algos::fastod {
 
@@ -27,9 +28,9 @@ public:
 
     explicit DataFrame(const std::vector<model::TypedColumnData>& columns_data);
 
-    int GetValue(int tuple_index, int attribute_index) const;
+    int GetValue(int tuple_index, AttributeSet::size_type attribute_index) const;
     
-    std::size_t GetColumnCount() const;
+    AttributeSet::size_type GetColumnCount() const;
     std::size_t GetTupleCount() const;
 
     static DataFrame FromCsv(std::filesystem::path const& path);

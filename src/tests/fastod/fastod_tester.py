@@ -125,8 +125,10 @@ def test_algorithms(c_impl_path: str,
     c_impl_name = 'C++'
     java_impl_name = 'Java'
 
-    summary = AlgorithmResultsSummary(c_impl_name, java_impl_name)
+    c_impl_name = 'C++'
+    java_impl_name = 'Java'
 
+    summary = AlgorithmResultsSummary(c_impl_name, java_impl_name)
     for dataset in datasets:
         c_impl_res = None
         java_impl_res = None

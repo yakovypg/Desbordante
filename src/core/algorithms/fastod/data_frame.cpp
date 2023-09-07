@@ -5,23 +5,22 @@
 #include "csv_parser/csv_parser.h"
 
 #include "data_frame.h"
-#include "attribute_set.h"
 
 using namespace algos::fastod;
 
 DataFrame::DataFrame(const std::vector<model::TypedColumnData>& columns_data) {
-    std::size_t cols_num = columns_data.size();  
+    AttributeSet::size_type cols_num = columns_data.size();  
     assert(cols_num != 0);
 
     std::transform(columns_data.cbegin(), columns_data.cend(),
         std::back_inserter(data_), ConvertColumnDataToIntegers);
 }
 
-int DataFrame::GetValue(int tuple_index, int attribute_index) const {
+int DataFrame::GetValue(int tuple_index, AttributeSet::size_type attribute_index) const {
     return data_[attribute_index][tuple_index];
 }
 
-std::size_t DataFrame::GetColumnCount() const {
+AttributeSet::size_type DataFrame::GetColumnCount() const {
     return data_.size();
 }
 
