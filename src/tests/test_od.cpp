@@ -17,11 +17,7 @@ size_t RunFastOdOn(std::string dataset, std::string folder) {
         algos::fastod::DataFrame::FromCsv(d);
 
     algos::fastod::Fastod fastod(std::move(data), std::numeric_limits<long>::max());
-    std::vector<algos::fastod::CanonicalOD> ods = fastod.Discover();
-    std::vector<std::string> string_ods;
-    string_ods.reserve(ods.size());
-    std::transform(std::begin(ods), std::end(ods), std::back_inserter(string_ods),
-                   [](auto const& od) { return od.ToString(); });
+    std::vector<std::string> string_ods = fastod.DiscoverAsStrings();
     std::sort(std::begin(string_ods), std::end(string_ods));
     return boost::hash<decltype(string_ods)>()(string_ods);
 }
