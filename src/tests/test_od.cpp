@@ -8,7 +8,7 @@
 
 namespace {
 
-constexpr auto input_data_path = "input_data/od_norm_data";
+constexpr auto input_data_path = "input_data/od_norm_data/metanome";
 
 size_t RunFastOdOn(std::string dataset) {
     auto d = input_data_path / std::filesystem::path(dataset);
