@@ -121,21 +121,8 @@ void Fastod::ComputeODs() {
 
         CCPut(context, context_cc);
 
-        if (level_ == 2) {
-            for (AttributeSet::size_type i = 0; i < data_.GetColumnCount(); i++) {
-                for (AttributeSet::size_type j = 0; j < data_.GetColumnCount(); j++) {
-                    if (i == j)
-                        continue;
-                    AttributeSet c = attributeSet({i, j}, data_.GetColumnCount());
-
-                    CSPut<false>(c, AttributePair(i, j));
-                    CSPut<true>(c, AttributePair(i, j));
-                }
-            }
-        } else if (level_ > 2) {
-            AddCandidates<false>(context, delAttrs);
-            AddCandidates<true>(context, delAttrs);
-        }
+        AddCandidates<false>(context, delAttrs);
+        AddCandidates<true>(context, delAttrs);
     }
     size_t condInd = 0;
     for (AttributeSet const& context : context_this_level) {
