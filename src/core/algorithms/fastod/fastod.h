@@ -84,28 +84,38 @@ private:
 
     template <bool ascending>
     void AddCandidates(AttributeSet const& context,
-                         std::vector<AttributeSet> const& delAttrs) {
-        std::unordered_set<AttributePair> candidates;
-        for (AttributeSet::size_type attr = context.find_first(); attr != AttributeSet::npos;
-             attr = context.find_next(attr)) {
-            const auto& tmp = CSGet<ascending>(delAttrs[attr]);
-            candidates.insert(tmp.cbegin(), tmp.cend());
-        }
-        for (AttributePair const& attribute_pair : candidates) {
-            AttributeSet context_delete_ab = deleteAttribute(
-                delAttrs[attribute_pair.left], attribute_pair.right);
-
-            bool add_context = true;
-            for (AttributeSet::size_type attr = context_delete_ab.find_first();
-                attr != AttributeSet::npos; attr = context_delete_ab.find_next(attr)) {
-                if (CSGet<ascending>(delAttrs[attr]).count(attribute_pair) == 0) {
-                    add_context = false;
-                    break;
+                       std::vector<AttributeSet> const& delAttrs) {
+        if (level_ == 2) {
+            for (AttributeSet::size_type i = 0; i < data_.GetColumnCount(); i++) {
+                for (AttributeSet::size_type j = 0; j < data_.GetColumnCount(); j++) {
+                    if (i == j)
+                        continue;
+                    CSPut<ascending>(attributeSet({i, j}, data_.GetColumnCount()), AttributePair(i, j));
                 }
             }
+        } else if (level_ > 2) {
+            std::unordered_set<AttributePair> candidates;
+            for (AttributeSet::size_type attr = context.find_first(); attr != AttributeSet::npos;
+                 attr = context.find_next(attr)) {
+                const auto& tmp = CSGet<ascending>(delAttrs[attr]);
+                candidates.insert(tmp.cbegin(), tmp.cend());
+            }
+            for (AttributePair const& attribute_pair : candidates) {
+                AttributeSet context_delete_ab = deleteAttribute(
+                    delAttrs[attribute_pair.left], attribute_pair.right);
 
-            if (add_context) {
-                CSPut<ascending>(context, attribute_pair);
+                bool add_context = true;
+                for (AttributeSet::size_type attr = context_delete_ab.find_first();
+                    attr != AttributeSet::npos; attr = context_delete_ab.find_next(attr)) {
+                    if (CSGet<ascending>(delAttrs[attr]).count(attribute_pair) == 0) {
+                        add_context = false;
+                        break;
+                    }
+                }
+
+                if (add_context) {
+                    CSPut<ascending>(context, attribute_pair);
+                }
             }
         }
     }
