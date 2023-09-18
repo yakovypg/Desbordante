@@ -78,14 +78,20 @@ private:
 
     void Initialize();
 
-    void ComputeODs();
-    void PruneLevels();
-    void CalculateNextLevel();
+    void CalculateAllLevels();
+    void ComputeODs(std::size_t level_from, std::size_t level_to);
+    void ComputeODsThread();
+    // void Compute1();
+    // void Compute2();
+
+    void ComputeODs(std::size_t level);
+    void PruneLevels(std::size_t level);
+    void CalculateNextLevel(std::size_t current_level);
 
     template <bool ascending>
     void AddCandidates(AttributeSet const& context,
-                       std::vector<AttributeSet> const& delAttrs) {
-        if (level_ == 2) {
+                       std::vector<AttributeSet> const& delAttrs, std::size_t current_level) {
+        if (current_level == 2) {
             for (AttributeSet::size_type i = 0; i < data_.GetColumnCount(); i++) {
                 for (AttributeSet::size_type j = 0; j < data_.GetColumnCount(); j++) {
                     if (i == j)
@@ -93,7 +99,7 @@ private:
                     CSPut<ascending>(attributeSet({i, j}, data_.GetColumnCount()), AttributePair(i, j));
                 }
             }
-        } else if (level_ > 2) {
+        } else if (current_level > 2) {
             std::unordered_set<AttributePair> candidates;
             for (AttributeSet::size_type attr = context.find_first(); attr != AttributeSet::npos;
                  attr = context.find_next(attr)) {
