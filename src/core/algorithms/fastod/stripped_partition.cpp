@@ -1,5 +1,7 @@
 #include <cstdint>
 #include <sstream>
+#include <iostream>
+
 #include "stripped_partition.h"
 #include "cache_with_limit.h"
 
@@ -17,6 +19,9 @@ StrippedPartition::StrippedPartition(const DataFrame& data) : data_(std::move(da
 
     begins_.push_back(data.GetTupleCount());
 }
+
+StrippedPartition::StrippedPartition(const DataFrame& data, std::vector<size_t> const& indexes,
+    std::vector<size_t> const& begins) : indexes_(indexes), begins_(begins), data_(data) {}
 
 std::string StrippedPartition::ToString() const {
     std::stringstream ss;
@@ -40,9 +45,9 @@ std::string StrippedPartition::ToString() const {
         begins_string += std::to_string(begins_[i]);
     }
 
-    ss << "StrippedPartition {indexes=" << indexes_string
-        << ", begins=" << begins_string
-        << "}";
+    ss << "StrippedPartition { indexes = [ " << indexes_string
+       << " ]; begins = [ " << begins_string
+       << " ] }";
 
     return ss.str();
 }
@@ -99,20 +104,24 @@ void StrippedPartition::Product(short attribute) {
     indexes_ = std::move(new_indexes);
     begins_ = std::move(new_begins);
     begins_.push_back(indexes_.size());
+
+    //std::cout << ToString() << std::endl;
 }
 
 bool StrippedPartition::Split(short right) {
-
     for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
         size_t group_begin = begins_[begin_pointer];
         size_t group_end = begins_[begin_pointer + 1];
         int group_value = data_.GetValue(indexes_[group_begin], right);
         for (size_t i = group_begin + 1; i < group_end; i++) {
-            if (data_.GetValue(indexes_[i], right) != group_value)
+            if (data_.GetValue(indexes_[i], right) != group_value) {
+                //std::cout << "Split:\t" << "true" << std::endl;
                 return true;
+            }
         }
     }
 
+    //std::cout << "Split:\t" << "false" << std::endl;
     return false;
 }
 

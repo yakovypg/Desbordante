@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
 #include <unordered_map>
 #include <algorithm>
 
@@ -18,6 +19,7 @@ private:
 public:
     explicit StrippedPartition(const DataFrame& data);
     StrippedPartition(const StrippedPartition& origin) = default;
+    StrippedPartition(const DataFrame& data, std::vector<size_t> const& indexes, std::vector<size_t> const& begins);
 
     std::string ToString() const;
     StrippedPartition& operator=(const StrippedPartition& other);
@@ -27,6 +29,8 @@ public:
 
     template <bool ascending>
     bool Swap(short left, short right) {
+        //static int swap_num = 1;
+        
         for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
             size_t group_begin = begins_[begin_pointer];
             size_t group_end = begins_[begin_pointer + 1];
@@ -93,10 +97,12 @@ public:
                 }
 
                 if (!is_first_group && values[prev_group_max_index].second > second) {
+                    //std::cout << "Swap-" << (swap_num++) << "-" << ascending << ":\t" << "true" << std::endl;
                     return true;
                 }
             }
         }
+        //std::cout << "Swap-" << (swap_num++) << "-" << ascending << ":\t" << "false" << std::endl;
         return false;
     }
 };
