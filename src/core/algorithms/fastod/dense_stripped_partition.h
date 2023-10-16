@@ -15,9 +15,11 @@ private:
 
 public:
     explicit DenseStrippedPartition(const DataFrame& data);
+    //DenseStrippedPartition(const DataFrame& data, std::vector<EquivalenceClass> const& classes) : classes_(classes), data_(std::move(data)) {}
     DenseStrippedPartition(const DenseStrippedPartition& origin) = default;
 
     std::string ToString() const;
+    std::string ToStringWithSort() const;
     StrippedPartition ToStrippedPartition() const;
 
     DenseStrippedPartition& operator=(const DenseStrippedPartition& other);
