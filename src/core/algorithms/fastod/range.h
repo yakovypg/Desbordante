@@ -3,12 +3,14 @@
 #include <string>
 #include <vector>
 #include <cstddef>
+#include <optional>
 
 namespace algos::fastod {
 
 class Range {
 public:
     Range() noexcept = default;
+    Range(Range const& other) = default;
     Range(std::size_t start, std::size_t end) noexcept;
     explicit Range(std::size_t start) noexcept;
     
@@ -19,6 +21,17 @@ public:
     std::string ToString() const;
     std::vector<std::size_t> ToVector() const;
 
+    Range& operator=(Range const& other);
+    bool operator<(Range const& other) const;
+    bool operator>(Range const& other) const;
+    bool operator==(Range const& other) const;
+    bool operator!=(Range const& other) const;
+
+    static std::optional<Range> Intersect(Range const& lhs, Range const& rhs);
+    static std::vector<Range> Differense(Range const& lhs, Range const& rhs);
+    static std::optional<Range> DifferenseWithLeftShift(Range const& lhs, Range const& rhs);
+
+    static std::vector<Range> ExtractRanges(std::vector<std::pair<int, size_t>> const& data);
     static std::vector<Range> ExtractRanges(std::vector<std::pair<int, size_t>> const& data,
                                             size_t start_index,
                                             size_t end_index);
