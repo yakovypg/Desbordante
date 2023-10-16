@@ -15,16 +15,42 @@ DenseStrippedPartition::DenseStrippedPartition(const DataFrame& data) : data_(st
     classes_.push_back(EquivalenceClass({ Range(0, tuple_count - 1) }, attribute));
 }
 
-std::string DenseStrippedPartition::ToString() const {
+std::string DenseStrippedPartition::ToString() const {   
     std::stringstream ss;
     size_t curr_index = 0;
 
     ss << "{\n";
 
-    for (EquivalenceClass const& eq_class : classes_) {
+    for (EquivalenceClass const& eq_class : classes_) {       
         ss << "  " << eq_class.ToString();
 
         if (curr_index++ < classes_.size() - 1) {
+            ss << ",\n";
+        }
+    }
+
+    ss << "\n}";
+
+    return ss.str();
+}
+
+std::string DenseStrippedPartition::ToStringWithSort() const {   
+    std::stringstream ss;
+    size_t curr_index = 0;
+
+    ss << "{\n";
+
+    std::vector<EquivalenceClass> sorted_classes;
+    sorted_classes.insert(sorted_classes.end(), classes_.begin(), classes_.end());
+
+    std::sort(sorted_classes.begin(), sorted_classes.end(), [](auto const& x, auto const& y) {
+        return x.GetIndexes().at(0).GetStart() < y.GetIndexes().at(0).GetStart();
+    });
+
+    for (EquivalenceClass const& eq_class : sorted_classes) {       
+        ss << "  " << eq_class.ToStringWithSort();
+
+        if (curr_index++ < sorted_classes.size() - 1) {
             ss << ",\n";
         }
     }
@@ -39,11 +65,34 @@ StrippedPartition DenseStrippedPartition::ToStrippedPartition() const {
     std::vector<size_t> begins;
 
     size_t group_start = 0;
-    
-    for (EquivalenceClass const& eq_class : classes_) {
-        begins.push_back(group_start);
+
+    std::vector<EquivalenceClass> sorted_classes;
+    sorted_classes.insert(sorted_classes.end(), classes_.begin(), classes_.end());
+
+    std::sort(sorted_classes.begin(), sorted_classes.end(), [](auto const& x, auto const& y) {
+        std::vector<Range> x_sorted_indexes = x.GetIndexes();
+        std::vector<Range> y_sorted_indexes = y.GetIndexes();
+
+        std::sort(x_sorted_indexes.begin(), x_sorted_indexes.end(), [](Range const& x, Range const& y) {
+            return x.GetStart() < y.GetStart();
+        });
+        std::sort(y_sorted_indexes.begin(), y_sorted_indexes.end(), [](Range const& x, Range const& y) {
+            return x.GetStart() < y.GetStart();
+        });
         
-        for (Range const& range : eq_class.GetIndexes()) {
+        return x_sorted_indexes.at(0).GetStart() < y_sorted_indexes.at(0).GetStart();
+    });
+    
+    for (EquivalenceClass const& eq_class : sorted_classes) {
+        begins.push_back(group_start);
+
+        std::vector<Range> sorted_indexes = eq_class.GetIndexes();
+
+        std::sort(sorted_indexes.begin(), sorted_indexes.end(), [](Range const& x, Range const& y) {
+            return x.GetStart() < y.GetStart();
+        });
+        
+        for (Range const& range : sorted_indexes) {
             std::vector<size_t> range_values = range.ToVector();
             indexes.insert(indexes.end(), range_values.begin(), range_values.end());
 
@@ -67,43 +116,21 @@ DenseStrippedPartition& DenseStrippedPartition::operator=(const DenseStrippedPar
     return *this;
 }
 
-void DenseStrippedPartition::Product(short attribute) {
+void DenseStrippedPartition::Product(short attribute) {   
     std::vector<EquivalenceClass> new_classes;
-    new_classes.reserve(data_.GetColumnCount());
+    std::vector<EquivalenceClass> attr_classes = data_.GetClasses(attribute);
 
-    for (EquivalenceClass const& eq_class : classes_) {
-        std::vector<std::pair<int, size_t>> values = eq_class.GetIndexedValues(data_, attribute);
+    for (EquivalenceClass const& lhs : classes_) {
+        for (EquivalenceClass const& rhs : attr_classes) {
+            EquivalenceClass intersection = EquivalenceClass::Intersect(lhs, rhs);
 
-        std::sort(values.begin(), values.end(), [](const auto& x, const auto& y) {
-            return x.first < y.first;
-        });
-
-        auto AddClass = [attribute, &new_classes, &values](size_t start_index, size_t end_index) {
-            if (end_index == start_index)
-                return;
-
-            std::vector<Range> indexes = Range::ExtractRanges(values, start_index, end_index);
-            EquivalenceClass new_class(indexes, attribute);
-
-            new_classes.push_back(new_class);
-        };
-
-        size_t class_start_index = 0;
-
-        for (size_t i = 1; i < values.size(); ++i) {
-            if (values[i - 1].first == values[i].first)
-                continue;
-            
-            AddClass(class_start_index, i - 1);
-            class_start_index = i;
+            if (intersection.Size() > 1) {
+                new_classes.push_back(intersection);
+            }
         }
-
-        AddClass(class_start_index, values.size() - 1);
     }
 
     classes_ = std::move(new_classes);
-
-    //std::cout << ToStrippedPartition().ToString() << std::endl;
 }
 
 bool DenseStrippedPartition::Split(short right) {
