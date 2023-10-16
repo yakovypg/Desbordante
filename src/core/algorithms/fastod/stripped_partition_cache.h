@@ -1,22 +1,25 @@
 #pragma once
 
 #include "stripped_partition.h"
+#include "dense_stripped_partition.h"
 #include "cache_with_limit.h"
+
+#define STRIPPED_PARTITION DenseStrippedPartition
 
 namespace algos::fastod {
 
 class StrippedPartitionCache {
 private:
-    CacheWithLimit<AttributeSet, StrippedPartition> cache_{static_cast<size_t>(1e8)};
+    CacheWithLimit<AttributeSet, STRIPPED_PARTITION> cache_{static_cast<size_t>(1e8)};
 
 public:
-    StrippedPartition GetStrippedPartition(AttributeSet const& attribute_set,
+    STRIPPED_PARTITION GetStrippedPartition(AttributeSet const& attribute_set,
                                            DataFrame const& data) {
         if (cache_.Contains(attribute_set)) {
             return cache_.Get(attribute_set);
         }
 
-        std::optional<StrippedPartition> result;
+        std::optional<STRIPPED_PARTITION> result;
 
         auto callProduct = [&result](size_t attr) {
             result->Product(attr);
@@ -33,7 +36,7 @@ public:
         }
 
         if (!result) {
-            result = StrippedPartition(data);
+            result = STRIPPED_PARTITION(data);
 
             for (AttributeSet::size_type attr = attribute_set.find_first(); attr != AttributeSet::npos;
                  attr = attribute_set.find_next(attr)) {
