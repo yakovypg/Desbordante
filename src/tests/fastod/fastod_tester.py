@@ -52,6 +52,19 @@ class AlgorithmResultsSummary(object):
     def print_summary(self) -> None:
         print(self.table)
 
+class ShortAlgorithmResultSummary(object):
+    def __init__(self, alg_name: str):
+        self.alg_name = alg_name
+        self.table = PrettyTable()
+        self.table.field_names = ['Dataset', alg_name]
+    
+    def add_result(self, dataset_name: str, alg_result: AlgorithmResult) -> None:
+        time_str = '%.6f' % alg_result.time
+        self.table.add_row([dataset_name, time_str])
+    
+    def print_summary(self) -> None:
+        print(self.table)
+
 def create_results_directory() -> str:
     output_dir = 'results'
 
@@ -106,6 +119,40 @@ def execute_algorithm(dataset_path: str, algorithm_execute_args: list[str], algo
     algorith_result.result_path = output_file_path
 
     return algorith_result
+
+def test_algorithm(impl_name: str, impl_start: list[str], datasets: list[str]):
+    output_dir = create_results_directory()
+    summary = ShortAlgorithmResultSummary(impl_name)
+
+    for dataset in datasets:
+        impl_res = None
+
+        try:
+            impl_res = execute_algorithm(dataset, impl_start, impl_name, output_dir)
+        except Exception as ex:
+            print(f'Failed to get result from {impl_name} algorithm implementation. Reason:')
+            print(str(ex))
+            print()
+
+        dataset_name = os.path.basename(dataset)
+        print(f'Dataset: {dataset_name}')
+        
+        summary.add_result(dataset_name, impl_res)
+
+        curr_dataset_table = PrettyTable()
+        curr_dataset_table.field_names = impl_res.get_table_header()
+        curr_dataset_table.add_row(impl_res.to_table_row(impl_name, 0))
+
+        print(curr_dataset_table)
+        print()
+
+    summary.print_summary()
+
+def test_c_without_second_alg(c_impl_path: str, datasets: list[str]):
+    c_impl_name = 'C++'
+    c_impl_start = [c_impl_path]
+
+    test_algorithm(c_impl_name, c_impl_start, datasets)
 
 def test_algorithms(first_impl_name: str,
                     first_impl_start: list[str],
