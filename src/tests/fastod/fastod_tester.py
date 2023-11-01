@@ -182,11 +182,11 @@ def test_c_vs_c(first_c_impl_path: str,
                 second_c_impl_path: str,
                 comparer_path: str, 
                 datasets: list[str]):
-    first_c_impl_name = 'C++ v1'
-    first_c_impl_start = [c_impl_path]
+    first_c_impl_name = 'C++_v1'
+    first_c_impl_start = [first_c_impl_path]
 
-    second_c_impl_name = 'C++ v2'
-    second_c_impl_start = [c_impl_path]
+    second_c_impl_name = 'C++_v2'
+    second_c_impl_start = [second_c_impl_path]
 
     test_algorithms(
         first_c_impl_name,
