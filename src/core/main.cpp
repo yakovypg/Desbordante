@@ -17,6 +17,8 @@
 
 INITIALIZE_EASYLOGGINGPP
 
+#define NO_OUTPUT "NULL"
+
 int findAndPrintOD(algos::fastod::DataFrame&& data, size_t max_time, const std::string& output_path) {
         
     algos::fastod::Fastod fastod(std::move(data), max_time);
@@ -27,6 +29,9 @@ int findAndPrintOD(algos::fastod::DataFrame&& data, size_t max_time, const std::
 
         for (size_t i = 0; i < ods.size(); ++i)
             std::cout << ods[i] << '\n';
+    }
+    else if (output_path == NO_OUTPUT) {
+        return 0;
     }
     else {
         std::ofstream file;
