@@ -1,10 +1,9 @@
 #pragma once
 
 #include "stripped_partition.h"
-#include "dense_stripped_partition.h"
 #include "cache_with_limit.h"
 
-#define STRIPPED_PARTITION DenseStrippedPartition
+#define STRIPPED_PARTITION StrippedPartition
 
 namespace algos::fastod {
 
