@@ -14,20 +14,10 @@ DataFrame::DataFrame(const std::vector<model::TypedColumnData>& columns_data) {
 
     std::transform(columns_data.cbegin(), columns_data.cend(),
         std::back_inserter(data_), ConvertColumnDataToIntegers);
-
-    classes_.reserve(data_.size());
-    
-    for (size_t i = 0; i < data_.size(); ++i) {
-        classes_.push_back(EquivalenceClass::ExtractClasses(data_[i], i));
-    }
 }
 
 int DataFrame::GetValue(int tuple_index, AttributeSet::size_type attribute_index) const {
     return data_[attribute_index][tuple_index];
-}
-
-std::vector<EquivalenceClass> const& DataFrame::GetClasses(AttributeSet::size_type attribute_index) const {
-    return classes_.at(attribute_index);
 }
 
 AttributeSet::size_type DataFrame::GetColumnCount() const {
