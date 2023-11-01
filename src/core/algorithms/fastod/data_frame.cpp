@@ -1,6 +1,8 @@
 #include <utility>
 #include <filesystem>
 #include <iostream>
+#include <optional>
+#include <assert.h>
 
 #include "csv_parser/csv_parser.h"
 
@@ -12,12 +14,43 @@ DataFrame::DataFrame(const std::vector<model::TypedColumnData>& columns_data) {
     AttributeSet::size_type cols_num = columns_data.size();  
     assert(cols_num != 0);
 
+    data_.reserve(cols_num);
+    data_ranges_.reserve(cols_num);
+    range_item_placement_.reserve(cols_num);
+
     std::transform(columns_data.cbegin(), columns_data.cend(),
         std::back_inserter(data_), ConvertColumnDataToIntegers);
+
+    std::transform(data_.cbegin(), data_.cend(),
+        std::back_inserter(data_ranges_), ExtractRangesFromColumn);
+    
+    for (size_t column = 0; column < cols_num; ++column) {
+        size_t tuple_count = data_.at(column).size();
+
+        std::vector<size_t> curr_column_item_placement;
+        curr_column_item_placement.reserve(tuple_count);
+        
+        for (size_t i = 0; i < tuple_count; ++i) {
+            std::optional<size_t> range_index = FindRangeIndexByItem(i, data_ranges_[column]);            
+            assert(range_index.has_value());
+
+            curr_column_item_placement.push_back(range_index.value());
+        }
+
+        range_item_placement_.push_back(std::move(curr_column_item_placement));
+    }
 }
 
 int DataFrame::GetValue(int tuple_index, AttributeSet::size_type attribute_index) const {
     return data_[attribute_index][tuple_index];
+}
+
+std::vector<std::vector<DataFrame::value_indexes_t>> const& DataFrame::GetDataRanges() const {
+    return data_ranges_;
+}
+
+size_t DataFrame::GetRangeIndexByItem(size_t item, algos::fastod::AttributeSet::size_type attribute) const {
+    return range_item_placement_.at(attribute).at(item);
 }
 
 AttributeSet::size_type DataFrame::GetColumnCount() const {
@@ -94,4 +127,42 @@ std::vector<int> DataFrame::ConvertColumnDataToIntegers(const model::TypedColumn
     }
 
     return converted_column;
+}
+
+std::vector<DataFrame::value_indexes_t> DataFrame::ExtractRangesFromColumn(std::vector<int> const& column) {
+    std::vector<value_indexes_t> ranges;
+
+    size_t start = 0;
+
+    for (size_t i = 1; i < column.size(); ++i) {
+        int curr_value = column[i];
+        int prev_value = column[i - 1];
+        
+        if (curr_value != prev_value) {
+            ranges.push_back({
+                prev_value,
+                { start, i - 1 }
+            });
+
+            start = i;
+        }
+    }
+
+    ranges.push_back({
+        column[column.size() - 1],
+        { start, column.size() - 1 }
+    });
+
+    return ranges;
+}
+
+std::optional<size_t> DataFrame::FindRangeIndexByItem(size_t item, std::vector<DataFrame::value_indexes_t> const& ranges) {   
+    auto iter = std::find_if(ranges.cbegin(), ranges.cend(), [item](auto const& p) {
+        range_t const& range = p.second;
+        return item >= range.first && item <= range.second;
+    });
+
+    return iter != ranges.cend()
+        ? std::optional<size_t> { iter - ranges.cbegin() }
+        : std::nullopt;
 }
