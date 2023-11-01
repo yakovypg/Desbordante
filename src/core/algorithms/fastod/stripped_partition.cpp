@@ -1,6 +1,5 @@
 #include <cstdint>
 #include <sstream>
-#include <iostream>
 
 #include "stripped_partition.h"
 #include "cache_with_limit.h"
@@ -20,8 +19,8 @@ StrippedPartition::StrippedPartition(const DataFrame& data) : data_(std::move(da
     begins_.push_back(data.GetTupleCount());
 }
 
-StrippedPartition::StrippedPartition(const DataFrame& data, std::vector<size_t> const& indexes,
-    std::vector<size_t> const& begins) : indexes_(indexes), begins_(begins), data_(data) {}
+// StrippedPartition::StrippedPartition(const DataFrame& data, std::vector<size_t> const& indexes,
+//     std::vector<size_t> const& begins) : indexes_(indexes), begins_(begins), data_(data) {}
 
 std::string StrippedPartition::ToString() const {
     std::stringstream ss;

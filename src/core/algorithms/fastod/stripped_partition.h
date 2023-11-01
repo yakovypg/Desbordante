@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <iostream>
 #include <unordered_map>
 #include <algorithm>
 
@@ -19,7 +18,7 @@ private:
 public:
     explicit StrippedPartition(const DataFrame& data);
     StrippedPartition(const StrippedPartition& origin) = default;
-    StrippedPartition(const DataFrame& data, std::vector<size_t> const& indexes, std::vector<size_t> const& begins);
+    //StrippedPartition(const DataFrame& data, std::vector<size_t> const& indexes, std::vector<size_t> const& begins);
 
     std::string ToString() const;
     StrippedPartition& operator=(const StrippedPartition& other);
