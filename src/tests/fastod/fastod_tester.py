@@ -108,59 +108,50 @@ def execute_algorithm(dataset_path: str, algorithm_execute_args: list[str], algo
 
     return algorith_result
 
-def test_algorithms(c_impl_path: str, 
-                    java_impl_path: str, 
-                    java_impl_class, 
-                    comparer_path: str, 
-                    datasets: list[str],
-                    java_max_heap_size: str = '12g') -> None:
+def test_algorithms(first_impl_name: str,
+                    first_impl_start: list[str],
+                    second_impl_name: str,
+                    second_impl_start: list[str],
+                    comparer_path: str,
+                    datasets: list[str]):   
     output_dir = create_results_directory()
+    summary = AlgorithmResultsSummary(first_impl_name, second_impl_name)
 
     passed_tests = 0
     failed_tests = 0
 
-    c_impl_start = [c_impl_path]
-    java_impl_start = ['java', f'-Xmx{java_max_heap_size}', '-classpath', java_impl_path, java_impl_class]
-
-    c_impl_name = 'C++'
-    java_impl_name = 'Java'
-
-    c_impl_name = 'C++'
-    java_impl_name = 'Java'
-
-    summary = AlgorithmResultsSummary(c_impl_name, java_impl_name)
     for dataset in datasets:
-        c_impl_res = None
-        java_impl_res = None
+        first_impl_res = None
+        second_impl_res = None
 
         compare_res = False
-        c_impl_acc_factor = 0
-        java_impl_acc_factor = 0
+        first_impl_acc_factor = 0
+        second_impl_acc_factor = 0
 
         try:
-            c_impl_res = execute_algorithm(dataset, c_impl_start, c_impl_name, output_dir)
+            first_impl_res = execute_algorithm(dataset, first_impl_start, first_impl_name, output_dir)
         except Exception as ex:
-            print('Failed to get result from C++ algorithm implementation. Reason:')
+            print(f'Failed to get result from {first_impl_name} algorithm implementation. Reason:')
             print(str(ex))
             print()
         
         try:
-            java_impl_res = execute_algorithm(dataset, java_impl_start, java_impl_name, output_dir)
+            second_impl_res = execute_algorithm(dataset, second_impl_start, second_impl_name, output_dir)
         except Exception as ex:
-            print('Failed to get result from Java algorithm implementation. Reason:')
+            print(f'Failed to get result from {second_impl_name} algorithm implementation. Reason:')
             print(str(ex))
             print()
         
-        if (c_impl_res is not None) and (java_impl_res is not None):
-            compare_res = c_impl_res.equal_to(java_impl_res, comparer_path)   
-            c_impl_acc_factor = java_impl_res.time / c_impl_res.time
-            java_impl_acc_factor = c_impl_res.time / java_impl_res.time
+        if (first_impl_res is not None) and (second_impl_res is not None):
+            compare_res = first_impl_res.equal_to(second_impl_res, comparer_path)   
+            first_impl_acc_factor = second_impl_res.time / first_impl_res.time
+            second_impl_acc_factor = first_impl_res.time / second_impl_res.time
         
-        if c_impl_res is None:
-            c_impl_res = AlgorithmResult(float('inf'), 0, 0, 0, '')
+        if first_impl_res is None:
+            first_impl_res = AlgorithmResult(float('inf'), 0, 0, 0, '')
         
-        if java_impl_res is None:
-            java_impl_res = AlgorithmResult(float('inf'), 0, 0, 0, '')
+        if second_impl_res is None:
+            second_impl_res = AlgorithmResult(float('inf'), 0, 0, 0, '')
 
         dataset_name = os.path.basename(dataset)
         print(f'Dataset: {dataset_name}')
@@ -171,12 +162,12 @@ def test_algorithms(c_impl_path: str,
         else:
             failed_tests += 1
         
-        summary.add_result(dataset_name, c_impl_res, java_impl_res)
+        summary.add_result(dataset_name, first_impl_res, second_impl_res)
 
         curr_dataset_table = PrettyTable()
-        curr_dataset_table.field_names = c_impl_res.get_table_header()
-        curr_dataset_table.add_row(c_impl_res.to_table_row(c_impl_name, c_impl_acc_factor))
-        curr_dataset_table.add_row(java_impl_res.to_table_row(java_impl_name, java_impl_acc_factor))
+        curr_dataset_table.field_names = first_impl_res.get_table_header()
+        curr_dataset_table.add_row(first_impl_res.to_table_row(first_impl_name, first_impl_acc_factor))
+        curr_dataset_table.add_row(second_impl_res.to_table_row(second_impl_name, second_impl_acc_factor))
 
         print(curr_dataset_table)
         print()
@@ -187,6 +178,44 @@ def test_algorithms(c_impl_path: str,
     print('[Summary]')
     print(f'Passed test: {passed_tests}')
     print(f'Failed test: {failed_tests}')
+
+def test_c_vs_c(first_c_impl_path: str,
+                second_c_impl_path: str,
+                comparer_path: str, 
+                datasets: list[str]):
+    first_c_impl_name = 'C++ v1'
+    first_c_impl_start = [c_impl_path]
+
+    second_c_impl_name = 'C++ v2'
+    second_c_impl_start = [c_impl_path]
+
+    test_algorithms(
+        first_c_impl_name,
+        first_c_impl_start,
+        second_c_impl_name,
+        second_c_impl_start,
+        comparer_path,
+        datasets)
+
+def test_c_vs_java(c_impl_path: str, 
+                   java_impl_path: str, 
+                   java_impl_class, 
+                   comparer_path: str, 
+                   datasets: list[str],
+                   java_max_heap_size: str = '12g') -> None:
+    c_impl_name = 'C++'
+    c_impl_start = [c_impl_path]
+
+    java_impl_name = 'Java'
+    java_impl_start = ['java', f'-Xmx{java_max_heap_size}', '-classpath', java_impl_path, java_impl_class]
+
+    test_algorithms(
+        c_impl_name,
+        c_impl_start,
+        java_impl_name,
+        java_impl_start,
+        comparer_path,
+        datasets)
 
 def configure_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description='Test FASTOD algorithm')
@@ -202,4 +231,4 @@ def configure_parser() -> argparse.ArgumentParser:
 if __name__ == '__main__':
     parser = configure_parser()
     args = parser.parse_args()
-    test_algorithms(args.c, args.java, args.package, args.comparer, args.datasets, args.heap)
+    test_c_vs_java(args.c, args.java, args.package, args.comparer, args.datasets, args.heap)
