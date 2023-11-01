@@ -12,4 +12,4 @@ if [[ -n $2 ]]; then
 	datasets=$2
 fi
 
-python3 fastod_tester.py -c ../../../build/target/Desbordante_run -j $java_alg_path -p leveretconey.fastod.Program -C ./sorted_compare.sh -d $datasets
+python3 test_with_java.py -c ../../../build/target/Desbordante_run -j $java_alg_path -p leveretconey.fastod.Program -C ./sorted_compare.sh -d $datasets
