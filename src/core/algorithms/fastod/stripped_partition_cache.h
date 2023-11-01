@@ -8,7 +8,7 @@ namespace algos::fastod {
 
 class StrippedPartitionCache {
 public:
-    using partition_t = StrippedPartition;
+    using partition_t = RangeBasedStrippedPartition;
 
 private:
     CacheWithLimit<AttributeSet, partition_t> cache_{static_cast<size_t>(1e8)};
