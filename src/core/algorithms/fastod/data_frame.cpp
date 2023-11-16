@@ -39,6 +39,8 @@ DataFrame::DataFrame(const std::vector<model::TypedColumnData>& columns_data) {
 
         range_item_placement_.push_back(std::move(curr_column_item_placement));
     }
+
+    RecognizeAttributesWithRanges();
 }
 
 int DataFrame::GetValue(int tuple_index, AttributeSet::size_type attribute_index) const {
@@ -49,8 +51,12 @@ std::vector<std::vector<DataFrame::value_indexes_t>> const& DataFrame::GetDataRa
     return data_ranges_;
 }
 
-size_t DataFrame::GetRangeIndexByItem(size_t item, algos::fastod::AttributeSet::size_type attribute) const {
+size_t DataFrame::GetRangeIndexByItem(size_t item, AttributeSet::size_type attribute) const {
     return range_item_placement_.at(attribute).at(item);
+}
+
+AttributeSet const& DataFrame::GetAttributesWithRanges() const {
+    return attrs_with_ranges_;
 }
 
 AttributeSet::size_type DataFrame::GetColumnCount() const {
@@ -75,6 +81,19 @@ DataFrame DataFrame::FromCsv(std::filesystem::path const& path,
     std::vector<model::TypedColumnData> columns_data = model::CreateTypedColumnData(parser, is_null_equal_null);
 
     return DataFrame(std::move(columns_data));
+}
+
+void DataFrame::RecognizeAttributesWithRanges() {
+    const double accept_factor = 0.001;
+    
+    for (size_t i = 0; i < data_ranges_.size(); ++i) {
+        size_t items_count = data_[i].size();
+        size_t ranges_count = data_ranges_[i].size();
+
+        if ((double)ranges_count / items_count >= accept_factor) {
+            attrs_with_ranges_.set(i, true);
+        }
+    }
 }
 
 std::vector<std::pair<const std::byte*, int>> DataFrame::CreateIndexedColumnData(const model::TypedColumnData& column) {
