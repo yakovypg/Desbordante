@@ -2,10 +2,8 @@
 
 #include <memory>
 
-#include "partition_dispatcher.h"
 #include "attribute_set.h"
 #include "cache_with_limit.h"
-#include "partition.h"
 #include "stripped_partition.h"
 #include "range_based_stripped_partition.h"
 
@@ -13,46 +11,88 @@ namespace algos::fastod {
 
 class StrippedPartitionCache {
 private:
-    CacheWithLimit<AttributeSet, std::shared_ptr<Partition>> cache_{static_cast<size_t>(1e8)};
-    PartitionDispatcher partition_dispatcher_;
+    CacheWithLimit<AttributeSet, StrippedPartition> sp_cache_{static_cast<size_t>(1e8)};
+    CacheWithLimit<AttributeSet, RangeBasedStrippedPartition> rb_cache_{static_cast<size_t>(1e8)};
 
 public:
-    void ConfigurePartitionDispatcher(DataFrame const& data) {
-        partition_dispatcher_.GenerateStartPartitions(std::move(data));
+    bool ContainsKey(AttributeSet const& attributes) const {
+        return sp_cache_.Contains(attributes) || rb_cache_.Contains(attributes);
     }
 
-    std::shared_ptr<Partition> GetStrippedPartition(AttributeSet const& attribute_set,
-                                                    DataFrame const& data) {
-        if (cache_.Contains(attribute_set)) {
-            return cache_.Get(attribute_set);
-        }
+    bool ContainsSpKey(AttributeSet const& attributes) const {
+        return sp_cache_.Contains(attributes);
+    }
 
-        std::optional<std::shared_ptr<Partition>> result;
+    bool ContainsRbKey(AttributeSet const& attributes) const {
+        return rb_cache_.Contains(attributes);
+    }
 
-        auto callProduct = [&result](size_t attr) {
-            (*result)->Product(attr);
+    StrippedPartition const& GetCachedStrippedPartition(AttributeSet const& attributes) const {
+        return sp_cache_.Get(attributes);
+    }
+
+    RangeBasedStrippedPartition const& GetCachedRangeBasedStrippedPartition(AttributeSet const& attributes) const {
+        return rb_cache_.Get(attributes);
+    }
+
+    StrippedPartition CreateStrippedPartition(AttributeSet const& attributes, DataFrame const& data) {
+        std::optional<StrippedPartition> result;
+
+        auto CallProduct = [&result](size_t attr) {
+            result->Product(attr);
         };
 
-        for (AttributeSet::size_type attr = attribute_set.find_first(); attr != AttributeSet::npos;
-             attr = attribute_set.find_next(attr)) {
-            AttributeSet one_less = deleteAttribute(attribute_set, attr);
+        for (AttributeSet::size_type attr = attributes.find_first(); attr != AttributeSet::npos;
+             attr = attributes.find_next(attr)) {
+            AttributeSet one_less = deleteAttribute(attributes, attr);
 
-            if (cache_.Contains(one_less)) {
-                result = cache_.Get(one_less)->Copy();
-                callProduct(attr);
+            if (sp_cache_.Contains(one_less)) {
+                result = sp_cache_.Get(one_less);
+                CallProduct(attr);
             }
         }
 
         if (!result) {
-            result = partition_dispatcher_.GetPrefferedPartition(attribute_set, data);
+            result = StrippedPartition(data);
 
-            for (AttributeSet::size_type attr = attribute_set.find_first(); attr != AttributeSet::npos;
-                attr = attribute_set.find_next(attr)) {
-                callProduct(attr);
+            for (AttributeSet::size_type attr = attributes.find_first(); attr != AttributeSet::npos;
+                attr = attributes.find_next(attr)) {
+                CallProduct(attr);
             }
         }
 
-        cache_.Set(attribute_set, *result);
+        sp_cache_.Set(attributes, *result);
+
+        return std::move(result.value());
+    }
+
+    RangeBasedStrippedPartition CreateRangeBasedStrippedPartition(AttributeSet const& attributes, DataFrame const& data) {
+        std::optional<RangeBasedStrippedPartition> result;
+
+        auto CallProduct = [&result](size_t attr) {
+            result->Product(attr);
+        };
+
+        for (AttributeSet::size_type attr = attributes.find_first(); attr != AttributeSet::npos;
+             attr = attributes.find_next(attr)) {
+            AttributeSet one_less = deleteAttribute(attributes, attr);
+
+            if (rb_cache_.Contains(one_less)) {
+                result = rb_cache_.Get(one_less);
+                CallProduct(attr);
+            }
+        }
+
+        if (!result) {
+            result = RangeBasedStrippedPartition(data);
+
+            for (AttributeSet::size_type attr = attributes.find_first(); attr != AttributeSet::npos;
+                attr = attributes.find_next(attr)) {
+                CallProduct(attr);
+            }
+        }
+
+        rb_cache_.Set(attributes, *result);
 
         return std::move(result.value());
     }

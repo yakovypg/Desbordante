@@ -69,6 +69,17 @@ std::size_t DataFrame::GetTupleCount() const {
         : 0;
 }
 
+bool DataFrame::IsAttributesMostlyRangeBased(AttributeSet attributes) const {
+    AttributeSet remaining_attrs = intersect(attrs_with_ranges_, attributes);
+
+    AttributeSet::size_type attrs_count = attributes.count();
+    AttributeSet::size_type remaining_attrs_count = remaining_attrs.count();
+
+    const double accept_range_based_partition_factor = 0.5;
+
+    return (double)remaining_attrs_count / attrs_count >= accept_range_based_partition_factor;
+}
+
 DataFrame DataFrame::FromCsv(std::filesystem::path const& path) {
     return FromCsv(path, ',', true, true);
 }

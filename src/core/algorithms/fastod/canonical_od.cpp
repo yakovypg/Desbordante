@@ -11,7 +11,20 @@ CanonicalOD<ascending>::CanonicalOD(AttributeSet&& context, AttributeSet::size_t
 
 template <bool ascending>
 bool CanonicalOD<ascending>::IsValid(const DataFrame& data, StrippedPartitionCache& cache) const {
-    return !(cache.GetStrippedPartition(context_, data)->Swap(ap_.left, ap_.right, ascending));
+    if (cache.ContainsSpKey(context_)) {
+        return !(cache.GetCachedStrippedPartition(context_).Swap(ap_.left, ap_.right, ascending));
+    }
+    else if (cache.ContainsRbKey(context_)) {
+        return !(cache.GetCachedRangeBasedStrippedPartition(context_).Swap(ap_.left, ap_.right, ascending));
+    }
+    else {
+        if (!data.IsAttributesMostlyRangeBased(context_)) {
+            return !(cache.CreateStrippedPartition(context_, data).Swap(ap_.left, ap_.right, ascending));
+        }
+        else {
+            return !(cache.CreateRangeBasedStrippedPartition(context_, data).Swap(ap_.left, ap_.right, ascending));
+        }
+    }
 }
 
 template <bool ascending>
@@ -26,7 +39,20 @@ SimpleCanonicalOD::SimpleCanonicalOD(const AttributeSet& context, AttributeSet::
     context_(context), right_(right) {}
 
 bool SimpleCanonicalOD::IsValid(const DataFrame& data, StrippedPartitionCache& cache) const {
-    return !(cache.GetStrippedPartition(context_, data)->Split(right_));
+    if (cache.ContainsSpKey(context_)) {
+        return !(cache.GetCachedStrippedPartition(context_).Split(right_));
+    }
+    else if (cache.ContainsRbKey(context_)) {
+        return !(cache.GetCachedRangeBasedStrippedPartition(context_).Split(right_));
+    }
+    else {
+        if (!data.IsAttributesMostlyRangeBased(context_)) {
+            return !(cache.CreateStrippedPartition(context_, data).Split(right_));
+        }
+        else {
+            return !(cache.CreateRangeBasedStrippedPartition(context_, data).Split(right_));
+        }
+    }
 }
 
 std::string SimpleCanonicalOD::ToString() const {
