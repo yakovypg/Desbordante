@@ -5,13 +5,12 @@
 
 #include "data_frame.h"
 #include "stripped_partition.h"
-#include "partition.h"
 
 namespace algos::fastod {
 
 class StrippedPartition;
 
-class RangeBasedStrippedPartition : public Partition {
+class RangeBasedStrippedPartition {
 private:
     std::vector<DataFrame::range_t> indexes_;
     std::vector<size_t> begins_;
@@ -31,12 +30,11 @@ public:
     StrippedPartition ToStrippedPartition() const;
     RangeBasedStrippedPartition& operator=(const RangeBasedStrippedPartition& other);
 
-    std::string ToString() const override;
-    std::shared_ptr<Partition> Copy() const override;
+    std::string ToString() const;
 
-    void Product(short attribute) override;
-    bool Split(short right) override;
-    bool Swap(short left, short right, bool ascending) override;
+    void Product(short attribute);
+    bool Split(short right) const;
+    bool Swap(short left, short right, bool ascending) const;
 };
 
 } // namespace algos::fastod
