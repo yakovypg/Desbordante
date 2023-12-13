@@ -51,10 +51,6 @@ std::string StrippedPartition::ToString() const {
     return ss.str();
 }
 
-std::shared_ptr<Partition> StrippedPartition::Copy() const {
-    return std::shared_ptr<Partition>(new StrippedPartition(data_, indexes_, begins_));
-}
-
 StrippedPartition& StrippedPartition::operator=(const StrippedPartition& other) {
     if (this == &other) {
         return *this;
@@ -111,7 +107,7 @@ void StrippedPartition::Product(short attribute) {
     //std::cout << ToString() << std::endl;
 }
 
-bool StrippedPartition::Split(short right) {
+bool StrippedPartition::Split(short right) const {
     for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
         size_t group_begin = begins_[begin_pointer];
         size_t group_end = begins_[begin_pointer + 1];
@@ -128,7 +124,7 @@ bool StrippedPartition::Split(short right) {
     return false;
 }
 
-bool StrippedPartition::Swap(short left, short right, bool ascending) {
+bool StrippedPartition::Swap(short left, short right, bool ascending) const {
     //static int swap_num = 1;
     
     for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {

@@ -50,10 +50,6 @@ std::string RangeBasedStrippedPartition::ToString() const {
     return ss.str();
 }
 
-std::shared_ptr<Partition> RangeBasedStrippedPartition::Copy() const {
-    return std::shared_ptr<Partition>(new RangeBasedStrippedPartition(data_, indexes_, begins_));
-}
-
 StrippedPartition RangeBasedStrippedPartition::ToStrippedPartition() const {
     std::vector<size_t> sp_indexes;
     std::vector<size_t> sp_begins;
@@ -151,7 +147,7 @@ void RangeBasedStrippedPartition::Product(short attribute) {
     //std::cout << product_index++ << "-" << ToStrippedPartition().ToString() << std::endl;
 }
 
-bool RangeBasedStrippedPartition::Split(short right) {
+bool RangeBasedStrippedPartition::Split(short right) const {
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; ++begin_pointer) {
         size_t group_begin = begins_[begin_pointer];
         size_t group_end = begins_[begin_pointer + 1];
@@ -176,7 +172,7 @@ bool RangeBasedStrippedPartition::Split(short right) {
     return false;
 }
 
-bool RangeBasedStrippedPartition::Swap(short left, short right, bool ascending) {
+bool RangeBasedStrippedPartition::Swap(short left, short right, bool ascending) const {
     //static int swap_num = 1;
     
     for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
