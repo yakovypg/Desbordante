@@ -51,6 +51,8 @@ public:
     AttributeSet::size_type GetColumnCount() const;
     std::size_t GetTupleCount() const;
 
+    bool IsAttributesMostlyRangeBased(AttributeSet attributes) const;
+
     static DataFrame FromCsv(std::filesystem::path const& path);
 
     static DataFrame FromCsv(std::filesystem::path const& path,
