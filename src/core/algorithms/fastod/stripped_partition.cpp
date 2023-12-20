@@ -202,4 +202,4 @@ bool StrippedPartition::Swap(short left, short right, bool ascending) const {
     return false;
 }
 
-}
+} // namespace algos::fastod
