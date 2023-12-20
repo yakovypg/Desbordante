@@ -21,6 +21,10 @@ RangeBasedStrippedPartition::RangeBasedStrippedPartition(const DataFrame& data,
     std::vector<DataFrame::range_t> const& indexes, std::vector<size_t> const& begins)
     : indexes_(indexes), begins_(begins), data_(data) {}
 
+bool RangeBasedStrippedPartition::ShouldBeConvertedToStrippedPartition() const {
+    return should_be_converted_to_sp_;
+}
+
 std::string RangeBasedStrippedPartition::ToString() const {
     std::stringstream ss;
     std::string indexes_string;
@@ -108,9 +112,10 @@ void RangeBasedStrippedPartition::Product(short attribute) {
                 IntersectWithAttribute(attribute, group_begin, group_end - 1);
 
         size_t intersection_size = intersection.size();
+        size_t small_ranges_count = 0;
 
-        auto AddGroup = [&new_indexes, &new_begins, &intersection, &curr_begin](size_t start_index,
-                                                                                size_t end_index) {
+        auto AddGroup = [&new_indexes, &new_begins, &intersection, &curr_begin, &small_ranges_count](size_t start_index,
+                                                                                                     size_t end_index) {
             if (start_index == end_index) {
                 DataFrame::range_t range = intersection[start_index].second;
 
@@ -120,7 +125,13 @@ void RangeBasedStrippedPartition::Product(short attribute) {
             }
 
             for (size_t i = start_index; i <= end_index; ++i) {
-                new_indexes.push_back(intersection[i].second);
+                DataFrame::range_t const& range = intersection[i].second;
+                //std::cout << "RANGE SIZE (" << range.first << ";" << range.second << ") = " << range_size(range) << '\n';
+                if (range_size(range) < MIN_MEANINGFUL_RANGE_SIZE) {
+                    small_ranges_count++;
+                }
+
+                new_indexes.push_back(std::move(range));
             }
 
             new_begins.push_back(curr_begin);
@@ -137,6 +148,10 @@ void RangeBasedStrippedPartition::Product(short attribute) {
         }
 
         AddGroup(group_start, intersection_size - 1);
+        //std::cout << "SIZE=" << intersection_size << " small=" << small_ranges_count << " factor=" << small_ranges_count / (double)intersection_size << '\n';
+        if (intersection_size > 0 && small_ranges_count / (double)intersection_size >= SMALL_RANGES_RATIO_TO_CONVERT) {
+            should_be_converted_to_sp_ = true;
+        }
     }
 
     new_begins.push_back(new_indexes.size());

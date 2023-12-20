@@ -15,6 +15,10 @@ private:
     std::vector<DataFrame::range_t> indexes_;
     std::vector<size_t> begins_;
     const DataFrame& data_;
+    bool should_be_converted_to_sp_;
+
+    static constexpr inline double SMALL_RANGES_RATIO_TO_CONVERT = 0.5;
+    static constexpr inline size_t MIN_MEANINGFUL_RANGE_SIZE = static_cast<size_t>(10);
 
     RangeBasedStrippedPartition(const DataFrame& data, std::vector<DataFrame::range_t> const& indexes, std::vector<size_t> const& begins);
 
@@ -27,10 +31,12 @@ public:
     explicit RangeBasedStrippedPartition(const DataFrame& data);
     RangeBasedStrippedPartition(const RangeBasedStrippedPartition& origin) = default;
 
-    StrippedPartition ToStrippedPartition() const;
-    RangeBasedStrippedPartition& operator=(const RangeBasedStrippedPartition& other);
+    bool ShouldBeConvertedToStrippedPartition() const;
 
     std::string ToString() const;
+    StrippedPartition ToStrippedPartition() const;
+
+    RangeBasedStrippedPartition& operator=(const RangeBasedStrippedPartition& other);
 
     void Product(short attribute);
     bool Split(short right) const;
