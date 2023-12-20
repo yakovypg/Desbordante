@@ -62,3 +62,11 @@ public:
 };
 
 } // namespace algos::fatod
+
+namespace algos::fastod {
+
+inline size_t range_size(DataFrame::range_t const& range) {
+    return range.second - range.first + 1;
+}
+
+} // namespace algos::fatod
