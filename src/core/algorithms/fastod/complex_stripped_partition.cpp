@@ -23,6 +23,8 @@ ComplexStrippedPartition& ComplexStrippedPartition::operator=(const ComplexStrip
     sp_begins_ = other.sp_begins_;
     rb_indexes_ = other.rb_indexes_;
     rb_begins_ = other.rb_begins_;
+    
+    should_be_converted_to_sp_ = other.should_be_converted_to_sp_;
     is_stripped_partition_ = other.is_stripped_partition_;
 
     return *this;
