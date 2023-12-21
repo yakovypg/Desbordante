@@ -69,7 +69,11 @@ std::size_t DataFrame::GetTupleCount() const {
         : 0;
 }
 
-bool DataFrame::IsAttributesMostlyRangeBased(AttributeSet attributes) const {
+bool DataFrame::IsAttributesMostlyRangeBased(AttributeSet attributes) const {   
+    if (!attributes.any()) {
+        return false;
+    }
+    
     AttributeSet remaining_attrs = intersect(attrs_with_ranges_, attributes);
 
     AttributeSet::size_type attrs_count = attributes.count();
