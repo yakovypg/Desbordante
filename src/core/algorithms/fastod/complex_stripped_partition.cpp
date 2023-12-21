@@ -73,6 +73,9 @@ void ComplexStrippedPartition::ToStrippedPartition() {
         sp_begins_.push_back(sp_begin);
     }
 
+    rb_begins_.clear();
+    rb_indexes_.clear();
+
     is_stripped_partition_ = true;
     should_be_converted_to_sp_ = false;
 }
