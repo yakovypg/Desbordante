@@ -21,7 +21,7 @@ private:
     const DataFrame& data_;
 
     static constexpr inline double SMALL_RANGES_RATIO_TO_CONVERT = 0.5;
-    static constexpr inline size_t MIN_MEANINGFUL_RANGE_SIZE = static_cast<size_t>(10);
+    static constexpr inline size_t MIN_MEANINGFUL_RANGE_SIZE = static_cast<size_t>(40);
 
     std::string sp_ToString() const;
     void sp_Product(short attribute);
