@@ -9,5 +9,6 @@ lib/
 .csv
 .idea/
 .vscode/
+src/tests/fastod/__pycache__
 src/tests/fastod/results
 src/tests/fastod/myeasylog.log
