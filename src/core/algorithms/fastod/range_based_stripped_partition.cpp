@@ -93,12 +93,6 @@ RangeBasedStrippedPartition& RangeBasedStrippedPartition::operator=(
 }
 
 void RangeBasedStrippedPartition::Product(short attribute) {
-    // static int product_index = 1;
-
-    // if (product_index == 38) {
-    //     std::cout << "";
-    // }
-
     std::vector<size_t> new_begins;
     std::vector<DataFrame::range_t> new_indexes;
 
@@ -126,7 +120,7 @@ void RangeBasedStrippedPartition::Product(short attribute) {
 
             for (size_t i = start_index; i <= end_index; ++i) {
                 DataFrame::range_t const& range = intersection[i].second;
-                //std::cout << "RANGE SIZE (" << range.first << ";" << range.second << ") = " << range_size(range) << '\n';
+
                 if (range_size(range) < MIN_MEANINGFUL_RANGE_SIZE) {
                     small_ranges_count++;
                 }
@@ -148,7 +142,7 @@ void RangeBasedStrippedPartition::Product(short attribute) {
         }
 
         AddGroup(group_start, intersection_size - 1);
-        //std::cout << "SIZE=" << intersection_size << " small=" << small_ranges_count << " factor=" << small_ranges_count / (double)intersection_size << '\n';
+
         if (intersection_size > 0 && small_ranges_count / (double)intersection_size >= SMALL_RANGES_RATIO_TO_CONVERT) {
             should_be_converted_to_sp_ = true;
         }
@@ -158,8 +152,6 @@ void RangeBasedStrippedPartition::Product(short attribute) {
 
     indexes_ = std::move(new_indexes);
     begins_ = std::move(new_begins);
-
-    //std::cout << product_index++ << "-" << ToStrippedPartition().ToString() << std::endl;
 }
 
 bool RangeBasedStrippedPartition::Split(short right) const {
@@ -174,22 +166,16 @@ bool RangeBasedStrippedPartition::Split(short right) const {
 
             for (size_t j = range.first; j <= range.second; ++j) {
                 if (data_.GetValue(j, right) != group_value) {
-                    // std::cout << "Split:\t"
-                    //           << "true" << std::endl;
                     return true;
                 }
             }
         }
     }
 
-    // std::cout << "Split:\t"
-    //           << "false" << std::endl;
     return false;
 }
 
-bool RangeBasedStrippedPartition::Swap(short left, short right, bool ascending) const {
-    //static int swap_num = 1;
-    
+bool RangeBasedStrippedPartition::Swap(short left, short right, bool ascending) const {   
     for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
         size_t group_begin = begins_[begin_pointer];
         size_t group_end = begins_[begin_pointer + 1];
@@ -227,7 +213,6 @@ bool RangeBasedStrippedPartition::Swap(short left, short right, bool ascending) 
             const auto& first = values[i].first;
             const auto& second = values[i].second;
 
-            // values are sorted by "first"
             if (i != 0 && values[i - 1].first != first) {
                 is_first_group = false;
                 prev_group_max_index = current_group_max_index;
@@ -237,13 +222,11 @@ bool RangeBasedStrippedPartition::Swap(short left, short right, bool ascending) 
             }
 
             if (!is_first_group && values[prev_group_max_index].second > second) {
-                //std::cout << "Swap-" << (swap_num++) << "-" << ascending << ":\t" << "true" << std::endl;
                 return true;
             }
         }
     }
 
-    //std::cout << "Swap-" << (swap_num++) << "-" << ascending << ":\t" << "false" << std::endl;
     return false;
 }
 
@@ -277,39 +260,5 @@ std::vector<DataFrame::value_indexes_t> RangeBasedStrippedPartition::IntersectWi
 
     return result;
 }
-
-// std::vector<DataFrame::value_indexes_t>
-// RangeBasedStrippedPartition::IntersectWithAttribute(algos::fastod::AttributeSet::size_type
-// attribute) {
-//     std::vector<DataFrame::value_indexes_t> result;
-//     std::vector<DataFrame::value_indexes_t> const& attr_ranges =
-//     data_.GetDataRanges().at(attribute);
-
-//     for (DataFrame::range_t const& range : indexes_) {
-//         size_t lower_bound_range_index = data_.GetRangeIndexByItem(range.first, attribute);
-//         size_t upper_bound_range_index = data_.GetRangeIndexByItem(range.second, attribute);
-
-//         for (size_t i = lower_bound_range_index; i <= upper_bound_range_index; ++i) {
-//             DataFrame::value_indexes_t const& attr_value_range = attr_ranges.at(i);
-//             DataFrame::range_t const& attr_range = attr_value_range.second;
-
-//             size_t start = std::max(range.first, attr_range.first);
-//             size_t end = std::min(range.second, attr_range.second);
-
-//             if (start <= end) {
-//                 result.push_back({
-//                     attr_value_range.first,
-//                     { start, end }
-//                 });
-//             }
-//         }
-//     }
-
-//     std::sort(result.begin(), result.end(), [](auto const& x, auto const& y) {
-//         return x.first < y.first;
-//     });
-
-//     return result;
-// }
 
 }  // namespace algos::fastod

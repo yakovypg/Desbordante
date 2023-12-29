@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <iostream>
 
 #include "data_frame.h"
 #include "stripped_partition.h"
