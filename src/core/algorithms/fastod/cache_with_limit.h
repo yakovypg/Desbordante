@@ -26,10 +26,6 @@ public:
         return entries_.at(key);
     }
     void Set(const K& key, const V& value) {
-        // if (Contains(key)) {
-        //     throw std::logic_error("Updaing a cache entry is not supported");
-        // }
-
         if (keys_in_order_.size() >= max_size_) {
             entries_.erase(keys_in_order_.front());
             keys_in_order_.pop();
