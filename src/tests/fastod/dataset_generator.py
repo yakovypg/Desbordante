@@ -30,7 +30,7 @@ class DatasetGenerator(object):
         header = [f'c{i}' for i in range(1, self.columns_num + 1)]
         self.write_list(file, header)
     
-    def write_list(self, file, lst: list[object]) -> None:
+    def write_list(self, file: str, lst: list[object]) -> None:
         for v in lst:
             if type(v) == type(1.4):
                 print(type(v))
