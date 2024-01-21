@@ -107,7 +107,10 @@ def parse_algorithm_output(output: str) -> AlgorithmResult:
 
     return AlgorithmResult(float(time_data), int(od_data), int(fd_data), int(ocd_data), None)
 
-def execute_algorithm(dataset_path: str, algorithm_execute_args: list[str], algorithm_name: str, output_dir: str = './') -> AlgorithmResult:
+def execute_algorithm(dataset_path: str,
+                      algorithm_execute_args: list[str],
+                      algorithm_name: str,
+                      output_dir: str = './') -> AlgorithmResult:
     dataset_name = os.path.basename(dataset_path)
     output_file_path = os.path.join(output_dir, f'res_{algorithm_name}_{dataset_name}.txt')
 
@@ -120,7 +123,7 @@ def execute_algorithm(dataset_path: str, algorithm_execute_args: list[str], algo
 
     return algorith_result
 
-def test_algorithm(impl_name: str, impl_start: list[str], datasets: list[str]):
+def test_algorithm(impl_name: str, impl_start: list[str], datasets: list[str]) -> None:
     output_dir = create_results_directory()
     summary = ShortAlgorithmResultSummary(impl_name)
 
@@ -148,7 +151,16 @@ def test_algorithm(impl_name: str, impl_start: list[str], datasets: list[str]):
 
     summary.print_summary()
 
-def test_c_without_second_alg(c_impl_path: str, datasets: list[str]):
+def test_java_without_second_alg(java_impl_path: str,
+                                 java_impl_class: str,
+                                 datasets: list[str],
+                                 java_max_heap_size: str = '12g') -> None:
+    java_impl_name = 'Java'
+    java_impl_start = ['java', f'-Xmx{java_max_heap_size}', '-classpath', java_impl_path, java_impl_class]
+
+    test_algorithm(java_impl_name, java_impl_start, datasets)
+
+def test_c_without_second_alg(c_impl_path: str, datasets: list[str]) -> None:
     c_impl_name = 'C++'
     c_impl_start = [c_impl_path]
 
@@ -159,7 +171,7 @@ def test_algorithms(first_impl_name: str,
                     second_impl_name: str,
                     second_impl_start: list[str],
                     comparer_path: str,
-                    datasets: list[str]):   
+                    datasets: list[str]) -> None:   
     output_dir = create_results_directory()
     summary = AlgorithmResultsSummary(first_impl_name, second_impl_name)
 
@@ -228,7 +240,7 @@ def test_algorithms(first_impl_name: str,
 def test_c_vs_c(first_c_impl_path: str,
                 second_c_impl_path: str,
                 comparer_path: str, 
-                datasets: list[str]):
+                datasets: list[str]) -> None:
     first_c_impl_name = 'C++_v1'
     first_c_impl_start = [first_c_impl_path]
 
@@ -245,7 +257,7 @@ def test_c_vs_c(first_c_impl_path: str,
 
 def test_c_vs_java(c_impl_path: str, 
                    java_impl_path: str, 
-                   java_impl_class, 
+                   java_impl_class: str, 
                    comparer_path: str, 
                    datasets: list[str],
                    java_max_heap_size: str = '12g') -> None:
