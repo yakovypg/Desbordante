@@ -14,6 +14,10 @@ private:
     CacheWithLimit<AttributeSet, ComplexStrippedPartition> cache_{static_cast<size_t>(1e8)};
 
 public:
+    void Clear() {
+        cache_.Clear();
+    }
+    
     ComplexStrippedPartition GetStrippedPartition(AttributeSet const& attribute_set, DataFrame const& data) {
         if (cache_.Contains(attribute_set)) {
             return cache_.Get(attribute_set);
