@@ -2,6 +2,7 @@
 #include <utility>
 #include <algorithm>
 
+#include <easylogging++.h>
 #include <boost/unordered/unordered_map.hpp>
 
 #include "fastod.h"
@@ -11,7 +12,7 @@
 namespace algos::fastod {
 
 Fastod::Fastod(DataFrame data, long time_limit)
-    : time_limit_(time_limit), data_(std::move(data)) { }
+    : time_limit_(time_limit), data_(std::move(data)), Algorithm({}) { }
 
 bool Fastod::IsTimeUp() const {
     return timer_.GetElapsedSeconds() >= time_limit_;
@@ -25,11 +26,54 @@ AttributeSet const& Fastod::CCGet(AttributeSet const& key) {
     return cc_[key];
 }
 
+void Fastod::LoadDataInternal() {
+}
+
+void Fastod::ResetState() {
+    is_complete_ = false;
+
+    level_ = 0;
+    od_count_ = 0;
+    fd_count_ = 0;
+    ocd_count_ = 0;
+
+    result_asc_.clear();
+    result_desc_.clear();
+    result_simple_.clear();
+    context_in_each_level_.clear();
+    cc_.clear();
+    cs_asc_.clear();
+    cs_desc_.clear();
+
+    timer_ = Timer();
+    partition_cache_.Clear();
+}
+
+unsigned long long Fastod::ExecuteInternal() {
+    auto start_time = std::chrono::system_clock::now();
+    auto [odsAsc, odsDesc, odsSimple] = Discover();
+
+    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+        std::chrono::system_clock::now() - start_time);
+
+    for (const auto& od : odsAsc) {
+        LOG(DEBUG) << od.ToString() << '\n';
+    }
+    for (const auto& od : odsDesc) {
+        LOG(DEBUG) << od.ToString() << '\n';
+    }
+    for (const auto& od : odsSimple) {
+        LOG(DEBUG) << od.ToString() << '\n';
+    }
+
+    return elapsed_milliseconds.count();
+}
+
 void Fastod::PrintStatistics() const {
-    std::cout << "RESULT: Time=" << timer_.GetElapsedSeconds() << ", "
-              << "OD=" << fd_count_ + ocd_count_ << ", "
-              << "FD=" << fd_count_ << ", "
-              << "OCD=" << ocd_count_ << '\n';
+    LOG(DEBUG) << "RESULT: Time=" << timer_.GetElapsedSeconds() << ", "
+               << "OD=" << fd_count_ + ocd_count_ << ", "
+               << "FD=" << fd_count_ << ", "
+               << "OCD=" << ocd_count_ << '\n';
 }
 
 bool Fastod::IsComplete() const {
@@ -77,9 +121,9 @@ std::tuple<std::vector<CanonicalOD<true>>,
     timer_.Stop();
 
     if (IsComplete()) {
-        std::cout << "FastOD finished successfully" << '\n';
+        LOG(DEBUG) << "FastOD finished successfully" << '\n';
     } else {
-        std::cout << "FastOD finished with a time-out" << '\n';
+        LOG(DEBUG) << "FastOD finished with a time-out" << '\n';
     }
     PrintStatistics();
     return { std::move(result_asc_), std::move(result_desc_), std::move(result_simple_) };
