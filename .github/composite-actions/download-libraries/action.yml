@@ -28,7 +28,6 @@ runs:
     - name: Make lib directory
       run: |
         mkdir -p lib
-        cd lib
       shell: bash
 
     - name: Download googletest
