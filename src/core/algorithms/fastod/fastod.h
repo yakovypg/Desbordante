@@ -4,7 +4,9 @@
 #include <unordered_set>
 #include <vector>
 #include <algorithm>
+#include <climits>
 
+#include "algorithms/algorithm.h"
 #include "attribute_set.h"
 #include "canonical_od.h"
 #include "attribute_pair.h"
@@ -13,7 +15,7 @@
 
 namespace algos::fastod {
 
-class Fastod {
+class Fastod : public Algorithm {
 private:
     const long time_limit_;
     bool is_complete_ = true;
@@ -34,6 +36,10 @@ private:
     DataFrame data_;
 
     Timer timer_;
+
+    void LoadDataInternal() override;
+    void ResetState() override;
+    unsigned long long ExecuteInternal() final;
 
     template <bool ascending>
     void addToRes(CanonicalOD<ascending>&& od) {
@@ -144,7 +150,7 @@ private:
     }
 
 public:
-    Fastod(DataFrame data, long time_limit);
+    explicit Fastod(DataFrame data, long time_limit = INT_MAX);
 
     void PrintStatistics() const;
     bool IsComplete() const;
