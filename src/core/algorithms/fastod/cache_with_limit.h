@@ -19,6 +19,11 @@ private:
 public:
     explicit CacheWithLimit(std::size_t max_size) : max_size_(max_size) {};
     
+    void Clear() {
+        entries_.clear();
+        keys_in_order_ = {};
+    }
+    
     bool Contains(const K& key) const noexcept {
         return entries_.count(key) != 0;
     }
