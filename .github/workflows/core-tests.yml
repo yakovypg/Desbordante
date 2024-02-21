@@ -4,7 +4,7 @@ on:
     types: [opened, synchronize, reopened]
   push:
     branches:
-      - fastod2
+      - main
   workflow_dispatch:
 jobs:
   run_tests:
@@ -33,4 +33,4 @@ jobs:
     - name: Test
       working-directory: ${{github.workspace}}/build/target
       shell: bash
-      run: ./Desbordante_test --gtest_filter='*TestFastOD*'
+      run: ./Desbordante_test --gtest_filter='*:-*HeavyDatasets*'
