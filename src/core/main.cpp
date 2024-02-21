@@ -19,8 +19,7 @@ INITIALIZE_EASYLOGGINGPP
 
 #define NO_OUTPUT "NULL"
 
-int findAndPrintOD(algos::fastod::DataFrame&& data, size_t max_time, const std::string& output_path) {
-        
+int findAndPrintOD(algos::fastod::DataFrame&& data, size_t max_time, const std::string& output_path) {  
     algos::fastod::Fastod fastod(std::move(data), max_time);
     std::vector<std::string> ods = fastod.DiscoverAsStrings();
 
@@ -73,6 +72,7 @@ int main(int argc, char const* argv[]) {
     if (argc >= 4) {
         max_time = std::stoi(argv[3]);
     }
+    
     algos::fastod::DataFrame data = algos::fastod::DataFrame::FromCsv(std::filesystem::path(path_to_dataset));
 
     return findAndPrintOD(std::move(data), max_time, output_path);
