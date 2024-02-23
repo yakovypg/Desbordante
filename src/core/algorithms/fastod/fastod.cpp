@@ -13,7 +13,7 @@
 namespace algos::fastod {
 
 Fastod::Fastod(DataFrame data, long time_limit)
-    : time_limit_(time_limit), data_(std::move(data)), Algorithm({}) {}
+    : Algorithm({}), time_limit_(time_limit), data_(std::move(data)) {}
 
 bool Fastod::IsTimeUp() const {
     return timer_.GetElapsedSeconds() >= time_limit_;
