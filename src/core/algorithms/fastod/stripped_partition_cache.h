@@ -2,8 +2,8 @@
 
 #include <memory>
 
-#include "attribute_set.h"
 #include "attribute_pair.h"
+#include "attribute_set.h"
 #include "cache_with_limit.h"
 #include "complex_stripped_partition.h"
 
@@ -17,15 +17,16 @@ public:
     void Clear() {
         cache_.Clear();
     }
-    
-    ComplexStrippedPartition GetStrippedPartition(AttributeSet const& attribute_set, DataFrame const& data) {
+
+    ComplexStrippedPartition GetStrippedPartition(AttributeSet const& attribute_set,
+                                                  DataFrame const& data) {
         if (cache_.Contains(attribute_set)) {
             return cache_.Get(attribute_set);
         }
 
         std::optional<ComplexStrippedPartition> result;
 
-        auto CallProduct = [&result](size_t attr) {           
+        auto CallProduct = [&result](size_t attr) {
             result->Product(attr);
 
             if (result->ShouldBeConvertedToStrippedPartition()) {
@@ -33,10 +34,8 @@ public:
             }
         };
 
-        for (AttributeSet::size_type attr = attribute_set.find_first();
-            attr != AttributeSet::npos;
-            attr = attribute_set.find_next(attr)) {
-            
+        for (AttributeSet::size_type attr = attribute_set.find_first(); attr != AttributeSet::npos;
+             attr = attribute_set.find_next(attr)) {
             AttributeSet one_less = deleteAttribute(attribute_set, attr);
 
             if (one_less.any() && cache_.Contains(one_less)) {
@@ -47,13 +46,11 @@ public:
 
         if (!result) {
             result = data.IsAttributesMostlyRangeBased(attribute_set)
-                ? ComplexStrippedPartition::Create<true>(data)
-                : ComplexStrippedPartition::Create<false>(data);
+                             ? ComplexStrippedPartition::Create<true>(data)
+                             : ComplexStrippedPartition::Create<false>(data);
 
             for (AttributeSet::size_type attr = attribute_set.find_first();
-                attr != AttributeSet::npos;
-                attr = attribute_set.find_next(attr)) {
-                
+                 attr != AttributeSet::npos; attr = attribute_set.find_next(attr)) {
                 CallProduct(attr);
             }
         }

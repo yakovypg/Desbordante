@@ -1,13 +1,13 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-#include <unordered_map>
 #include <algorithm>
+#include <memory>
+#include <unordered_map>
+#include <vector>
 
+#include "attribute_set.h"
 #include "range_based_stripped_partition.h"
 #include "single_attribute_predicate.h"
-#include "attribute_set.h"
 
 namespace algos::fastod {
 
@@ -19,7 +19,7 @@ private:
     std::shared_ptr<std::vector<size_t>> rb_begins_;
     bool is_stripped_partition_;
     bool should_be_converted_to_sp_;
-    const DataFrame& data_;
+    DataFrame const& data_;
 
     static constexpr inline double SMALL_RANGES_RATIO_TO_CONVERT = 0.5;
     static constexpr inline size_t MIN_MEANINGFUL_RANGE_SIZE = static_cast<size_t>(40);
@@ -33,27 +33,22 @@ private:
     bool rb_Split(short right) const;
 
     std::vector<DataFrame::value_indexes_t> IntersectWithAttribute(
-        algos::fastod::AttributeSet::size_type attribute,
-        size_t group_start,
-        size_t group_end);
-    
-    ComplexStrippedPartition(
-        const DataFrame& data,
-        std::shared_ptr<std::vector<size_t>> indexes,
-        std::shared_ptr<std::vector<size_t>> begins);
+            algos::fastod::AttributeSet::size_type attribute, size_t group_start, size_t group_end);
 
-    ComplexStrippedPartition(
-        const DataFrame& data,
-        std::shared_ptr<std::vector<DataFrame::range_t>> indexes,
-        std::shared_ptr<std::vector<size_t>> begins);
+    ComplexStrippedPartition(DataFrame const& data, std::shared_ptr<std::vector<size_t>> indexes,
+                             std::shared_ptr<std::vector<size_t>> begins);
+
+    ComplexStrippedPartition(DataFrame const& data,
+                             std::shared_ptr<std::vector<DataFrame::range_t>> indexes,
+                             std::shared_ptr<std::vector<size_t>> begins);
 
 public:
     ComplexStrippedPartition() = delete;
-    ComplexStrippedPartition(const ComplexStrippedPartition& origin) = default;
+    ComplexStrippedPartition(ComplexStrippedPartition const& origin) = default;
 
-    ComplexStrippedPartition& operator=(const ComplexStrippedPartition& other);
+    ComplexStrippedPartition& operator=(ComplexStrippedPartition const& other);
 
-    std::string ToString() const; 
+    std::string ToString() const;
     void Product(short attribute);
     bool Split(short right) const;
 
@@ -62,8 +57,8 @@ public:
 
 private:
     template <bool ascending>
-    bool sp_Swap(short left, short right) const {   
-        for (size_t begin_pointer = 0; begin_pointer <  sp_begins_->size() - 1; begin_pointer++) {
+    bool sp_Swap(short left, short right) const {
+        for (size_t begin_pointer = 0; begin_pointer < sp_begins_->size() - 1; begin_pointer++) {
             size_t group_begin = sp_begins_->operator[](begin_pointer);
             size_t group_end = sp_begins_->operator[](begin_pointer + 1);
 
@@ -71,28 +66,25 @@ private:
 
             for (size_t i = group_begin; i < group_end; ++i) {
                 size_t index = sp_indexes_->operator[](i);
-                values[i - group_begin] = { data_.GetValue(index, left), 
-                                            data_.GetValue(index, right) };
+                values[i - group_begin] = {data_.GetValue(index, left),
+                                           data_.GetValue(index, right)};
             }
 
             if constexpr (ascending) {
-                std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
-                    return p1.first < p2.first;
-                });
-            }
-            else {
-                std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
-                    return p2.first < p1.first;
-                });
+                std::sort(values.begin(), values.end(),
+                          [](auto const& p1, auto const& p2) { return p1.first < p2.first; });
+            } else {
+                std::sort(values.begin(), values.end(),
+                          [](auto const& p1, auto const& p2) { return p2.first < p1.first; });
             }
 
             size_t prev_group_max_index = 0;
             size_t current_group_max_index = 0;
             bool is_first_group = true;
-                
+
             for (size_t i = 0; i < values.size(); i++) {
-                const auto& first = values[i].first;
-                const auto& second = values[i].second;
+                auto const& first = values[i].first;
+                auto const& second = values[i].second;
 
                 if (i != 0 && values[i - 1].first != first) {
                     is_first_group = false;
@@ -112,8 +104,8 @@ private:
     }
 
     template <bool ascending>
-    bool rb_Swap(short left, short right) const {   
-        for (size_t begin_pointer = 0; begin_pointer <  rb_begins_->size() - 1; begin_pointer++) {
+    bool rb_Swap(short left, short right) const {
+        for (size_t begin_pointer = 0; begin_pointer < rb_begins_->size() - 1; begin_pointer++) {
             size_t group_begin = rb_begins_->operator[](begin_pointer);
             size_t group_end = rb_begins_->operator[](begin_pointer + 1);
 
@@ -124,31 +116,25 @@ private:
                 DataFrame::range_t range = rb_indexes_->operator[](i);
 
                 for (size_t j = range.first; j <= range.second; ++j) {
-                    values.push_back({
-                        data_.GetValue(j, left), 
-                        data_.GetValue(j, right)
-                    });
+                    values.push_back({data_.GetValue(j, left), data_.GetValue(j, right)});
                 }
             }
 
             if constexpr (ascending) {
-                std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
-                    return p1.first < p2.first;
-                });
-            }
-            else {
-                std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
-                    return p2.first < p1.first;
-                });
+                std::sort(values.begin(), values.end(),
+                          [](auto const& p1, auto const& p2) { return p1.first < p2.first; });
+            } else {
+                std::sort(values.begin(), values.end(),
+                          [](auto const& p1, auto const& p2) { return p2.first < p1.first; });
             }
 
             size_t prev_group_max_index = 0;
             size_t current_group_max_index = 0;
-            bool is_first_group = true;          
-            
+            bool is_first_group = true;
+
             for (size_t i = 0; i < values.size(); i++) {
-                const auto& first = values[i].first;
-                const auto& second = values[i].second;
+                auto const& first = values[i].first;
+                auto const& second = values[i].second;
 
                 if (i != 0 && values[i - 1].first != first) {
                     is_first_group = false;
@@ -168,19 +154,18 @@ private:
     }
 
 public:
-    template<bool ascending>
+    template <bool ascending>
     bool Swap(short left, short right) const {
-        return is_stripped_partition_
-            ? sp_Swap<ascending>(left, right)
-            : rb_Swap<ascending>(left, right);
+        return is_stripped_partition_ ? sp_Swap<ascending>(left, right)
+                                      : rb_Swap<ascending>(left, right);
     }
 
-    template<bool range_based_mode>
-    static ComplexStrippedPartition Create(const DataFrame& data) {
-        if constexpr(range_based_mode) {
+    template <bool range_based_mode>
+    static ComplexStrippedPartition Create(DataFrame const& data) {
+        if constexpr (range_based_mode) {
             std::vector<DataFrame::range_t>* rb_indexes = new std::vector<DataFrame::range_t>();
             std::vector<size_t>* rb_begins = new std::vector<size_t>();
-            
+
             size_t tuple_count = data.GetTupleCount();
             rb_begins->push_back(0);
 
@@ -190,16 +175,15 @@ public:
             }
 
             return ComplexStrippedPartition(
-                std::move(data),
-                std::shared_ptr<std::vector<DataFrame::range_t>>(rb_indexes),
-                std::shared_ptr<std::vector<size_t>>(rb_begins));
+                    std::move(data), std::shared_ptr<std::vector<DataFrame::range_t>>(rb_indexes),
+                    std::shared_ptr<std::vector<size_t>>(rb_begins));
         }
 
         std::vector<size_t>* sp_indexes = new std::vector<size_t>();
         std::vector<size_t>* sp_begins = new std::vector<size_t>();
 
         sp_indexes->reserve(data.GetTupleCount());
-    
+
         for (size_t i = 0; i < data.GetTupleCount(); i++) {
             sp_indexes->push_back(i);
         }
@@ -210,11 +194,10 @@ public:
 
         sp_begins->push_back(data.GetTupleCount());
 
-        return ComplexStrippedPartition(
-            std::move(data),
-            std::shared_ptr<std::vector<size_t>>(sp_indexes),
-            std::shared_ptr<std::vector<size_t>>(sp_begins));
+        return ComplexStrippedPartition(std::move(data),
+                                        std::shared_ptr<std::vector<size_t>>(sp_indexes),
+                                        std::shared_ptr<std::vector<size_t>>(sp_begins));
     }
 };
 
-} // namespace algos::fastod
+}  // namespace algos::fastod

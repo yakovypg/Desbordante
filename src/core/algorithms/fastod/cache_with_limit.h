@@ -1,11 +1,11 @@
 #pragma once
 
-#include <unordered_map>
-#include <queue>
 #include <cstddef>
-#include <stdexcept>
-#include <shared_mutex>
 #include <mutex>
+#include <queue>
+#include <shared_mutex>
+#include <stdexcept>
+#include <unordered_map>
 
 namespace algos::fastod {
 
@@ -17,19 +17,21 @@ private:
     const std::size_t max_size_;
 
 public:
-    explicit CacheWithLimit(std::size_t max_size) : max_size_(max_size) {};
-    
+    explicit CacheWithLimit(std::size_t max_size) : max_size_(max_size){};
+
     void Clear() {
         entries_.clear();
         keys_in_order_ = {};
     }
-    
+
     bool Contains(const K& key) const noexcept {
         return entries_.count(key) != 0;
     }
+
     const V& Get(const K& key) const {
         return entries_.at(key);
     }
+
     void Set(const K& key, const V& value) {
         if (keys_in_order_.size() >= max_size_) {
             entries_.erase(keys_in_order_.front());
@@ -41,4 +43,4 @@ public:
     }
 };
 
-} // namespace algos::fastod;
+}  // namespace algos::fastod

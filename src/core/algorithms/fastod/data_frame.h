@@ -1,15 +1,14 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <optional>
 #include <filesystem>
+#include <optional>
+#include <string>
 #include <type_traits>
-
-#include "config/equal_nulls/type.h"
-#include "table/column_layout_typed_relation_data.h"
+#include <vector>
 
 #include "attribute_set.h"
+#include "config/equal_nulls/type.h"
+#include "table/column_layout_typed_relation_data.h"
 
 namespace algos::fastod {
 
@@ -27,27 +26,30 @@ private:
 
     void RecognizeAttributesWithRanges();
 
-    static std::vector<std::pair<const std::byte*, int>> CreateIndexedColumnData(const model::TypedColumnData& column);
-    static std::vector<int> ConvertColumnDataToIntegers(const model::TypedColumnData& column);
-    static std::vector<DataFrame::value_indexes_t> ExtractRangesFromColumn(std::vector<int> const& column);
-    static std::optional<size_t> FindRangeIndexByItem(size_t item, std::vector<DataFrame::value_indexes_t> const& ranges);
+    static std::vector<std::pair<std::byte const*, int>> CreateIndexedColumnData(
+            model::TypedColumnData const& column);
+    static std::vector<int> ConvertColumnDataToIntegers(model::TypedColumnData const& column);
+    static std::vector<DataFrame::value_indexes_t> ExtractRangesFromColumn(
+            std::vector<int> const& column);
+    static std::optional<size_t> FindRangeIndexByItem(
+            size_t item, std::vector<DataFrame::value_indexes_t> const& ranges);
 
 public:
-    DataFrame(const DataFrame&) = delete;
-    DataFrame& operator=(const DataFrame&) = delete;
+    DataFrame(DataFrame const&) = delete;
+    DataFrame& operator=(DataFrame const&) = delete;
 
     DataFrame() = default;
     DataFrame(DataFrame&&) noexcept = default;
     DataFrame& operator=(DataFrame&&) = default;
     ~DataFrame() noexcept = default;
 
-    explicit DataFrame(const std::vector<model::TypedColumnData>& columns_data);
+    explicit DataFrame(std::vector<model::TypedColumnData> const& columns_data);
 
     int GetValue(int tuple_index, AttributeSet::size_type attribute_index) const;
     std::vector<std::vector<DataFrame::value_indexes_t>> const& GetDataRanges() const;
     size_t GetRangeIndexByItem(size_t item, AttributeSet::size_type attribute) const;
     AttributeSet const& GetAttributesWithRanges() const;
-    
+
     AttributeSet::size_type GetColumnCount() const;
     std::size_t GetTupleCount() const;
 
@@ -55,13 +57,11 @@ public:
 
     static DataFrame FromCsv(std::filesystem::path const& path);
 
-    static DataFrame FromCsv(std::filesystem::path const& path,
-                             char separator,
-                             bool has_header,
+    static DataFrame FromCsv(std::filesystem::path const& path, char separator, bool has_header,
                              config::EqNullsType is_null_equal_null);
 };
 
-} // namespace algos::fatod
+}  // namespace algos::fastod
 
 namespace algos::fastod {
 
@@ -69,4 +69,4 @@ inline size_t range_size(DataFrame::range_t const& range) {
     return range.second - range.first + 1;
 }
 
-} // namespace algos::fatod
+}  // namespace algos::fastod

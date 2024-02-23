@@ -1,29 +1,33 @@
+#include "complex_stripped_partition.h"
+
 #include <cstdint>
 #include <sstream>
 
-#include "complex_stripped_partition.h"
 #include "cache_with_limit.h"
 
 namespace algos::fastod {
 
-ComplexStrippedPartition::ComplexStrippedPartition(const DataFrame& data, std::shared_ptr<std::vector<size_t>> indexes,
-    std::shared_ptr<std::vector<size_t>> begins)
+ComplexStrippedPartition::ComplexStrippedPartition(DataFrame const& data,
+                                                   std::shared_ptr<std::vector<size_t>> indexes,
+                                                   std::shared_ptr<std::vector<size_t>> begins)
     : sp_indexes_(indexes), sp_begins_(begins), is_stripped_partition_(true), data_(data) {}
 
-ComplexStrippedPartition::ComplexStrippedPartition(const DataFrame& data,
-    std::shared_ptr<std::vector<DataFrame::range_t>> indexes, std::shared_ptr<std::vector<size_t>> begins)
+ComplexStrippedPartition::ComplexStrippedPartition(
+        DataFrame const& data, std::shared_ptr<std::vector<DataFrame::range_t>> indexes,
+        std::shared_ptr<std::vector<size_t>> begins)
     : rb_indexes_(indexes), rb_begins_(begins), is_stripped_partition_(false), data_(data) {}
 
-ComplexStrippedPartition& ComplexStrippedPartition::operator=(const ComplexStrippedPartition& other) {
+ComplexStrippedPartition& ComplexStrippedPartition::operator=(
+        ComplexStrippedPartition const& other) {
     if (this == &other) {
         return *this;
     }
-    
+
     sp_indexes_ = other.sp_indexes_;
     sp_begins_ = other.sp_begins_;
     rb_indexes_ = other.rb_indexes_;
     rb_begins_ = other.rb_begins_;
-    
+
     should_be_converted_to_sp_ = other.should_be_converted_to_sp_;
     is_stripped_partition_ = other.is_stripped_partition_;
 
@@ -31,24 +35,19 @@ ComplexStrippedPartition& ComplexStrippedPartition::operator=(const ComplexStrip
 }
 
 std::string ComplexStrippedPartition::ToString() const {
-    return is_stripped_partition_
-        ? sp_ToString()
-        : rb_ToString();
+    return is_stripped_partition_ ? sp_ToString() : rb_ToString();
 }
 
 void ComplexStrippedPartition::Product(short attribute) {
     if (is_stripped_partition_) {
         sp_Product(attribute);
-    }
-    else {
+    } else {
         rb_Product(attribute);
     }
 }
 
 bool ComplexStrippedPartition::Split(short right) const {
-    return is_stripped_partition_
-        ? sp_Split(right)
-        : rb_Split(right);
+    return is_stripped_partition_ ? sp_Split(right) : rb_Split(right);
 }
 
 bool ComplexStrippedPartition::ShouldBeConvertedToStrippedPartition() const {
@@ -58,7 +57,7 @@ bool ComplexStrippedPartition::ShouldBeConvertedToStrippedPartition() const {
 void ComplexStrippedPartition::ToStrippedPartition() {
     sp_begins_ = std::shared_ptr<std::vector<size_t>>(new std::vector<size_t>());
     sp_indexes_ = std::shared_ptr<std::vector<size_t>>(new std::vector<size_t>());
-    
+
     size_t sp_begin = 0;
     sp_begins_->push_back(sp_begin);
 
@@ -107,9 +106,8 @@ std::string ComplexStrippedPartition::sp_ToString() const {
         begins_string += std::to_string(sp_begins_->operator[](i));
     }
 
-    ss << "ComplexStrippedPartition[SP mode] { indexes = [ " << indexes_string
-       << " ]; begins = [ " << begins_string
-       << " ] }";
+    ss << "ComplexStrippedPartition[SP mode] { indexes = [ " << indexes_string << " ]; begins = [ "
+       << begins_string << " ] }";
 
     return ss.str();
 }
@@ -117,7 +115,7 @@ std::string ComplexStrippedPartition::sp_ToString() const {
 void ComplexStrippedPartition::sp_Product(short attribute) {
     std::vector<size_t>* new_indexes = new std::vector<size_t>();
     new_indexes->reserve(data_.GetColumnCount());
-    
+
     std::vector<size_t>* new_begins = new std::vector<size_t>();
     size_t fill_pointer = 0;
 
@@ -129,23 +127,22 @@ void ComplexStrippedPartition::sp_Product(short attribute) {
 
         for (size_t i = group_begin; i < group_end; i++) {
             size_t index = sp_indexes_->operator[](i);
-            values[i - group_begin] = { data_.GetValue(index, attribute), index };
+            values[i - group_begin] = {data_.GetValue(index, attribute), index};
         }
 
-        std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
-            return p1.first < p2.first;
-        });
+        std::sort(values.begin(), values.end(),
+                  [](auto const& p1, auto const& p2) { return p1.first < p2.first; });
 
         size_t group_start = 0;
         size_t i = 1;
-        
+
         auto AddGroup = [&]() {
             size_t group_size = i - group_start;
-            
+
             if (group_size > 1) {
                 new_begins->push_back(fill_pointer);
                 fill_pointer += group_size;
-                
+
                 for (size_t j = group_start; j < group_start + group_size; ++j) {
                     new_indexes->push_back(values[j].second);
                 }
@@ -154,8 +151,7 @@ void ComplexStrippedPartition::sp_Product(short attribute) {
         };
 
         for (; i < values.size(); ++i) {
-            if (values[i - 1].first != values[i].first)
-                AddGroup();
+            if (values[i - 1].first != values[i].first) AddGroup();
         }
 
         AddGroup();
@@ -168,12 +164,12 @@ void ComplexStrippedPartition::sp_Product(short attribute) {
 }
 
 bool ComplexStrippedPartition::sp_Split(short right) const {
-    for (size_t begin_pointer = 0; begin_pointer <  sp_begins_->size() - 1; begin_pointer++) {
+    for (size_t begin_pointer = 0; begin_pointer < sp_begins_->size() - 1; begin_pointer++) {
         size_t group_begin = sp_begins_->operator[](begin_pointer);
         size_t group_end = sp_begins_->operator[](begin_pointer + 1);
-        
+
         int group_value = data_.GetValue(sp_indexes_->operator[](group_begin), right);
-        
+
         for (size_t i = group_begin + 1; i < group_end; i++) {
             if (data_.GetValue(sp_indexes_->operator[](i), right) != group_value) {
                 return true;
@@ -224,13 +220,13 @@ void ComplexStrippedPartition::rb_Product(short attribute) {
         size_t group_end = rb_begins_->operator[](begin_pointer + 1);
 
         std::vector<DataFrame::value_indexes_t> intersection =
-            IntersectWithAttribute(attribute, group_begin, group_end - 1);
+                IntersectWithAttribute(attribute, group_begin, group_end - 1);
 
         size_t intersection_size = intersection.size();
         size_t small_ranges_count = 0;
 
-        auto AddGroup = [&new_indexes, &new_begins, &intersection, &curr_begin, &small_ranges_count](size_t start_index,
-                                                                                                     size_t end_index) {
+        auto AddGroup = [&new_indexes, &new_begins, &intersection, &curr_begin,
+                         &small_ranges_count](size_t start_index, size_t end_index) {
             if (start_index == end_index) {
                 DataFrame::range_t range = intersection[start_index].second;
 
@@ -264,10 +260,8 @@ void ComplexStrippedPartition::rb_Product(short attribute) {
 
         AddGroup(group_start, intersection_size - 1);
 
-        if (!should_be_converted_to_sp_
-            && intersection_size > 0
-            && small_ranges_count / (double)intersection_size >= SMALL_RANGES_RATIO_TO_CONVERT) {
-            
+        if (!should_be_converted_to_sp_ && intersection_size > 0 &&
+            small_ranges_count / (double)intersection_size >= SMALL_RANGES_RATIO_TO_CONVERT) {
             should_be_converted_to_sp_ = true;
         }
     }
@@ -304,7 +298,7 @@ std::vector<DataFrame::value_indexes_t> ComplexStrippedPartition::IntersectWithA
     std::vector<DataFrame::value_indexes_t> result;
 
     std::vector<DataFrame::value_indexes_t> const& attr_ranges =
-        data_.GetDataRanges().at(attribute);
+            data_.GetDataRanges().at(attribute);
 
     for (size_t i = group_start; i <= group_end; ++i) {
         DataFrame::range_t const& range = rb_indexes_->operator[](i);
@@ -326,9 +320,9 @@ std::vector<DataFrame::value_indexes_t> ComplexStrippedPartition::IntersectWithA
     }
 
     std::sort(result.begin(), result.end(),
-        [](auto const& x, auto const& y) { return x.first < y.first; });
+              [](auto const& x, auto const& y) { return x.first < y.first; });
 
     return result;
 }
 
-} // namespace algos::fastod
+}  // namespace algos::fastod
