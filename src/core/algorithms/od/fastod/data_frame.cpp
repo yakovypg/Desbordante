@@ -151,8 +151,8 @@ std::vector<int> DataFrame::ConvertColumnDataToIntegers(model::TypedColumnData c
     converted_column[indexed_column_data[0].second] = current_value;
 
     for (std::size_t i = 1; i < indexed_column_data.size(); ++i) {
-        std::pair<const std::byte*, int> const& prev = indexed_column_data[i - 1];
-        std::pair<const std::byte*, int> const& curr = indexed_column_data[i];
+        std::pair<std::byte const*, int> const& prev = indexed_column_data[i - 1];
+        std::pair<std::byte const*, int> const& curr = indexed_column_data[i];
 
         converted_column[curr.second] = equal(prev, curr) ? current_value : ++current_value;
     }
