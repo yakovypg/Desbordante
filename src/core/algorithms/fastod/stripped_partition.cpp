@@ -1,14 +1,15 @@
+#include "stripped_partition.h"
+
 #include <cstdint>
 #include <sstream>
 
-#include "stripped_partition.h"
 #include "cache_with_limit.h"
 
 namespace algos::fastod {
 
-StrippedPartition::StrippedPartition(const DataFrame& data) : data_(std::move(data)) {
+StrippedPartition::StrippedPartition(DataFrame const& data) : data_(std::move(data)) {
     indexes_.reserve(data.GetTupleCount());
-    
+
     for (size_t i = 0; i < data.GetTupleCount(); i++) {
         indexes_.push_back(i);
     }
@@ -20,8 +21,9 @@ StrippedPartition::StrippedPartition(const DataFrame& data) : data_(std::move(da
     begins_.push_back(data.GetTupleCount());
 }
 
-StrippedPartition::StrippedPartition(const DataFrame& data, std::vector<size_t> const& indexes,
-    std::vector<size_t> const& begins) : indexes_(indexes), begins_(begins), data_(data) {}
+StrippedPartition::StrippedPartition(DataFrame const& data, std::vector<size_t> const& indexes,
+                                     std::vector<size_t> const& begins)
+    : indexes_(indexes), begins_(begins), data_(data) {}
 
 std::string StrippedPartition::ToString() const {
     std::stringstream ss;
@@ -45,18 +47,17 @@ std::string StrippedPartition::ToString() const {
         begins_string += std::to_string(begins_[i]);
     }
 
-    ss << "StrippedPartition { indexes = [ " << indexes_string
-       << " ]; begins = [ " << begins_string
+    ss << "StrippedPartition { indexes = [ " << indexes_string << " ]; begins = [ " << begins_string
        << " ] }";
 
     return ss.str();
 }
 
-StrippedPartition& StrippedPartition::operator=(const StrippedPartition& other) {
+StrippedPartition& StrippedPartition::operator=(StrippedPartition const& other) {
     if (this == &other) {
         return *this;
     }
-    
+
     indexes_ = other.indexes_;
     begins_ = other.begins_;
 
@@ -78,12 +79,11 @@ void StrippedPartition::Product(short attribute) {
 
         for (size_t i = group_begin; i < group_end; i++) {
             size_t index = indexes_[i];
-            values[i - group_begin] = { data_.GetValue(index, attribute), index };
+            values[i - group_begin] = {data_.GetValue(index, attribute), index};
         }
 
-        std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
-            return p1.first < p2.first;
-        });
+        std::sort(values.begin(), values.end(),
+                  [](auto const& p1, auto const& p2) { return p1.first < p2.first; });
 
         size_t group_start = 0;
         size_t i = 1;
@@ -100,8 +100,7 @@ void StrippedPartition::Product(short attribute) {
         };
 
         for (; i < values.size(); ++i) {
-            if (values[i - 1].first != values[i].first)
-                addGroup();
+            if (values[i - 1].first != values[i].first) addGroup();
         }
 
         addGroup();
@@ -113,12 +112,12 @@ void StrippedPartition::Product(short attribute) {
 }
 
 bool StrippedPartition::Split(short right) const {
-    for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
+    for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
         size_t group_begin = begins_[begin_pointer];
         size_t group_end = begins_[begin_pointer + 1];
-        
+
         int group_value = data_.GetValue(indexes_[group_begin], right);
-        
+
         for (size_t i = group_begin + 1; i < group_end; i++) {
             if (data_.GetValue(indexes_[i], right) != group_value) {
                 return true;
@@ -129,8 +128,8 @@ bool StrippedPartition::Split(short right) const {
     return false;
 }
 
-bool StrippedPartition::Swap(short left, short right, bool ascending) const {   
-    for (size_t begin_pointer = 0; begin_pointer <  begins_.size() - 1; begin_pointer++) {
+bool StrippedPartition::Swap(short left, short right, bool ascending) const {
+    for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
         size_t group_begin = begins_[begin_pointer];
         size_t group_end = begins_[begin_pointer + 1];
 
@@ -138,26 +137,23 @@ bool StrippedPartition::Swap(short left, short right, bool ascending) const {
 
         for (size_t i = group_begin; i < group_end; ++i) {
             size_t index = indexes_[i];
-            values[i - group_begin] = { data_.GetValue(index, left), 
-                                        data_.GetValue(index, right) };
+            values[i - group_begin] = {data_.GetValue(index, left), data_.GetValue(index, right)};
         }
 
         if (ascending)
-            std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
-                return p1.first < p2.first;
-            });
+            std::sort(values.begin(), values.end(),
+                      [](auto const& p1, auto const& p2) { return p1.first < p2.first; });
         else
-            std::sort(values.begin(), values.end(), [](const auto& p1, const auto& p2) {
-                return p2.first < p1.first;
-            });
+            std::sort(values.begin(), values.end(),
+                      [](auto const& p1, auto const& p2) { return p2.first < p1.first; });
 
         size_t prev_group_max_index = 0;
         size_t current_group_max_index = 0;
-        bool is_first_group = true;     
-        
+        bool is_first_group = true;
+
         for (size_t i = 0; i < values.size(); i++) {
-            const auto& first = values[i].first;
-            const auto& second = values[i].second;
+            auto const& first = values[i].first;
+            auto const& second = values[i].second;
 
             // values are sorted by "first"
             if (i != 0 && values[i - 1].first != first) {
@@ -177,4 +173,4 @@ bool StrippedPartition::Swap(short left, short right, bool ascending) const {
     return false;
 }
 
-} // namespace algos::fastod
+}  // namespace algos::fastod

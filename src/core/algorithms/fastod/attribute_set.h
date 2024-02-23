@@ -4,8 +4,8 @@
 #include <cassert>
 #include <climits>
 #include <cstddef>
-#include <string>
 #include <functional>
+#include <string>
 
 #include <boost/functional/hash.hpp>
 
@@ -14,35 +14,39 @@ namespace algos::fastod {
 class AttributeSet {
 public:
     using size_type = size_t;
+
 private:
     static constexpr size_type kBitsNum = 64;
 
     std::bitset<kBitsNum> bitset_;
 
-    explicit AttributeSet(std::bitset<kBitsNum> bitset) noexcept
-        : bitset_(std::move(bitset)) {}
+    explicit AttributeSet(std::bitset<kBitsNum> bitset) noexcept : bitset_(std::move(bitset)) {}
 
 public:
     constexpr static size_type npos = static_cast<size_type>(-1);
 
     AttributeSet() noexcept = default;
+
     explicit AttributeSet([[maybe_unused]] size_type attrs) noexcept {
         assert(attrs < kBitsNum);
     }
+
     explicit AttributeSet([[maybe_unused]] size_type attrs, size_type value) noexcept
         : bitset_(value) {
         assert(attrs < kBitsNum);
     }
 
-    AttributeSet& operator&=(const AttributeSet& b) noexcept {
+    AttributeSet& operator&=(AttributeSet const& b) noexcept {
         bitset_ &= b.bitset_;
         return *this;
     }
-    AttributeSet& operator|=(const AttributeSet& b) noexcept {
+
+    AttributeSet& operator|=(AttributeSet const& b) noexcept {
         bitset_ |= b.bitset_;
         return *this;
     }
-    AttributeSet& operator^=(const AttributeSet& b) noexcept {
+
+    AttributeSet& operator^=(AttributeSet const& b) noexcept {
         bitset_ ^= b.bitset_;
         return *this;
     }
@@ -51,34 +55,43 @@ public:
         bitset_.set(n, val);
         return *this;
     }
+
     AttributeSet& set() noexcept {
         bitset_.set();
         return *this;
     }
+
     AttributeSet& reset(size_type n) {
         bitset_.reset(n);
         return *this;
     }
+
     AttributeSet& reset() noexcept {
         bitset_.reset();
         return *this;
     }
+
     bool test(size_type n) const noexcept {
         return bitset_.test(n);
     }
+
     bool all() const noexcept {
         return bitset_.all();
     }
+
     bool any() const noexcept {
         return bitset_.any();
     }
+
     bool none() const noexcept {
         return bitset_.none();
     }
+
     AttributeSet operator~() const noexcept {
         AttributeSet as(~bitset_);
         return as;
     }
+
     size_type count() const noexcept {
         return bitset_.count();
     }
@@ -96,6 +109,7 @@ public:
             return npos;
         }
     }
+
     size_type find_next(size_type pos) const noexcept {
         if constexpr (kBitsNum <= sizeof(unsigned long long) * CHAR_BIT) {
             unsigned long long mask = ~((1 << (pos + 1)) - 1);
@@ -111,60 +125,58 @@ public:
         }
     }
 
-    friend AttributeSet operator&(const AttributeSet& b1, const AttributeSet& b2) noexcept;
-    friend AttributeSet operator|(const AttributeSet& b1, const AttributeSet& b2) noexcept;
-    friend AttributeSet operator^(const AttributeSet& b1, const AttributeSet& b2) noexcept;
-    friend bool operator==(const AttributeSet& b1, const AttributeSet& b2) noexcept;
-    friend bool operator!=(const AttributeSet& b1, const AttributeSet& b2) noexcept;
+    friend AttributeSet operator&(AttributeSet const& b1, AttributeSet const& b2) noexcept;
+    friend AttributeSet operator|(AttributeSet const& b1, AttributeSet const& b2) noexcept;
+    friend AttributeSet operator^(AttributeSet const& b1, AttributeSet const& b2) noexcept;
+    friend bool operator==(AttributeSet const& b1, AttributeSet const& b2) noexcept;
+    friend bool operator!=(AttributeSet const& b1, AttributeSet const& b2) noexcept;
     friend struct std::hash<AttributeSet>;
     friend struct boost::hash<AttributeSet>;
 };
 
-inline AttributeSet operator&(const AttributeSet& b1, const AttributeSet& b2) noexcept {
+inline AttributeSet operator&(AttributeSet const& b1, AttributeSet const& b2) noexcept {
     AttributeSet as(b1.bitset_ & b2.bitset_);
     return as;
 }
 
-inline AttributeSet operator|(const AttributeSet& b1, const AttributeSet& b2) noexcept {
+inline AttributeSet operator|(AttributeSet const& b1, AttributeSet const& b2) noexcept {
     AttributeSet as(b1.bitset_ | b2.bitset_);
     return as;
 }
 
-inline AttributeSet operator^(const AttributeSet& b1, const AttributeSet& b2) noexcept {
+inline AttributeSet operator^(AttributeSet const& b1, AttributeSet const& b2) noexcept {
     AttributeSet as(b1.bitset_ ^ b2.bitset_);
     return as;
 }
 
-inline bool operator==(const AttributeSet& b1, const AttributeSet& b2) noexcept {
+inline bool operator==(AttributeSet const& b1, AttributeSet const& b2) noexcept {
     return b1.bitset_ == b2.bitset_;
 }
 
-inline bool operator!=(const AttributeSet& b1, const AttributeSet& b2) noexcept {
+inline bool operator!=(AttributeSet const& b1, AttributeSet const& b2) noexcept {
     return !(b1 == b2);
 }
 
 }  // namespace algos::fastod
 
 template <>
-struct std::hash<algos::fastod::AttributeSet>
-{
+struct std::hash<algos::fastod::AttributeSet> {
     size_t operator()(algos::fastod::AttributeSet const& x) const noexcept {
         return x.bitset_.to_ullong();
     }
 };
 
 template <>
-struct boost::hash<algos::fastod::AttributeSet>
-{
+struct boost::hash<algos::fastod::AttributeSet> {
     size_t operator()(algos::fastod::AttributeSet const& x) const noexcept {
         return x.bitset_.to_ullong();
     }
 };
 
-
 namespace algos::fastod {
 
-inline AttributeSet attributeSet(std::initializer_list<AttributeSet::size_type> attributes, AttributeSet::size_type size) {
+inline AttributeSet attributeSet(std::initializer_list<AttributeSet::size_type> attributes,
+                                 AttributeSet::size_type size) {
     AttributeSet attr_set(size);
     for (auto attr : attributes) {
         attr_set.set(attr);
@@ -172,7 +184,8 @@ inline AttributeSet attributeSet(std::initializer_list<AttributeSet::size_type> 
     return attr_set;
 }
 
-inline bool containsAttribute(AttributeSet const& value, AttributeSet::size_type attribute) noexcept {
+inline bool containsAttribute(AttributeSet const& value,
+                              AttributeSet::size_type attribute) noexcept {
     return value.test(attribute);
 }
 
@@ -203,6 +216,7 @@ inline bool isEmptyAS(AttributeSet const& value) noexcept {
 }
 
 std::string ASToString(AttributeSet const& value);
+
 inline AttributeSet::size_type getAttributeCount(AttributeSet const& value) noexcept {
     return value.count();
 }

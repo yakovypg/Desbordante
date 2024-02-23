@@ -3,7 +3,7 @@
 namespace algos::fastod {
 
 SingleAttributePredicate::SingleAttributePredicate(size_t attribute, bool ascending)
-    : attribute(attribute), ascending(ascending) { }
+    : attribute(attribute), ascending(ascending) {}
 
 std::string SingleAttributePredicate::ToString() const {
     return std::to_string(attribute + 1) + (ascending ? "<=" : ">=");
@@ -17,4 +17,4 @@ size_t SingleAttributePredicate::hash() const {
     return attribute << (ascending ? 0 : 5);
 }
 
-} // namespace algos::fastod
+}  // namespace algos::fastod

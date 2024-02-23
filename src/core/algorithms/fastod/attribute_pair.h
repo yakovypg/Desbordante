@@ -12,17 +12,18 @@ public:
     AttributePair(AttributeSet::size_type, AttributeSet::size_type);
     std::string ToString() const;
 };
-bool operator==(const AttributePair& x, const AttributePair& y);
 
-} // namespace algos::fastod 
+bool operator==(AttributePair const& x, AttributePair const& y);
+
+}  // namespace algos::fastod
 
 namespace std {
 
 template <>
 struct hash<algos::fastod::AttributePair> {
-    std::size_t operator()(const algos::fastod::AttributePair& pair) const {
+    std::size_t operator()(algos::fastod::AttributePair const& pair) const {
         return std::hash<size_t>()((pair.left << 10) + pair.right);
     }
 };
 
-} //namespace std;
+}  // namespace std

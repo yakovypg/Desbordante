@@ -1,7 +1,7 @@
+#include "attribute_set.h"
+
 #include <numeric>
 #include <sstream>
-
-#include "attribute_set.h"
 
 namespace algos::fastod {
 
@@ -9,16 +9,16 @@ std::string ASToString(AttributeSet const& value) {
     std::stringstream ss;
     ss << "{";
     bool first = true;
-    for (AttributeSet::size_type i = value.find_first();
-            i != AttributeSet::npos; i = value.find_next(i)) {
-         if (first)
-             first = false;
-         else
-             ss << ",";
-         ss << i + 1;
+    for (AttributeSet::size_type i = value.find_first(); i != AttributeSet::npos;
+         i = value.find_next(i)) {
+        if (first)
+            first = false;
+        else
+            ss << ",";
+        ss << i + 1;
     }
     ss << "}";
     return ss.str();
 }
 
-} // namespace algos::fastod
+}  // namespace algos::fastod

@@ -1,8 +1,8 @@
 #pragma once
 
+#include "attribute_pair.h"
 #include "stripped_partition.h"
 #include "stripped_partition_cache.h"
-#include "attribute_pair.h"
 
 namespace algos::fastod {
 
@@ -13,9 +13,10 @@ private:
     AttributePair ap_;
 
 public:
-    CanonicalOD(AttributeSet&& context, AttributeSet::size_type left, AttributeSet::size_type right);
+    CanonicalOD(AttributeSet&& context, AttributeSet::size_type left,
+                AttributeSet::size_type right);
 
-    bool IsValid(const DataFrame& data, StrippedPartitionCache& cache) const;
+    bool IsValid(DataFrame const& data, StrippedPartitionCache& cache) const;
     std::string ToString() const;
 };
 
@@ -28,10 +29,10 @@ private:
     AttributeSet::size_type right_;
 
 public:
-    SimpleCanonicalOD(const AttributeSet& context, AttributeSet::size_type right);
+    SimpleCanonicalOD(AttributeSet const& context, AttributeSet::size_type right);
 
-    bool IsValid(const DataFrame& data, StrippedPartitionCache& cache) const;
+    bool IsValid(DataFrame const& data, StrippedPartitionCache& cache) const;
     std::string ToString() const;
 };
 
-} // namespace algos::fatod
+}  // namespace algos::fastod

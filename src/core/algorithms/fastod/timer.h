@@ -22,4 +22,4 @@ public:
     double GetElapsedSeconds() const;
 };
 
-} // namespace algos::fastod
+}  // namespace algos::fastod
