@@ -2,7 +2,7 @@
 
 using namespace algos::fastod;
 
-Timer::Timer(bool start) {
+Timer::Timer(bool start) : is_started_(false) {
     if (start) Start();
 }
 

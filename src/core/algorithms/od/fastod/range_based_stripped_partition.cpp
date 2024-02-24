@@ -8,7 +8,7 @@
 namespace algos::fastod {
 
 RangeBasedStrippedPartition::RangeBasedStrippedPartition(DataFrame const& data)
-    : data_(std::move(data)) {
+    : data_(std::move(data)), should_be_converted_to_sp_(false) {
     size_t tuple_count = data.GetTupleCount();
     begins_.push_back(0);
 
@@ -21,7 +21,7 @@ RangeBasedStrippedPartition::RangeBasedStrippedPartition(DataFrame const& data)
 RangeBasedStrippedPartition::RangeBasedStrippedPartition(
         DataFrame const& data, std::vector<DataFrame::range_t> const& indexes,
         std::vector<size_t> const& begins)
-    : indexes_(indexes), begins_(begins), data_(data) {}
+    : indexes_(indexes), begins_(begins), data_(data), should_be_converted_to_sp_(false) {}
 
 bool RangeBasedStrippedPartition::ShouldBeConvertedToStrippedPartition() const {
     return should_be_converted_to_sp_;

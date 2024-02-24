@@ -19,7 +19,7 @@ class Fastod : public Algorithm {
 private:
     long const time_limit_;
     bool is_complete_ = true;
-    size_t level_;
+    size_t level_ = 1;
     size_t od_count_ = 0;
     size_t fd_count_ = 0;
     size_t ocd_count_ = 0;
