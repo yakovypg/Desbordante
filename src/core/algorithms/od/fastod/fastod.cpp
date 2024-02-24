@@ -57,7 +57,7 @@ void Fastod::LoadDataInternal() {
 void Fastod::ResetState() {
     is_complete_ = false;
 
-    level_ = 0;
+    level_ = 1;
     od_count_ = 0;
     fd_count_ = 0;
     ocd_count_ = 0;
