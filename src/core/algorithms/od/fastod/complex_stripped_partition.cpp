@@ -10,12 +10,20 @@ namespace algos::fastod {
 ComplexStrippedPartition::ComplexStrippedPartition(DataFrame const& data,
                                                    std::shared_ptr<std::vector<size_t>> indexes,
                                                    std::shared_ptr<std::vector<size_t>> begins)
-    : sp_indexes_(indexes), sp_begins_(begins), is_stripped_partition_(true), data_(data) {}
+    : sp_indexes_(indexes),
+      sp_begins_(begins),
+      is_stripped_partition_(true),
+      should_be_converted_to_sp_(false),
+      data_(data) {}
 
 ComplexStrippedPartition::ComplexStrippedPartition(
         DataFrame const& data, std::shared_ptr<std::vector<DataFrame::range_t>> indexes,
         std::shared_ptr<std::vector<size_t>> begins)
-    : rb_indexes_(indexes), rb_begins_(begins), is_stripped_partition_(false), data_(data) {}
+    : rb_indexes_(indexes),
+      rb_begins_(begins),
+      is_stripped_partition_(false),
+      should_be_converted_to_sp_(false),
+      data_(data) {}
 
 ComplexStrippedPartition& ComplexStrippedPartition::operator=(
         ComplexStrippedPartition const& other) {
