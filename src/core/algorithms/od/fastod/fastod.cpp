@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <optional>
 #include <utility>
 
 #include <boost/unordered/unordered_map.hpp>
@@ -12,11 +13,15 @@
 
 namespace algos::fastod {
 
-Fastod::Fastod(DataFrame data, long time_limit)
-    : Algorithm({}), time_limit_(time_limit), data_(std::move(data)) {}
+Fastod::Fastod(DataFrame data)
+    : Algorithm({}), time_limit_seconds_(std::nullopt), data_(std::move(data)) {}
+
+Fastod::Fastod(DataFrame data, size_t time_limit_seconds)
+    : Algorithm({}), time_limit_seconds_({time_limit_seconds}), data_(std::move(data)) {}
 
 bool Fastod::IsTimeUp() const {
-    return timer_.GetElapsedSeconds() >= time_limit_;
+    return time_limit_seconds_.has_value() &&
+           timer_.GetElapsedSeconds() >= time_limit_seconds_.value();
 }
 
 void Fastod::CCPut(AttributeSet const& key, AttributeSet attribute_set) {

@@ -1,5 +1,4 @@
 #include <filesystem>
-#include <limits>
 #include <tuple>
 #include <utility>
 
@@ -21,7 +20,7 @@ size_t RunFastod(std::string const& dataset_name, std::string const& subfolder) 
     fs::path dataset_path = fs::path(input_data_path) / subfolder / dataset_name;
 
     algos::fastod::DataFrame data = algos::fastod::DataFrame::FromCsv(dataset_path);
-    algos::fastod::Fastod fastod(std::move(data), std::numeric_limits<long>::max());
+    algos::fastod::Fastod fastod(std::move(data));
 
     std::vector<std::string> string_ods = fastod.DiscoverAsStrings();
     std::sort(std::begin(string_ods), std::end(string_ods));

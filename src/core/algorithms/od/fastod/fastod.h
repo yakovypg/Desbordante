@@ -1,7 +1,7 @@
 #pragma once
 
 #include <algorithm>
-#include <climits>
+#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -17,7 +17,7 @@ namespace algos::fastod {
 
 class Fastod : public Algorithm {
 private:
-    long const time_limit_;
+    std::optional<size_t> const time_limit_seconds_;
     bool is_complete_ = true;
     size_t level_ = 1;
     size_t od_count_ = 0;
@@ -149,7 +149,8 @@ private:
     }
 
 public:
-    explicit Fastod(DataFrame data, long time_limit = INT_MAX);
+    explicit Fastod(DataFrame data);
+    explicit Fastod(DataFrame data, size_t time_limit);
 
     void PrintStatistics() const;
     bool IsComplete() const;
