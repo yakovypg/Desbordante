@@ -10,6 +10,7 @@
 #include "attribute_pair.h"
 #include "attribute_set.h"
 #include "canonical_od.h"
+#include "config/tabular_data/input_table_type.h"
 #include "stripped_partition_cache.h"
 #include "timer.h"
 
@@ -34,12 +35,16 @@ private:
 
     AttributeSet schema_;
     DataFrame data_;
+    config::InputTable input_table_;
 
     Timer timer_;
 
     void LoadDataInternal() override;
     void ResetState() override;
     unsigned long long ExecuteInternal() final;
+
+    void PrepareOptions();
+    void RegisterOptions();
 
     template <bool ascending>
     void addToRes(CanonicalOD<ascending>&& od) {

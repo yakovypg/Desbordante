@@ -8,16 +8,23 @@
 #include <boost/unordered/unordered_map.hpp>
 #include <easylogging++.h>
 
+#include "config/names_and_descriptions.h"
+#include "config/option_using.h"
+#include "config/tabular_data/input_table/option.h"
 #include "single_attribute_predicate.h"
 #include "stripped_partition.h"
 
 namespace algos::fastod {
 
 Fastod::Fastod(DataFrame data)
-    : Algorithm({}), time_limit_seconds_(std::nullopt), data_(std::move(data)) {}
+    : Algorithm({}), time_limit_seconds_(std::nullopt), data_(std::move(data)) {
+    PrepareOptions();
+}
 
 Fastod::Fastod(DataFrame data, size_t time_limit_seconds)
-    : Algorithm({}), time_limit_seconds_({time_limit_seconds}), data_(std::move(data)) {}
+    : Algorithm({}), time_limit_seconds_({time_limit_seconds}), data_(std::move(data)) {
+    PrepareOptions();
+}
 
 bool Fastod::IsTimeUp() const {
     return time_limit_seconds_.has_value() &&
@@ -32,7 +39,20 @@ AttributeSet const& Fastod::CCGet(AttributeSet const& key) {
     return cc_[key];
 }
 
-void Fastod::LoadDataInternal() {}
+void Fastod::PrepareOptions() {
+    using namespace config::names;
+    RegisterOptions();
+    MakeOptionsAvailable({kTable});
+}
+
+void Fastod::RegisterOptions() {
+    DESBORDANTE_OPTION_USING;
+    RegisterOption(config::TableOpt(&input_table_));
+}
+
+void Fastod::LoadDataInternal() {
+    data_ = DataFrame::FromInputTable(input_table_);
+}
 
 void Fastod::ResetState() {
     is_complete_ = false;

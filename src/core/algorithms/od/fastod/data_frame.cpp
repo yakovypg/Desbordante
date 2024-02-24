@@ -3,9 +3,11 @@
 #include <assert.h>
 #include <filesystem>
 #include <iostream>
+#include <memory>
 #include <optional>
 #include <utility>
 
+#include "config/tabular_data/input_table_type.h"
 #include "csv_parser/csv_parser.h"
 
 using namespace algos::fastod;
@@ -82,15 +84,17 @@ bool DataFrame::IsAttributesMostlyRangeBased(AttributeSet attributes) const {
     return (double)remaining_attrs_count / attrs_count >= accept_range_based_partition_factor;
 }
 
-DataFrame DataFrame::FromCsv(std::filesystem::path const& path) {
-    return FromCsv(path, ',', true, true);
-}
-
 DataFrame DataFrame::FromCsv(std::filesystem::path const& path, char separator, bool has_header,
                              config::EqNullsType is_null_equal_null) {
-    CSVParser parser = CSVParser(path, separator, has_header);
+    std::shared_ptr<CSVParser> parser =
+            std::shared_ptr<CSVParser>(new CSVParser(path, separator, has_header));
+    return FromInputTable(parser, is_null_equal_null);
+}
+
+DataFrame DataFrame::FromInputTable(config::InputTable input_table,
+                                    config::EqNullsType is_null_equal_null) {
     std::vector<model::TypedColumnData> columns_data =
-            model::CreateTypedColumnData(parser, is_null_equal_null);
+            model::CreateTypedColumnData(*input_table, is_null_equal_null);
 
     return DataFrame(std::move(columns_data));
 }
