@@ -86,8 +86,7 @@ bool DataFrame::IsAttributesMostlyRangeBased(AttributeSet attributes) const {
 
 DataFrame DataFrame::FromCsv(std::filesystem::path const& path, char separator, bool has_header,
                              config::EqNullsType is_null_equal_null) {
-    std::shared_ptr<CSVParser> parser =
-            std::shared_ptr<CSVParser>(new CSVParser(path, separator, has_header));
+    std::shared_ptr<CSVParser> parser = std::make_shared<CSVParser>(path, separator, has_header);
     return FromInputTable(parser, is_null_equal_null);
 }
 
