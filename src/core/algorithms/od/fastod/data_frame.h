@@ -8,6 +8,7 @@
 
 #include "attribute_set.h"
 #include "config/equal_nulls/type.h"
+#include "config/tabular_data/input_table_type.h"
 #include "table/column_layout_typed_relation_data.h"
 
 namespace algos::fastod {
@@ -55,10 +56,11 @@ public:
 
     bool IsAttributesMostlyRangeBased(AttributeSet attributes) const;
 
-    static DataFrame FromCsv(std::filesystem::path const& path);
+    static DataFrame FromCsv(std::filesystem::path const& path, char separator = ',',
+                             bool has_header = true, config::EqNullsType is_null_equal_null = true);
 
-    static DataFrame FromCsv(std::filesystem::path const& path, char separator, bool has_header,
-                             config::EqNullsType is_null_equal_null);
+    static DataFrame FromInputTable(config::InputTable input_table,
+                                    config::EqNullsType is_null_equal_null = true);
 };
 
 }  // namespace algos::fastod
