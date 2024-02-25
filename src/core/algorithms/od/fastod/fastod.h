@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <optional>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -18,7 +17,7 @@ namespace algos::fastod {
 
 class Fastod : public Algorithm {
 private:
-    std::optional<size_t> const time_limit_seconds_;
+    size_t time_limit_seconds_;
     bool is_complete_ = true;
     size_t level_ = 1;
     size_t od_count_ = 0;

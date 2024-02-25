@@ -2,12 +2,12 @@
 
 #include <algorithm>
 #include <iostream>
-#include <optional>
 #include <utility>
 
 #include <boost/unordered/unordered_map.hpp>
 #include <easylogging++.h>
 
+#include "config/equal_nulls/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
@@ -16,19 +16,17 @@
 
 namespace algos::fastod {
 
-Fastod::Fastod(DataFrame data)
-    : Algorithm({}), time_limit_seconds_(std::nullopt), data_(std::move(data)) {
+Fastod::Fastod(DataFrame data) : Algorithm({}), time_limit_seconds_(0UL), data_(std::move(data)) {
     PrepareOptions();
 }
 
 Fastod::Fastod(DataFrame data, size_t time_limit_seconds)
-    : Algorithm({}), time_limit_seconds_({time_limit_seconds}), data_(std::move(data)) {
+    : Algorithm({}), time_limit_seconds_(time_limit_seconds), data_(std::move(data)) {
     PrepareOptions();
 }
 
 bool Fastod::IsTimeUp() const {
-    return time_limit_seconds_.has_value() &&
-           timer_.GetElapsedSeconds() >= time_limit_seconds_.value();
+    return time_limit_seconds_ > 0 && timer_.GetElapsedSeconds() >= time_limit_seconds_;
 }
 
 void Fastod::CCPut(AttributeSet const& key, AttributeSet attribute_set) {
@@ -47,7 +45,9 @@ void Fastod::PrepareOptions() {
 
 void Fastod::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
+
     RegisterOption(config::TableOpt(&input_table_));
+    RegisterOption(Option(&time_limit_seconds_, kTimeLimit, kDTimeLimit, 0UL));
 }
 
 void Fastod::LoadDataInternal() {
