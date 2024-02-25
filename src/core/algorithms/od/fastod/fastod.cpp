@@ -16,7 +16,7 @@
 
 namespace algos::fastod {
 
-Fastod::Fastod(DataFrame data) : Algorithm({}), time_limit_seconds_(0UL), data_(std::move(data)) {
+Fastod::Fastod() : Algorithm({}), time_limit_seconds_(0UL) {
     PrepareOptions();
 }
 
@@ -40,7 +40,7 @@ AttributeSet const& Fastod::CCGet(AttributeSet const& key) {
 void Fastod::PrepareOptions() {
     using namespace config::names;
     RegisterOptions();
-    MakeOptionsAvailable({kTable});
+    MakeOptionsAvailable({kTable, kTimeLimit});
 }
 
 void Fastod::RegisterOptions() {
