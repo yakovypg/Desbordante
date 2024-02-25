@@ -158,8 +158,13 @@ public:
 
     void PrintStatistics() const;
     bool IsComplete() const;
-    std::tuple<std::vector<CanonicalOD<true>>, std::vector<CanonicalOD<false>>,
-               std::vector<SimpleCanonicalOD>>
+
+    std::vector<CanonicalOD<true>> const& GetAscendingDependencies() const;
+    std::vector<CanonicalOD<false>> const& GetDescendingDependencies() const;
+    std::vector<SimpleCanonicalOD> const& GetSimpleDependencies() const;
+
+    std::tuple<std::vector<CanonicalOD<true>> const&, std::vector<CanonicalOD<false>> const&,
+               std::vector<SimpleCanonicalOD> const&>
     Discover();
 
     std::vector<std::string> DiscoverAsStrings();
