@@ -153,8 +153,8 @@ private:
     }
 
 public:
-    explicit Fastod(DataFrame data);
-    explicit Fastod(DataFrame data, size_t time_limit);
+    Fastod();
+    explicit Fastod(DataFrame data, size_t time_limit = 0UL);
 
     void PrintStatistics() const;
     bool IsComplete() const;
