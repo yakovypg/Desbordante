@@ -105,6 +105,18 @@ bool Fastod::IsComplete() const {
     return is_complete_;
 }
 
+std::vector<CanonicalOD<true>> const& Fastod::GetAscendingDependencies() const {
+    return result_asc_;
+}
+
+std::vector<CanonicalOD<false>> const& Fastod::GetDescendingDependencies() const {
+    return result_desc_;
+}
+
+std::vector<SimpleCanonicalOD> const& Fastod::GetSimpleDependencies() const {
+    return result_simple_;
+}
+
 void Fastod::Initialize() {
     timer_.Start();
 
@@ -124,8 +136,8 @@ void Fastod::Initialize() {
     context_in_each_level_.push_back(std::move(level_1_candidates));
 }
 
-std::tuple<std::vector<CanonicalOD<true>>, std::vector<CanonicalOD<false>>,
-           std::vector<SimpleCanonicalOD>>
+std::tuple<std::vector<CanonicalOD<true>> const&, std::vector<CanonicalOD<false>> const&,
+           std::vector<SimpleCanonicalOD> const&>
 Fastod::Discover() {
     Initialize();
 
@@ -151,7 +163,7 @@ Fastod::Discover() {
         LOG(DEBUG) << "FastOD finished with a time-out" << '\n';
     }
     PrintStatistics();
-    return {std::move(result_asc_), std::move(result_desc_), std::move(result_simple_)};
+    return {result_asc_, result_desc_, result_simple_};
 }
 
 std::vector<std::string> Fastod::DiscoverAsStrings() {
