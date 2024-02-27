@@ -58,7 +58,7 @@ void Fastod::MakeLoadOptsAvailable() {
 }
 
 void Fastod::MakeExecuteOptsAvailable() {
-    using namespace config::names;  
+    using namespace config::names;
     MakeOptionsAvailable({config::TimeLimitSecondsOpt.GetName()});
 }
 
@@ -117,11 +117,11 @@ bool Fastod::IsComplete() const {
     return is_complete_;
 }
 
-std::vector<CanonicalOD<true>> const& Fastod::GetAscendingDependencies() const {
+std::vector<AscCanonicalOD> const& Fastod::GetAscendingDependencies() const {
     return result_asc_;
 }
 
-std::vector<CanonicalOD<false>> const& Fastod::GetDescendingDependencies() const {
+std::vector<DescCanonicalOD> const& Fastod::GetDescendingDependencies() const {
     return result_desc_;
 }
 
