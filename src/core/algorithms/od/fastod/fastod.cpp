@@ -11,6 +11,7 @@
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
+#include "config/time_limit/option.h"
 #include "single_attribute_predicate.h"
 #include "stripped_partition.h"
 
@@ -40,14 +41,14 @@ AttributeSet const& Fastod::CCGet(AttributeSet const& key) {
 void Fastod::PrepareOptions() {
     using namespace config::names;
     RegisterOptions();
-    MakeOptionsAvailable({kTable, kTimeLimit});
+    MakeOptionsAvailable({kTable, kTimeLimitSeconds});
 }
 
 void Fastod::RegisterOptions() {
     DESBORDANTE_OPTION_USING;
 
     RegisterOption(config::TableOpt(&input_table_));
-    RegisterOption(Option(&time_limit_seconds_, kTimeLimit, kDTimeLimit, 0UL));
+    RegisterOption(config::TimeLimitSecondsOpt(&time_limit_seconds_));
 }
 
 void Fastod::LoadDataInternal() {
