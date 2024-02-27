@@ -31,8 +31,8 @@ PYBIND11_MODULE(desbordante, module) {
     }
 
     for (auto bind_func :
-         {BindMainClasses, BindDataTypes, BindFd, BindAr, BindUcc, BindAc, BindFdVerification,
-          BindMfdVerification, BindUccVerification, BindStatistics, BindInd}) {
+         {BindMainClasses, BindDataTypes, BindFd, BindAr, BindUcc, BindAc, BindOd,
+          BindFdVerification, BindMfdVerification, BindUccVerification, BindStatistics, BindInd}) {
         bind_func(module);
     }
 }
