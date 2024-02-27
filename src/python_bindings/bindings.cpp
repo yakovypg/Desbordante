@@ -11,6 +11,7 @@
 #include "fd/bind_fd_verification.h"
 #include "ind/bind_ind.h"
 #include "mfd/bind_mfd_verification.h"
+#include "od/bind_od.h"
 #include "statistics/bind_statistics.h"
 #include "ucc/bind_ucc.h"
 #include "ucc/bind_ucc_verification.h"
