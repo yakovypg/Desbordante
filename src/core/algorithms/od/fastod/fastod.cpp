@@ -17,7 +17,7 @@
 
 namespace algos::fastod {
 
-Fastod::Fastod() : Algorithm({}), time_limit_seconds_(0UL) {
+Fastod::Fastod() : Algorithm({}), time_limit_seconds_(0u) {
     PrepareOptions();
 }
 
@@ -40,8 +40,9 @@ AttributeSet const& Fastod::CCGet(AttributeSet const& key) {
 
 void Fastod::PrepareOptions() {
     using namespace config::names;
+
     RegisterOptions();
-    MakeOptionsAvailable({kTable, kTimeLimitSeconds});
+    MakeLoadOptsAvailable();
 }
 
 void Fastod::RegisterOptions() {
@@ -49,6 +50,16 @@ void Fastod::RegisterOptions() {
 
     RegisterOption(config::TableOpt(&input_table_));
     RegisterOption(config::TimeLimitSecondsOpt(&time_limit_seconds_));
+}
+
+void Fastod::MakeLoadOptsAvailable() {
+    using namespace config::names;
+    MakeOptionsAvailable({config::TableOpt.GetName()});
+}
+
+void Fastod::MakeExecuteOptsAvailable() {
+    using namespace config::names;  
+    MakeOptionsAvailable({config::TimeLimitSecondsOpt.GetName()});
 }
 
 void Fastod::LoadDataInternal() {
