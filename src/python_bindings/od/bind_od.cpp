@@ -26,7 +26,8 @@ void BindOd(py::module_& main_module) {
                  [](AscCanonicalOD const& od1, AscCanonicalOD const& od2) {
                      return od1.ToString() == od2.ToString();
                  })
-            .def("__hash__", [](AscCanonicalOD const& od) { return py::hash(py::str(od.ToString())); });
+            .def("__hash__",
+                 [](AscCanonicalOD const& od) { return py::hash(py::str(od.ToString())); });
 
     py::class_<DescCanonicalOD>(od_module, "DescCanonicalOD")
             .def("__str__", &DescCanonicalOD::ToString)
@@ -34,7 +35,8 @@ void BindOd(py::module_& main_module) {
                  [](DescCanonicalOD const& od1, DescCanonicalOD const& od2) {
                      return od1.ToString() == od2.ToString();
                  })
-            .def("__hash__", [](DescCanonicalOD const& od) { return py::hash(py::str(od.ToString())); });
+            .def("__hash__",
+                 [](DescCanonicalOD const& od) { return py::hash(py::str(od.ToString())); });
 
     py::class_<SimpleCanonicalOD>(od_module, "SimpleCanonicalOD")
             .def("__str__", &SimpleCanonicalOD::ToString)
@@ -42,7 +44,8 @@ void BindOd(py::module_& main_module) {
                  [](SimpleCanonicalOD const& od1, SimpleCanonicalOD const& od2) {
                      return od1.ToString() == od2.ToString();
                  })
-            .def("__hash__", [](SimpleCanonicalOD const& od) { return py::hash(py::str(od.ToString())); });
+            .def("__hash__",
+                 [](SimpleCanonicalOD const& od) { return py::hash(py::str(od.ToString())); });
 
     static constexpr auto kFastodName = "Fastod";
 
