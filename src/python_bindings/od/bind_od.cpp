@@ -10,6 +10,10 @@
 #include "py_util/bind_primitive.h"
 #include "util/bitset_utils.h"
 
+namespace {
+namespace py = pybind11;
+}  // namespace
+
 namespace python_bindings {
 void BindOd(py::module_& main_module) {
     using namespace algos::fastod;
