@@ -10,6 +10,7 @@
 #include "attribute_set.h"
 #include "canonical_od.h"
 #include "config/tabular_data/input_table_type.h"
+#include "config/time_limit/type.h"
 #include "stripped_partition_cache.h"
 #include "timer.h"
 
@@ -17,7 +18,7 @@ namespace algos::fastod {
 
 class Fastod : public Algorithm {
 private:
-    size_t time_limit_seconds_;
+    config::TimeLimitSecondsType time_limit_seconds_;
     bool is_complete_ = true;
     size_t level_ = 1;
     size_t od_count_ = 0;

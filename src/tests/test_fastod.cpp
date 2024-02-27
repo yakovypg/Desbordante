@@ -50,7 +50,7 @@ protected:
             config::InputTable table, size_t time_limit_seconds = 0) {
         using namespace config::names;
 
-        algos::StdParamsMap params{{kTable, table}, {kTimeLimit, time_limit_seconds}};
+        algos::StdParamsMap params{{kTable, table}, {kTimeLimitSeconds, time_limit_seconds}};
 
         return algos::CreateAndLoadAlgorithm<algos::fastod::Fastod>(params);
     }
