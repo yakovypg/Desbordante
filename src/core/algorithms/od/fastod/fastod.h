@@ -39,12 +39,14 @@ private:
 
     Timer timer_;
 
+    void MakeExecuteOptsAvailable() override;
     void LoadDataInternal() override;
     void ResetState() override;
     unsigned long long ExecuteInternal() final;
 
     void PrepareOptions();
     void RegisterOptions();
+    void MakeLoadOptsAvailable();
 
     template <bool ascending>
     void addToRes(CanonicalOD<ascending>&& od) {
