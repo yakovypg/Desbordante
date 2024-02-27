@@ -12,6 +12,7 @@
 #include "algorithms/od/fastod/canonical_od.h"
 #include "algorithms/od/fastod/fastod.h"
 #include "config/names.h"
+#include "config/time_limit/type.h"
 
 namespace {
 
@@ -47,7 +48,7 @@ size_t RunFastod(std::string const& dataset_name, std::string const& subfolder) 
 class FastodTest : public ::testing::Test {
 protected:
     static std::unique_ptr<algos::fastod::Fastod> CreateAlgorithmInstance(
-            config::InputTable table, size_t time_limit_seconds = 0) {
+            config::InputTable table, config::TimeLimitSecondsType time_limit_seconds = 0u) {
         using namespace config::names;
 
         algos::StdParamsMap params{{kTable, table}, {kTimeLimitSeconds, time_limit_seconds}};
