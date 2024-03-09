@@ -107,7 +107,7 @@ private:
             }
         } else if (level_ > 2) {
             std::unordered_set<AttributePair> candidates;
-            for (AttributeSet::size_type attr = context.find_first(); attr != AttributeSet::npos;
+            for (AttributeSet::size_type attr = context.find_first(); attr != context.size();
                  attr = context.find_next(attr)) {
                 auto const& tmp = CSGet<ascending>(delAttrs[attr]);
                 candidates.insert(tmp.cbegin(), tmp.cend());
@@ -118,7 +118,7 @@ private:
 
                 bool add_context = true;
                 for (AttributeSet::size_type attr = context_delete_ab.find_first();
-                     attr != AttributeSet::npos; attr = context_delete_ab.find_next(attr)) {
+                     attr != context_delete_ab.size(); attr = context_delete_ab.find_next(attr)) {
                     if (CSGet<ascending>(delAttrs[attr]).count(attribute_pair) == 0) {
                         add_context = false;
                         break;

@@ -34,8 +34,8 @@ public:
             }
         };
 
-        for (AttributeSet::size_type attr = attribute_set.find_first(); attr != AttributeSet::npos;
-             attr = attribute_set.find_next(attr)) {
+        for (AttributeSet::size_type attr = attribute_set.find_first();
+             attr != attribute_set.size(); attr = attribute_set.find_next(attr)) {
             AttributeSet one_less = deleteAttribute(attribute_set, attr);
 
             if (one_less.any() && cache_.Contains(one_less)) {
@@ -50,7 +50,7 @@ public:
                              : ComplexStrippedPartition::Create<false>(data);
 
             for (AttributeSet::size_type attr = attribute_set.find_first();
-                 attr != AttributeSet::npos; attr = attribute_set.find_next(attr)) {
+                 attr != attribute_set.size(); attr = attribute_set.find_next(attr)) {
                 CallProduct(attr);
             }
         }

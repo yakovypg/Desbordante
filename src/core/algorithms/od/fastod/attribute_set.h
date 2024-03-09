@@ -23,8 +23,6 @@ private:
     explicit AttributeSet(std::bitset<kBitsNum> bitset) noexcept : bitset_(std::move(bitset)) {}
 
 public:
-    constexpr static size_type npos = static_cast<size_type>(-1);
-
     AttributeSet() noexcept = default;
 
     explicit AttributeSet([[maybe_unused]] size_type attrs) noexcept {
@@ -96,33 +94,16 @@ public:
         return bitset_.count();
     }
 
+    size_type size() const noexcept {
+        return bitset_.size();
+    }
+
     size_type find_first() const noexcept {
-        if constexpr (kBitsNum <= sizeof(unsigned long long) * CHAR_BIT) {
-            // relying on the fact that npos == -1
-            return __builtin_ffsll(bitset_.to_ullong()) - 1;
-        } else {
-            for (size_type i = 0; i != bitset_.size(); ++i) {
-                if (bitset_[i] == 1) {
-                    return i;
-                }
-            }
-            return npos;
-        }
+        return bitset_._Find_first();
     }
 
     size_type find_next(size_type pos) const noexcept {
-        if constexpr (kBitsNum <= sizeof(unsigned long long) * CHAR_BIT) {
-            unsigned long long mask = ~((1 << (pos + 1)) - 1);
-            unsigned long long value = bitset_.to_ullong() & mask;
-            return __builtin_ffsll(value) - 1;
-        } else {
-            for (size_type i = pos + 1; i != bitset_.size(); ++i) {
-                if (bitset_[i] == 1) {
-                    return i;
-                }
-            }
-            return npos;
-        }
+        return bitset_._Find_next(pos);
     }
 
     friend AttributeSet operator&(AttributeSet const& b1, AttributeSet const& b2) noexcept;
@@ -178,7 +159,7 @@ namespace algos::fastod {
 inline AttributeSet attributeSet(std::initializer_list<AttributeSet::size_type> attributes,
                                  AttributeSet::size_type size) {
     AttributeSet attr_set(size);
-    for (auto attr : attributes) {
+    for (auto const attr : attributes) {
         attr_set.set(attr);
     }
     return attr_set;
