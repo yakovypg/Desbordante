@@ -1,6 +1,7 @@
 #include "csv_parser.h"
 
 #include <cassert>
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -76,16 +77,19 @@ void CSVParser::Reset() {
     next_line_.clear();
     has_next_ = true;
 
-    /* Skip header */
+    // Skip header
     if (has_header_) {
         SkipLine();
     }
+
+    // For correctness of GetNextRow() after this method
+    GetNextIfHas();
 }
 
 void CSVParser::GetLine(unsigned long long const line_index) {
     Reset();
 
-    /* Index is less than the line number by one. Skip line_index lines */
+    // Index is less than the line number by one. Skip line_index lines
     for (unsigned long long i = 0; i < line_index; ++i) {
         SkipLine();
     }
@@ -97,7 +101,12 @@ void CSVParser::GetLine(unsigned long long const line_index) {
 
 void CSVParser::GetNextIfHas() {
     has_next_ = !source_.eof();
+
     if (has_next_) {
+        if (source_.peek() == std::ifstream::traits_type::eof()) {  // Check for the last newline
+            has_next_ = false;
+            return;
+        }
         GetNext();
     }
 }
@@ -106,20 +115,50 @@ std::string CSVParser::GetUnparsedLine(unsigned long long const line_index) {
     GetLine(line_index);
     std::string line = next_line_;
 
-    /* For correctness of GetNextRow() after this method */
+    // For correctness of GetNextRow() after this method
     GetNextIfHas();
 
     return line;
 }
 
 std::vector<std::string> CSVParser::ParseString(std::string const& s) const {
+    std::size_t const length = s.size();
+    std::string t;
+    for (std::size_t index = 0; index < length; ++index) {
+        if (s[index] == '\\') {  // preserve \ through boost parsing
+            t.append(2, '\\');
+        } else if (s[index] == '"') {  // preserve " through boost parsing
+            t.append("\\\"\"");
+        } else {
+            t.push_back(s[index]);
+        }
+    }
+
     std::vector<std::string> tokens;
     tokens.reserve(number_of_columns_);
     boost::escaped_list_separator<char> list_sep(escape_symbol_, separator_, quote_);
-    boost::tokenizer<boost::escaped_list_separator<char>> tokenizer(s, list_sep);
+    boost::tokenizer<boost::escaped_list_separator<char>> tokenizer(t, list_sep);
 
     for (auto& token : tokenizer) {
-        tokens.push_back(token);
+        std::size_t const token_length = token.size();
+        bool is_enclosed =
+                token_length >= 2 && token.front() == '"' &&
+                token.back() == '"';  // states whether a field is enclosed in double-quotes
+
+        std::string new_token;
+        for (std::size_t index = 0; index < token_length; ++index) {
+            if (token[index] == '"') {
+                if (is_enclosed && index > 0 && index < token_length - 2 &&
+                    token[index + 1] == '"') {  // transfer "" to " if the current field is enclosed
+                                                // in double-quotes
+                    new_token.push_back(token[index]);
+                    ++index;
+                }
+            } else {
+                new_token.push_back(token[index]);
+            }
+        }
+        tokens.push_back(std::move(new_token));
     }
 
     return tokens;
