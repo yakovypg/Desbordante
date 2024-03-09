@@ -54,18 +54,8 @@ public:
         return *this;
     }
 
-    AttributeSet& set() noexcept {
-        bitset_.set();
-        return *this;
-    }
-
     AttributeSet& reset(size_type n) {
         bitset_.reset(n);
-        return *this;
-    }
-
-    AttributeSet& reset() noexcept {
-        bitset_.reset();
         return *this;
     }
 
@@ -173,10 +163,6 @@ inline bool containsAttribute(AttributeSet const& value,
 inline AttributeSet addAttribute(AttributeSet const& value, AttributeSet::size_type attribute) {
     auto value_copy = value;
     return value_copy.set(attribute);
-}
-
-inline void addAttributeTo(AttributeSet& value, AttributeSet::size_type attribute) {
-    value.set(attribute);
 }
 
 inline AttributeSet deleteAttribute(AttributeSet const& value, AttributeSet::size_type attribute) {
