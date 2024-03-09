@@ -204,7 +204,7 @@ void Fastod::ComputeODs() {
         }
 
         AttributeSet context_cc = schema_;
-        for (AttributeSet::size_type attr = context.find_first(); attr != AttributeSet::npos;
+        for (AttributeSet::size_type attr = context.find_first(); attr != context.size();
              attr = context.find_next(attr)) {
             context_cc = intersect(context_cc, CCGet(delAttrs[attr]));
         }
@@ -224,7 +224,8 @@ void Fastod::ComputeODs() {
 
         AttributeSet context_intersect_cc_context = intersect(context, CCGet(context));
         for (AttributeSet::size_type attr = context_intersect_cc_context.find_first();
-             attr != AttributeSet::npos; attr = context_intersect_cc_context.find_next(attr)) {
+             attr != context_intersect_cc_context.size();
+             attr = context_intersect_cc_context.find_next(attr)) {
             SimpleCanonicalOD od(delAttrs[attr], attr);
 
             if (od.IsValid(data_, partition_cache_)) {
@@ -233,7 +234,7 @@ void Fastod::ComputeODs() {
                 CCPut(context, deleteAttribute(CCGet(context), attr));
 
                 AttributeSet diff = difference(schema_, context);
-                for (AttributeSet::size_type i = diff.find_first(); i != AttributeSet::npos;
+                for (AttributeSet::size_type i = diff.find_first(); i != diff.size();
                      i = diff.find_next(i))
                     CCPut(context, deleteAttribute(CCGet(context), i));
             }
@@ -264,8 +265,8 @@ void Fastod::CalculateNextLevel() {
     auto const& context_this_level = context_in_each_level_[level_];
 
     for (AttributeSet const& attribute_set : context_this_level) {
-        for (AttributeSet::size_type attr = attribute_set.find_first(); attr != AttributeSet::npos;
-             attr = attribute_set.find_next(attr)) {
+        for (AttributeSet::size_type attr = attribute_set.find_first();
+             attr != attribute_set.size(); attr = attribute_set.find_next(attr)) {
             prefix_blocks[deleteAttribute(attribute_set, attr)].push_back(attr);
         }
     }
@@ -284,7 +285,7 @@ void Fastod::CalculateNextLevel() {
                 AttributeSet candidate = addAttribute(addAttribute(prefix, single_attributes[i]),
                                                       single_attributes[j]);
                 for (AttributeSet::size_type attr = candidate.find_first();
-                     attr != AttributeSet::npos; attr = candidate.find_next(attr)) {
+                     attr != candidate.size(); attr = candidate.find_next(attr)) {
                     if (context_this_level.count(deleteAttribute(candidate, attr)) == 0) {
                         create_context = false;
                         break;
