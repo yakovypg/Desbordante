@@ -174,13 +174,12 @@ std::vector<DataFrame::value_indexes_t> DataFrame::ExtractRangesFromColumn(
         int prev_value = column[i - 1];
 
         if (curr_value != prev_value) {
-            ranges.push_back({prev_value, {start, i - 1}});
-
+            ranges.emplace_back(prev_value, std::pair(start, i - 1));
             start = i;
         }
     }
 
-    ranges.push_back({column[column.size() - 1], {start, column.size() - 1}});
+    ranges.emplace_back(column[column.size() - 1], std::pair(start, column.size() - 1));
 
     return ranges;
 }
