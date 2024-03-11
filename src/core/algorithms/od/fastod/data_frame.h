@@ -63,10 +63,6 @@ public:
                                     config::EqNullsType is_null_equal_null = true);
 };
 
-}  // namespace algos::fastod
-
-namespace algos::fastod {
-
 inline size_t range_size(DataFrame::range_t const& range) {
     return range.second - range.first + 1;
 }
