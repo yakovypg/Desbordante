@@ -49,7 +49,6 @@ public:
     int GetValue(int tuple_index, AttributeSet::size_type attribute_index) const;
     std::vector<std::vector<DataFrame::value_indexes_t>> const& GetDataRanges() const;
     size_t GetRangeIndexByItem(size_t item, AttributeSet::size_type attribute) const;
-    AttributeSet const& GetAttributesWithRanges() const;
 
     AttributeSet::size_type GetColumnCount() const;
     std::size_t GetTupleCount() const;
