@@ -99,13 +99,13 @@ DataFrame DataFrame::FromInputTable(config::InputTable input_table,
 }
 
 void DataFrame::RecognizeAttributesWithRanges() {
-    double const accept_factor = 0.001;
+    double constexpr accept_factor = 0.001;
 
     for (size_t i = 0; i < data_ranges_.size(); ++i) {
-        size_t items_count = data_[i].size();
-        size_t ranges_count = data_ranges_[i].size();
+        const size_t items_count = data_[i].size();
+        const size_t ranges_count = data_ranges_[i].size();
 
-        if ((double)ranges_count / items_count >= accept_factor) {
+        if (static_cast<double>(ranges_count) / items_count >= accept_factor) {
             attrs_with_ranges_.set(i, true);
         }
     }
