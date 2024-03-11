@@ -79,9 +79,9 @@ bool DataFrame::IsAttributesMostlyRangeBased(AttributeSet attributes) const {
     AttributeSet::size_type attrs_count = attributes.count();
     AttributeSet::size_type remaining_attrs_count = remaining_attrs.count();
 
-    double const accept_range_based_partition_factor = 0.5;
+    double constexpr accept_range_based_partition_factor = 0.5;
 
-    return (double)remaining_attrs_count / attrs_count >= accept_range_based_partition_factor;
+    return static_cast<double>(remaining_attrs_count) / attrs_count >= accept_range_based_partition_factor;
 }
 
 DataFrame DataFrame::FromCsv(std::filesystem::path const& path, char separator, bool has_header,
@@ -170,8 +170,8 @@ std::vector<DataFrame::value_indexes_t> DataFrame::ExtractRangesFromColumn(
     size_t start = 0;
 
     for (size_t i = 1; i < column.size(); ++i) {
-        int curr_value = column[i];
-        int prev_value = column[i - 1];
+        const int curr_value = column[i];
+        const int prev_value = column[i - 1];
 
         if (curr_value != prev_value) {
             ranges.emplace_back(prev_value, std::pair(start, i - 1));
