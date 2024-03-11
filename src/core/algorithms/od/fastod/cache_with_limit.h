@@ -33,9 +33,8 @@ public:
     }
 
     void Set(const K& key, const V& value) {
-        if (!entries_.try_emplace(key, value).second)
-            return;
-        
+        if (!entries_.try_emplace(key, value).second) return;
+
         if (keys_in_order_.size() >= max_size_) {
             entries_.erase(keys_in_order_.front());
             keys_in_order_.pop();
