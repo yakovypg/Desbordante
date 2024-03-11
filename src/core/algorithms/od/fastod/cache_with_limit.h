@@ -25,7 +25,7 @@ public:
     }
 
     bool Contains(const K& key) const noexcept {
-        return entries_.count(key) != 0;
+        return entries_.find(key) != entries_.end();
     }
 
     const V& Get(const K& key) const {
@@ -33,13 +33,15 @@ public:
     }
 
     void Set(const K& key, const V& value) {
+        if (!entries_.try_emplace(key, value).second)
+            return;
+        
         if (keys_in_order_.size() >= max_size_) {
             entries_.erase(keys_in_order_.front());
             keys_in_order_.pop();
         }
 
         keys_in_order_.push(key);
-        entries_.emplace(key, value);
     }
 };
 
