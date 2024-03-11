@@ -145,8 +145,8 @@ void RangeBasedStrippedPartition::Product(short attribute) {
 
         AddGroup(group_start, intersection_size - 1);
 
-        if (intersection_size > 0 &&
-            small_ranges_count / static_cast<double>(intersection_size) >= SMALL_RANGES_RATIO_TO_CONVERT) {
+        if (intersection_size > 0 && small_ranges_count / static_cast<double>(intersection_size) >=
+                                             SMALL_RANGES_RATIO_TO_CONVERT) {
             should_be_converted_to_sp_ = true;
         }
     }
