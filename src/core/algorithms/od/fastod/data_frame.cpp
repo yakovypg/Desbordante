@@ -57,10 +57,6 @@ size_t DataFrame::GetRangeIndexByItem(size_t item, AttributeSet::size_type attri
     return range_item_placement_.at(attribute).at(item);
 }
 
-AttributeSet const& DataFrame::GetAttributesWithRanges() const {
-    return attrs_with_ranges_;
-}
-
 AttributeSet::size_type DataFrame::GetColumnCount() const {
     return data_.size();
 }
