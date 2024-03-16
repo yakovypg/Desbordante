@@ -27,6 +27,7 @@ private:
             algos::fastod::AttributeSet::size_type attribute, size_t group_start, size_t group_end);
 
 public:
+    RangeBasedStrippedPartition() = delete;
     explicit RangeBasedStrippedPartition(DataFrame const& data);
     RangeBasedStrippedPartition(RangeBasedStrippedPartition const& origin) = default;
 

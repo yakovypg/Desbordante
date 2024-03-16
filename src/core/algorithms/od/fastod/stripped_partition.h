@@ -23,6 +23,7 @@ private:
     friend class RangeBasedStrippedPartition;
 
 public:
+    StrippedPartition() = delete;
     explicit StrippedPartition(DataFrame const& data);
     StrippedPartition(StrippedPartition const& origin) = default;
 
