@@ -116,7 +116,7 @@ bool StrippedPartition::Split(short right) const {
         const size_t group_begin = begins_[begin_pointer];
         const size_t group_end = begins_[begin_pointer + 1];
 
-        const int group_value = data_.GetValue(indexes_[group_begin], right);
+        int const group_value = data_.GetValue(indexes_[group_begin], right);
 
         for (size_t i = group_begin + 1; i < group_end; i++) {
             if (data_.GetValue(indexes_[i], right) != group_value) {
