@@ -72,13 +72,13 @@ void StrippedPartition::Product(short attribute) {
     size_t fill_pointer = 0;
 
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
-        size_t group_begin = begins_[begin_pointer];
-        size_t group_end = begins_[begin_pointer + 1];
+        const size_t group_begin = begins_[begin_pointer];
+        const size_t group_end = begins_[begin_pointer + 1];
         // CHANGE: utilize column types
         std::vector<std::pair<int, size_t>> values(group_end - group_begin);
 
         for (size_t i = group_begin; i < group_end; i++) {
-            size_t index = indexes_[i];
+            const size_t index = indexes_[i];
             values[i - group_begin] = {data_.GetValue(index, attribute), index};
         }
 
@@ -113,10 +113,10 @@ void StrippedPartition::Product(short attribute) {
 
 bool StrippedPartition::Split(short right) const {
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
-        size_t group_begin = begins_[begin_pointer];
-        size_t group_end = begins_[begin_pointer + 1];
+        const size_t group_begin = begins_[begin_pointer];
+        const size_t group_end = begins_[begin_pointer + 1];
 
-        int group_value = data_.GetValue(indexes_[group_begin], right);
+        const int group_value = data_.GetValue(indexes_[group_begin], right);
 
         for (size_t i = group_begin + 1; i < group_end; i++) {
             if (data_.GetValue(indexes_[i], right) != group_value) {
@@ -130,13 +130,13 @@ bool StrippedPartition::Split(short right) const {
 
 bool StrippedPartition::Swap(short left, short right, bool ascending) const {
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
-        size_t group_begin = begins_[begin_pointer];
-        size_t group_end = begins_[begin_pointer + 1];
+        const size_t group_begin = begins_[begin_pointer];
+        const size_t group_end = begins_[begin_pointer + 1];
 
         std::vector<std::pair<int, int>> values(group_end - group_begin);
 
         for (size_t i = group_begin; i < group_end; ++i) {
-            size_t index = indexes_[i];
+            const size_t index = indexes_[i];
             values[i - group_begin] = {data_.GetValue(index, left), data_.GetValue(index, right)};
         }
 

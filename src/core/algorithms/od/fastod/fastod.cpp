@@ -87,10 +87,10 @@ void Fastod::ResetState() {
 }
 
 unsigned long long Fastod::ExecuteInternal() {
-    auto start_time = std::chrono::system_clock::now();
-    auto [odsAsc, odsDesc, odsSimple] = Discover();
+    const auto start_time = std::chrono::system_clock::now();
+    const auto [odsAsc, odsDesc, odsSimple] = Discover();
 
-    auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+    const auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
 
     for (auto const& od : odsAsc) {
@@ -134,7 +134,7 @@ void Fastod::Initialize() {
 
     AttributeSet empty_set(data_.GetColumnCount());
 
-    context_in_each_level_.push_back({});
+    context_in_each_level_.emplace_back();
     context_in_each_level_[0].insert(empty_set);
     schema_ = AttributeSet(data_.GetColumnCount(), (1 << data_.GetColumnCount()) - 1);
     CCPut(empty_set, schema_);
@@ -179,7 +179,7 @@ Fastod::Discover() {
 }
 
 std::vector<std::string> Fastod::DiscoverAsStrings() {
-    auto [odsAsc, odsDesc, odsSimple] = Discover();
+    const auto [odsAsc, odsDesc, odsSimple] = Discover();
     std::vector<std::string> result;
     result.reserve(odsAsc.size() + odsDesc.size() + odsSimple.size());
     for (auto const& od : odsAsc) result.push_back(od.ToString());
@@ -233,7 +233,7 @@ void Fastod::ComputeODs() {
                 fd_count_++;
                 CCPut(context, deleteAttribute(CCGet(context), attr));
 
-                AttributeSet diff = difference(schema_, context);
+                const AttributeSet diff = difference(schema_, context);
                 for (AttributeSet::size_type i = diff.find_first(); i != diff.size();
                      i = diff.find_next(i))
                     CCPut(context, deleteAttribute(CCGet(context), i));
@@ -282,11 +282,11 @@ void Fastod::CalculateNextLevel() {
         for (size_t i = 0; i < single_attributes.size(); ++i) {
             for (size_t j = i + 1; j < single_attributes.size(); ++j) {
                 bool create_context = true;
-                AttributeSet candidate = addAttribute(addAttribute(prefix, single_attributes[i]),
+                const AttributeSet candidate = addAttribute(addAttribute(prefix, single_attributes[i]),
                                                       single_attributes[j]);
                 for (AttributeSet::size_type attr = candidate.find_first();
                      attr != candidate.size(); attr = candidate.find_next(attr)) {
-                    if (context_this_level.count(deleteAttribute(candidate, attr)) == 0) {
+                    if (context_this_level.find(deleteAttribute(candidate, attr)) == context_this_level.end()) {
                         create_context = false;
                         break;
                     }

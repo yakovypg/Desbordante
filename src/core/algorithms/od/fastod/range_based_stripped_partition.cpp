@@ -9,7 +9,7 @@ namespace algos::fastod {
 
 RangeBasedStrippedPartition::RangeBasedStrippedPartition(DataFrame const& data)
     : data_(std::move(data)), should_be_converted_to_sp_(false) {
-    size_t tuple_count = data.GetTupleCount();
+    const size_t tuple_count = data.GetTupleCount();
     begins_.push_back(0);
 
     if (tuple_count != 0) {
@@ -64,11 +64,11 @@ StrippedPartition RangeBasedStrippedPartition::ToStrippedPartition() const {
     sp_begins.push_back(sp_begin);
 
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
-        size_t group_begin = begins_[begin_pointer];
-        size_t group_end = begins_[begin_pointer + 1];
+        const size_t group_begin = begins_[begin_pointer];
+        const size_t group_end = begins_[begin_pointer + 1];
 
         for (size_t i = group_begin; i < group_end; ++i) {
-            DataFrame::range_t range = indexes_[i];
+            const DataFrame::range_t range = indexes_[i];
             sp_begin += range.second - range.first + 1;
 
             for (size_t sp_index = range.first; sp_index <= range.second; ++sp_index) {
@@ -101,13 +101,13 @@ void RangeBasedStrippedPartition::Product(short attribute) {
     size_t curr_begin = 0;
 
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; ++begin_pointer) {
-        size_t group_begin = begins_[begin_pointer];
-        size_t group_end = begins_[begin_pointer + 1];
+        const size_t group_begin = begins_[begin_pointer];
+        const size_t group_end = begins_[begin_pointer + 1];
 
         std::vector<DataFrame::value_indexes_t> intersection =
                 IntersectWithAttribute(attribute, group_begin, group_end - 1);
 
-        size_t intersection_size = intersection.size();
+        const size_t intersection_size = intersection.size();
         size_t small_ranges_count = 0;
 
         auto AddGroup = [&new_indexes, &new_begins, &intersection, &curr_begin,
@@ -159,13 +159,13 @@ void RangeBasedStrippedPartition::Product(short attribute) {
 
 bool RangeBasedStrippedPartition::Split(short right) const {
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; ++begin_pointer) {
-        size_t group_begin = begins_[begin_pointer];
-        size_t group_end = begins_[begin_pointer + 1];
+        const size_t group_begin = begins_[begin_pointer];
+        const size_t group_end = begins_[begin_pointer + 1];
 
-        int group_value = data_.GetValue(indexes_[group_begin].first, right);
+        const int group_value = data_.GetValue(indexes_[group_begin].first, right);
 
         for (size_t i = group_begin; i < group_end; ++i) {
-            DataFrame::range_t range = indexes_[i];
+            const DataFrame::range_t range = indexes_[i];
 
             for (size_t j = range.first; j <= range.second; ++j) {
                 if (data_.GetValue(j, right) != group_value) {
@@ -180,14 +180,14 @@ bool RangeBasedStrippedPartition::Split(short right) const {
 
 bool RangeBasedStrippedPartition::Swap(short left, short right, bool ascending) const {
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
-        size_t group_begin = begins_[begin_pointer];
-        size_t group_end = begins_[begin_pointer + 1];
+        const size_t group_begin = begins_[begin_pointer];
+        const size_t group_end = begins_[begin_pointer + 1];
 
         std::vector<std::pair<int, int>> values;
         // values.reserve(...)?
 
         for (size_t i = group_begin; i < group_end; ++i) {
-            DataFrame::range_t range = indexes_[i];
+            const DataFrame::range_t range = indexes_[i];
 
             for (size_t j = range.first; j <= range.second; ++j) {
                 values.push_back({data_.GetValue(j, left), data_.GetValue(j, right)});
@@ -231,20 +231,20 @@ std::vector<DataFrame::value_indexes_t> RangeBasedStrippedPartition::IntersectWi
         algos::fastod::AttributeSet::size_type attribute, size_t group_start, size_t group_end) {
     std::vector<DataFrame::value_indexes_t> result;
     std::vector<DataFrame::value_indexes_t> const& attr_ranges =
-            data_.GetDataRanges().at(attribute);
+            data_.GetDataRanges()[attribute];
 
     for (size_t i = group_start; i <= group_end; ++i) {
         DataFrame::range_t const& range = indexes_[i];
 
-        size_t lower_bound_range_index = data_.GetRangeIndexByItem(range.first, attribute);
-        size_t upper_bound_range_index = data_.GetRangeIndexByItem(range.second, attribute);
+        const size_t lower_bound_range_index = data_.GetRangeIndexByItem(range.first, attribute);
+        const size_t upper_bound_range_index = data_.GetRangeIndexByItem(range.second, attribute);
 
         for (size_t j = lower_bound_range_index; j <= upper_bound_range_index; ++j) {
-            DataFrame::value_indexes_t const& attr_value_range = attr_ranges.at(j);
+            DataFrame::value_indexes_t const& attr_value_range = attr_ranges[j];
             DataFrame::range_t const& attr_range = attr_value_range.second;
 
-            size_t start = std::max(range.first, attr_range.first);
-            size_t end = std::min(range.second, attr_range.second);
+            const size_t start = std::max(range.first, attr_range.first);
+            const size_t end = std::min(range.second, attr_range.second);
 
             if (start <= end) {
                 result.push_back({attr_value_range.first, {start, end}});
