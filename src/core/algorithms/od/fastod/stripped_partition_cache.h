@@ -26,7 +26,7 @@ public:
 
         std::optional<ComplexStrippedPartition> result;
 
-        auto CallProduct = [&result](size_t attr) {
+        auto call_product = [&result](size_t attr) {
             result->Product(attr);
 
             if (result->ShouldBeConvertedToStrippedPartition()) {
@@ -40,7 +40,7 @@ public:
 
             if (one_less.any() && cache_.Contains(one_less)) {
                 result = cache_.Get(one_less);
-                CallProduct(attr);
+                call_product(attr);
             }
         }
 
@@ -51,7 +51,7 @@ public:
 
             for (AttributeSet::size_type attr = attribute_set.find_first();
                  attr != attribute_set.size(); attr = attribute_set.find_next(attr)) {
-                CallProduct(attr);
+                call_product(attr);
             }
         }
 
