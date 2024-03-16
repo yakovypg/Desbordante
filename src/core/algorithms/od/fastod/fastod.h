@@ -113,13 +113,14 @@ private:
                 candidates.insert(tmp.cbegin(), tmp.cend());
             }
             for (AttributePair const& attribute_pair : candidates) {
-                AttributeSet context_delete_ab =
+                const AttributeSet context_delete_ab =
                         deleteAttribute(delAttrs[attribute_pair.left], attribute_pair.right);
 
                 bool add_context = true;
                 for (AttributeSet::size_type attr = context_delete_ab.find_first();
                      attr != context_delete_ab.size(); attr = context_delete_ab.find_next(attr)) {
-                    if (CSGet<ascending>(delAttrs[attr]).count(attribute_pair) == 0) {
+                    std::unordered_set<AttributePair> const& cs = CSGet<ascending>(delAttrs[attr]);
+                    if (cs.find(attribute_pair) == cs.end()) {
                         add_context = false;
                         break;
                     }

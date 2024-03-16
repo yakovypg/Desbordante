@@ -27,13 +27,13 @@ DataFrame::DataFrame(std::vector<model::TypedColumnData> const& columns_data) {
                    ExtractRangesFromColumn);
 
     for (size_t column = 0; column < cols_num; ++column) {
-        size_t tuple_count = data_.at(column).size();
+        const size_t tuple_count = data_[column].size();
 
         std::vector<size_t> curr_column_item_placement;
         curr_column_item_placement.reserve(tuple_count);
 
         for (size_t i = 0; i < tuple_count; ++i) {
-            std::optional<size_t> range_index = FindRangeIndexByItem(i, data_ranges_[column]);
+            const std::optional<size_t> range_index = FindRangeIndexByItem(i, data_ranges_[column]);
             assert(range_index.has_value());
 
             curr_column_item_placement.push_back(range_index.value());
@@ -54,7 +54,7 @@ std::vector<std::vector<DataFrame::value_indexes_t>> const& DataFrame::GetDataRa
 }
 
 size_t DataFrame::GetRangeIndexByItem(size_t item, AttributeSet::size_type attribute) const {
-    return range_item_placement_.at(attribute).at(item);
+    return range_item_placement_[attribute][item];
 }
 
 AttributeSet::size_type DataFrame::GetColumnCount() const {
@@ -62,7 +62,7 @@ AttributeSet::size_type DataFrame::GetColumnCount() const {
 }
 
 std::size_t DataFrame::GetTupleCount() const {
-    return data_.size() > 0 ? data_.at(0).size() : 0;
+    return data_.size() > 0 ? data_[0].size() : 0;
 }
 
 bool DataFrame::IsAttributesMostlyRangeBased(AttributeSet attributes) const {
@@ -110,7 +110,7 @@ void DataFrame::RecognizeAttributesWithRanges() {
 
 std::vector<std::pair<std::byte const*, int>> DataFrame::CreateIndexedColumnData(
         model::TypedColumnData const& column) {
-    std::vector<std::byte const*> data = column.GetData();
+    const std::vector<std::byte const*> data = column.GetData();
     std::vector<std::pair<std::byte const*, int>> indexed_column_data(data.size());
 
     for (std::size_t i = 0; i < data.size(); ++i) {
@@ -188,5 +188,5 @@ std::optional<size_t> DataFrame::FindRangeIndexByItem(
         return item >= range.first && item <= range.second;
     });
 
-    return iter != ranges.cend() ? std::optional<size_t>{iter - ranges.cbegin()} : std::nullopt;
+    return (iter != ranges.cend()) ? std::optional<size_t>{iter - ranges.cbegin()} : std::nullopt;
 }

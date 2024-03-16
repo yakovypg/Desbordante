@@ -59,13 +59,13 @@ private:
     template <bool ascending>
     bool sp_Swap(short left, short right) const {
         for (size_t begin_pointer = 0; begin_pointer < sp_begins_->size() - 1; begin_pointer++) {
-            size_t group_begin = sp_begins_->operator[](begin_pointer);
-            size_t group_end = sp_begins_->operator[](begin_pointer + 1);
+            const size_t group_begin = (*sp_begins_)[begin_pointer];
+            const size_t group_end = (*sp_begins_)[begin_pointer + 1];
 
             std::vector<std::pair<int, int>> values(group_end - group_begin);
 
             for (size_t i = group_begin; i < group_end; ++i) {
-                size_t index = sp_indexes_->operator[](i);
+                const size_t index = (*sp_indexes_)[i];
                 values[i - group_begin] = {data_.GetValue(index, left),
                                            data_.GetValue(index, right)};
             }
@@ -106,14 +106,14 @@ private:
     template <bool ascending>
     bool rb_Swap(short left, short right) const {
         for (size_t begin_pointer = 0; begin_pointer < rb_begins_->size() - 1; begin_pointer++) {
-            size_t group_begin = rb_begins_->operator[](begin_pointer);
-            size_t group_end = rb_begins_->operator[](begin_pointer + 1);
+            const size_t group_begin = (*rb_begins_)[begin_pointer];
+            const size_t group_end = (*rb_begins_)[begin_pointer + 1];
 
             std::vector<std::pair<int, int>> values;
             // values.reserve(...)?
 
             for (size_t i = group_begin; i < group_end; ++i) {
-                DataFrame::range_t range = rb_indexes_->operator[](i);
+                const DataFrame::range_t range = (*rb_indexes_)[i];
 
                 for (size_t j = range.first; j <= range.second; ++j) {
                     values.push_back({data_.GetValue(j, left), data_.GetValue(j, right)});
@@ -166,7 +166,7 @@ public:
             std::vector<DataFrame::range_t>* rb_indexes = new std::vector<DataFrame::range_t>();
             std::vector<size_t>* rb_begins = new std::vector<size_t>();
 
-            size_t tuple_count = data.GetTupleCount();
+            const size_t tuple_count = data.GetTupleCount();
             rb_begins->push_back(0);
 
             if (tuple_count != 0) {
