@@ -7,6 +7,9 @@
 
 namespace algos::fastod {
 
+ComplexStrippedPartition::ComplexStrippedPartition()
+    : is_stripped_partition_(true), should_be_converted_to_sp_(false), data_(DataFrame()) {}
+
 ComplexStrippedPartition::ComplexStrippedPartition(DataFrame const& data,
                                                    std::shared_ptr<std::vector<size_t>> indexes,
                                                    std::shared_ptr<std::vector<size_t>> begins)
@@ -90,6 +93,10 @@ void ComplexStrippedPartition::ToStrippedPartition() {
 
     is_stripped_partition_ = true;
     should_be_converted_to_sp_ = false;
+}
+
+ComplexStrippedPartition ComplexStrippedPartition::CreateEmpty() {
+    return ComplexStrippedPartition();
 }
 
 std::string ComplexStrippedPartition::sp_ToString() const {
