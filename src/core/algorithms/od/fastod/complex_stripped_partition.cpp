@@ -176,7 +176,7 @@ bool ComplexStrippedPartition::sp_Split(short right) const {
         const size_t group_begin = (*sp_begins_)[begin_pointer];
         const size_t group_end = (*sp_begins_)[begin_pointer + 1];
 
-        const int group_value = data_.GetValue((*sp_indexes_)[group_begin], right);
+        int const group_value = data_.GetValue((*sp_indexes_)[group_begin], right);
 
         for (size_t i = group_begin + 1; i < group_end; i++) {
             if (data_.GetValue((*sp_indexes_)[i], right) != group_value) {
@@ -286,7 +286,7 @@ bool ComplexStrippedPartition::rb_Split(short right) const {
         const size_t group_begin = (*rb_begins_)[begin_pointer];
         const size_t group_end = (*rb_begins_)[begin_pointer + 1];
 
-        const int group_value = data_.GetValue((*rb_indexes_)[group_begin].first, right);
+        int const group_value = data_.GetValue((*rb_indexes_)[group_begin].first, right);
 
         for (size_t i = group_begin; i < group_end; ++i) {
             const DataFrame::range_t range = (*rb_indexes_)[i];
@@ -306,8 +306,7 @@ std::vector<DataFrame::value_indexes_t> ComplexStrippedPartition::IntersectWithA
         algos::fastod::AttributeSet::size_type attribute, size_t group_start, size_t group_end) {
     std::vector<DataFrame::value_indexes_t> result;
 
-    std::vector<DataFrame::value_indexes_t> const& attr_ranges =
-            data_.GetDataRanges()[attribute];
+    std::vector<DataFrame::value_indexes_t> const& attr_ranges = data_.GetDataRanges()[attribute];
 
     for (size_t i = group_start; i <= group_end; ++i) {
         DataFrame::range_t const& range = (*rb_indexes_)[i];

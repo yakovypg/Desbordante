@@ -87,10 +87,10 @@ void Fastod::ResetState() {
 }
 
 unsigned long long Fastod::ExecuteInternal() {
-    const auto start_time = std::chrono::system_clock::now();
-    const auto [odsAsc, odsDesc, odsSimple] = Discover();
+    auto const start_time = std::chrono::system_clock::now();
+    auto const [odsAsc, odsDesc, odsSimple] = Discover();
 
-    const auto elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+    auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
 
     for (auto const& od : odsAsc) {
@@ -179,7 +179,7 @@ Fastod::Discover() {
 }
 
 std::vector<std::string> Fastod::DiscoverAsStrings() {
-    const auto [odsAsc, odsDesc, odsSimple] = Discover();
+    auto const [odsAsc, odsDesc, odsSimple] = Discover();
     std::vector<std::string> result;
     result.reserve(odsAsc.size() + odsDesc.size() + odsSimple.size());
     for (auto const& od : odsAsc) result.push_back(od.ToString());
@@ -282,11 +282,12 @@ void Fastod::CalculateNextLevel() {
         for (size_t i = 0; i < single_attributes.size(); ++i) {
             for (size_t j = i + 1; j < single_attributes.size(); ++j) {
                 bool create_context = true;
-                const AttributeSet candidate = addAttribute(addAttribute(prefix, single_attributes[i]),
-                                                      single_attributes[j]);
+                const AttributeSet candidate = addAttribute(
+                        addAttribute(prefix, single_attributes[i]), single_attributes[j]);
                 for (AttributeSet::size_type attr = candidate.find_first();
                      attr != candidate.size(); attr = candidate.find_next(attr)) {
-                    if (context_this_level.find(deleteAttribute(candidate, attr)) == context_this_level.end()) {
+                    if (context_this_level.find(deleteAttribute(candidate, attr)) ==
+                        context_this_level.end()) {
                         create_context = false;
                         break;
                     }

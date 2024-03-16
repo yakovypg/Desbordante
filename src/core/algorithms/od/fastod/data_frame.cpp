@@ -122,12 +122,12 @@ std::vector<std::pair<std::byte const*, int>> DataFrame::CreateIndexedColumnData
 
 std::vector<int> DataFrame::ConvertColumnDataToIntegers(model::TypedColumnData const& column) {
     using data_t = std::pair<std::byte const*, int>;
-    
+
     std::function<bool(data_t, data_t)> less_mixed = [&column](data_t l, data_t r) {
         const model::MixedType* mixed_type = column.GetIfMixed();
         return mixed_type->ValueToString(l.first) < mixed_type->ValueToString(r.first);
     };
-    
+
     std::function<bool(data_t, data_t)> less_not_mixed = [&column](data_t l, data_t r) {
         const model::Type& type = column.GetType();
         return type.Compare(l.first, r.first) == model::CompareResult::kLess;
@@ -143,9 +143,10 @@ std::vector<int> DataFrame::ConvertColumnDataToIntegers(model::TypedColumnData c
         return type.Compare(l.first, r.first) == model::CompareResult::kEqual;
     };
 
-    std::vector<std::pair<std::byte const*, int>> indexed_column_data = CreateIndexedColumnData(column);
+    std::vector<std::pair<std::byte const*, int>> indexed_column_data =
+            CreateIndexedColumnData(column);
 
-    const bool is_column_mixed = column.IsMixed();
+    bool const is_column_mixed = column.IsMixed();
 
     auto less = is_column_mixed ? less_mixed : less_not_mixed;
     auto equal = is_column_mixed ? equal_mixed : equal_not_mixed;

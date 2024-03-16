@@ -162,7 +162,7 @@ bool RangeBasedStrippedPartition::Split(short right) const {
         const size_t group_begin = begins_[begin_pointer];
         const size_t group_end = begins_[begin_pointer + 1];
 
-        const int group_value = data_.GetValue(indexes_[group_begin].first, right);
+        int const group_value = data_.GetValue(indexes_[group_begin].first, right);
 
         for (size_t i = group_begin; i < group_end; ++i) {
             const DataFrame::range_t range = indexes_[i];
@@ -230,8 +230,7 @@ bool RangeBasedStrippedPartition::Swap(short left, short right, bool ascending) 
 std::vector<DataFrame::value_indexes_t> RangeBasedStrippedPartition::IntersectWithAttribute(
         algos::fastod::AttributeSet::size_type attribute, size_t group_start, size_t group_end) {
     std::vector<DataFrame::value_indexes_t> result;
-    std::vector<DataFrame::value_indexes_t> const& attr_ranges =
-            data_.GetDataRanges()[attribute];
+    std::vector<DataFrame::value_indexes_t> const& attr_ranges = data_.GetDataRanges()[attribute];
 
     for (size_t i = group_start; i <= group_end; ++i) {
         DataFrame::range_t const& range = indexes_[i];
