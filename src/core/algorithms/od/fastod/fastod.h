@@ -158,7 +158,7 @@ private:
 
 public:
     Fastod();
-    explicit Fastod(DataFrame data, size_t time_limit = 0UL);
+    explicit Fastod(config::TimeLimitSecondsType time_limit_seconds);
 
     void PrintStatistics() const;
     bool IsComplete() const;

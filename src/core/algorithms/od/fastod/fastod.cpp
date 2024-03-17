@@ -17,12 +17,9 @@
 
 namespace algos::fastod {
 
-Fastod::Fastod() : Algorithm({}), time_limit_seconds_(0u) {
-    PrepareOptions();
-}
+Fastod::Fastod() : Fastod(0u) {}
 
-Fastod::Fastod(DataFrame data, size_t time_limit_seconds)
-    : Algorithm({}), time_limit_seconds_(time_limit_seconds), data_(std::move(data)) {
+Fastod::Fastod(config::TimeLimitSecondsType time_limit_seconds) : Algorithm({}), time_limit_seconds_(time_limit_seconds) {
     PrepareOptions();
 }
 
