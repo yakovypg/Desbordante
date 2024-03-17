@@ -19,7 +19,8 @@ namespace algos::fastod {
 
 Fastod::Fastod() : Fastod(0u) {}
 
-Fastod::Fastod(config::TimeLimitSecondsType time_limit_seconds) : Algorithm({}), time_limit_seconds_(time_limit_seconds) {
+Fastod::Fastod(config::TimeLimitSecondsType time_limit_seconds)
+    : Algorithm({}), time_limit_seconds_(time_limit_seconds) {
     PrepareOptions();
 }
 
