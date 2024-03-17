@@ -8,26 +8,25 @@
 
 #include <gtest/gtest.h>
 
+#include "all_csv_configs.h"
+#include "csv_config_util.h"
 #include "algorithms/algo_factory.h"
 #include "algorithms/od/fastod/canonical_od.h"
 #include "algorithms/od/fastod/fastod.h"
 #include "config/names.h"
 #include "config/time_limit/type.h"
 
-namespace {
-
-namespace fs = std::filesystem;
-constexpr auto input_data_path = "input_data/od_norm_data/";
+namespace tests {
 
 inline size_t combine_hashes(size_t first, size_t second) {
     size_t wave = second + 2654435769UL + (first << 6) + (first >> 2);
     return first ^ wave;
 }
 
-size_t RunFastod(std::string const& dataset_name, std::string const& subfolder) {
-    fs::path dataset_path = fs::path(input_data_path) / subfolder / dataset_name;
-
-    algos::fastod::DataFrame data = algos::fastod::DataFrame::FromCsv(dataset_path);
+size_t RunFastod(CSVConfig const& csv_config) {
+    config::InputTable input_table = MakeInputTable(csv_config);
+    
+    algos::fastod::DataFrame data = algos::fastod::DataFrame::FromInputTable(input_table);
     algos::fastod::Fastod fastod(std::move(data));
 
     std::vector<std::string> string_ods = fastod.DiscoverAsStrings();
@@ -43,8 +42,6 @@ size_t RunFastod(std::string const& dataset_name, std::string const& subfolder) 
     return result_hash;
 }
 
-}  // namespace
-
 class FastodTest : public ::testing::Test {
 protected:
     static std::unique_ptr<algos::fastod::Fastod> CreateAlgorithmInstance(
@@ -56,15 +53,15 @@ protected:
         return algos::CreateAndLoadAlgorithm<algos::fastod::Fastod>(params);
     }
 
-    static void TestFastod(fs::path const& dataset_path,
+    static void TestFastod(CSVConfig const& csv_config,
                            std::vector<std::string> expected_asc_ods_str,
                            std::vector<std::string> expected_desc_ods_str,
                            std::vector<std::string> expected_simple_ods_str) {
         using namespace algos::fastod;
 
-        config::InputTable table = std::make_shared<CSVParser>(dataset_path, ',', true);
+        config::InputTable input_table = MakeInputTable(csv_config);
 
-        auto algorithm = CreateAlgorithmInstance(table);
+        auto algorithm = CreateAlgorithmInstance(input_table);
         algorithm->Execute();
 
         std::vector<AscCanonicalOD> asc_ods = algorithm->GetAscendingDependencies();
@@ -108,8 +105,6 @@ protected:
 };
 
 TEST_F(FastodTest, TestSmall1) {
-    fs::path dataset_path = fs::path(input_data_path) / "small_2x3.csv";
-
     std::vector<std::string> expected_asc_ods_str = {
             "{} : 2<= ~ 1<=", "{} : 1<= ~ 2<=", "{} : 3<= ~ 1<=",
             "{} : 1<= ~ 3<=", "{} : 3<= ~ 2<=", "{} : 2<= ~ 3<="};
@@ -120,13 +115,11 @@ TEST_F(FastodTest, TestSmall1) {
             "{2} : [] -> 1<=", "{1} : [] -> 2<=", "{3} : [] -> 1<=",
             "{1} : [] -> 3<=", "{3} : [] -> 2<=", "{2} : [] -> 3<="};
 
-    TestFastod(dataset_path, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
+    TestFastod(kOdTestNormSmall2x3, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
                std::move(expected_simple_ods_str));
 }
 
 TEST_F(FastodTest, TestSmall2) {
-    fs::path dataset_path = fs::path(input_data_path) / "small_3x3.csv";
-
     std::vector<std::string> expected_asc_ods_str = {};
 
     std::vector<std::string> expected_desc_ods_str = {"{} : 3>= ~ 2<=", "{} : 2>= ~ 3<="};
@@ -134,13 +127,11 @@ TEST_F(FastodTest, TestSmall2) {
     std::vector<std::string> expected_simple_ods_str = {
             "{} : [] -> 1<=", "{3} : [] -> 2<=", "{2} : [] -> 3<="};
 
-    TestFastod(dataset_path, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
+    TestFastod(kOdTestNormSmall3x3, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
                std::move(expected_simple_ods_str));
 }
 
 TEST_F(FastodTest, TestSmall3) {
-    fs::path dataset_path = fs::path(input_data_path) / "OD_norm.csv";
-
     std::vector<std::string> expected_asc_ods_str = {
             "{} : 2<= ~ 1<=", "{} : 1<= ~ 2<=", "{1} : 3<= ~ 2<=", "{1} : 2<= ~ 3<="};
 
@@ -149,13 +140,11 @@ TEST_F(FastodTest, TestSmall3) {
     std::vector<std::string> expected_simple_ods_str = {
             "{2} : [] -> 1<=", "{3} : [] -> 1<=", "{3} : [] -> 2<=", "{2} : [] -> 3<="};
 
-    TestFastod(dataset_path, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
+    TestFastod(kOdTestNormOd, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
                std::move(expected_simple_ods_str));
 }
 
 TEST_F(FastodTest, TestMedium1) {
-    fs::path dataset_path = fs::path(input_data_path) / "metanome" / "horse_10c_norm.csv";
-
     std::vector<std::string> expected_asc_ods_str = {
             "{3} : 9<= ~ 6<=",          "{3} : 6<= ~ 9<=",          "{3} : 7<= ~ 6<=",
             "{3} : 6<= ~ 7<=",          "{3} : 1<= ~ 8<=",          "{3} : 8<= ~ 1<=",
@@ -473,37 +462,36 @@ TEST_F(FastodTest, TestMedium1) {
             "{3,9} : [] -> 7<=",         "{3,7} : [] -> 9<=",  "{1,4,5,6,8} : [] -> 9<=",
             "{1,4,5,6,7,10} : [] -> 9<="};
 
-    TestFastod(dataset_path, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
+    TestFastod(kOdTestNormHorse10c, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
                std::move(expected_simple_ods_str));
 }
 
-using DatasetPathAndHash = std::tuple<std::string, std::string, size_t>;
-
-class FastodResultHashTest : public ::testing::TestWithParam<DatasetPathAndHash> {};
+class FastodResultHashTest : public ::testing::TestWithParam<CSVConfigHash> {};
 
 TEST_P(FastodResultHashTest, CorrectnessTest) {
-    auto const& [subfolder, dataset, expected_hash] = GetParam();
-    size_t actual_hash = RunFastod(dataset, subfolder);
-    EXPECT_EQ(actual_hash, expected_hash);
+    CSVConfigHash csv_config_hash = GetParam();
+    size_t actual_hash = RunFastod(csv_config_hash.config);
+    EXPECT_EQ(actual_hash, csv_config_hash.hash);
 }
 
 INSTANTIATE_TEST_SUITE_P(
         TestFastodSuite, FastodResultHashTest,
         ::testing::Values(
-                DatasetPathAndHash{"metanome", "abalone_norm.csv", 8494646055080399391ULL},
-                DatasetPathAndHash{"metanome", "balance-scale_norm.csv", 0ULL},
-                DatasetPathAndHash{"metanome", "breast-cancer-wisconsin.csv",
-                                   16845062592796597733ULL},
-                DatasetPathAndHash{"metanome", "CLASSIFICATION_norm.csv", 10775947267660160689ULL},
-                DatasetPathAndHash{"metanome", "echocardiogram_norm.csv", 2811588447932787109ULL},
-                DatasetPathAndHash{"metanome", "hepatitis_norm_1.csv", 132585063305091933ULL},
-                DatasetPathAndHash{"metanome", "hepatitis_norm_2.csv", 10199178000978455890ULL},
-                DatasetPathAndHash{"metanome", "hepatitis_norm_3.csv", 3063999440011758644ULL},
-                DatasetPathAndHash{"metanome", "hepatitis_norm_4.csv", 132585063305091933ULL},
-                DatasetPathAndHash{"metanome", "hepatitis_norm_5.csv", 11668977472753401458ULL},
-                DatasetPathAndHash{"metanome", "hepatitis_norm.csv", 8347405483583260580ULL},
-                DatasetPathAndHash{"metanome", "horse_10c_norm.csv", 13235589009124491858ULL},
-                DatasetPathAndHash{"metanome", "iris_norm.csv", 0ULL},
-                DatasetPathAndHash{".", "OD_norm.csv", 11980520805314995804ULL},
-                DatasetPathAndHash{".", "small_2x3.csv", 7457915278574020764ULL},
-                DatasetPathAndHash{".", "small_3x3.csv", 3318291924553133612ULL}));
+                CSVConfigHash{kOdTestNormOd, 11980520805314995804UL},
+                CSVConfigHash{kOdTestNormSmall2x3, 7457915278574020764UL},
+                CSVConfigHash{kOdTestNormSmall3x3, 3318291924553133612UL},
+                CSVConfigHash{kOdTestNormAbalone, 8494646055080399391UL},
+                CSVConfigHash{kOdTestNormBalanceScale, 0ULL},
+                CSVConfigHash{kOdTestNormBreastCancerWisconsin, 16845062592796597733UL},
+                CSVConfigHash{kOdTestNormClassification, 10775947267660160689UL},
+                CSVConfigHash{kOdTestNormEchocardiogram, 2811588447932787109UL},
+                CSVConfigHash{kOdTestNormHepatitis1, 132585063305091933UL},
+                CSVConfigHash{kOdTestNormHepatitis2, 10199178000978455890UL},
+                CSVConfigHash{kOdTestNormHepatitis3, 3063999440011758644UL},
+                CSVConfigHash{kOdTestNormHepatitis4, 132585063305091933UL},
+                CSVConfigHash{kOdTestNormHepatitis5, 11668977472753401458UL},
+                CSVConfigHash{kOdTestNormHepatitis, 8347405483583260580UL},
+                CSVConfigHash{kOdTestNormHorse10c, 13235589009124491858UL},
+                CSVConfigHash{kOdTestNormIris, 0UL}));
+
+}  // namespace tests
