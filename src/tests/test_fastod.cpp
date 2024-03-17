@@ -8,13 +8,13 @@
 
 #include <gtest/gtest.h>
 
-#include "all_csv_configs.h"
-#include "csv_config_util.h"
 #include "algorithms/algo_factory.h"
 #include "algorithms/od/fastod/canonical_od.h"
 #include "algorithms/od/fastod/fastod.h"
+#include "all_csv_configs.h"
 #include "config/names.h"
 #include "config/time_limit/type.h"
+#include "csv_config_util.h"
 
 namespace tests {
 
@@ -25,7 +25,7 @@ inline size_t combine_hashes(size_t first, size_t second) {
 
 size_t RunFastod(CSVConfig const& csv_config) {
     config::InputTable input_table = MakeInputTable(csv_config);
-    
+
     algos::fastod::DataFrame data = algos::fastod::DataFrame::FromInputTable(input_table);
     algos::fastod::Fastod fastod(std::move(data));
 
@@ -104,7 +104,7 @@ protected:
     }
 };
 
-TEST_F(FastodTest, TestSmall1) {
+TEST_F(FastodTest, ExactResultTest_NumbersOnly_Small2x3) {
     std::vector<std::string> expected_asc_ods_str = {
             "{} : 2<= ~ 1<=", "{} : 1<= ~ 2<=", "{} : 3<= ~ 1<=",
             "{} : 1<= ~ 3<=", "{} : 3<= ~ 2<=", "{} : 2<= ~ 3<="};
@@ -115,23 +115,22 @@ TEST_F(FastodTest, TestSmall1) {
             "{2} : [] -> 1<=", "{1} : [] -> 2<=", "{3} : [] -> 1<=",
             "{1} : [] -> 3<=", "{3} : [] -> 2<=", "{2} : [] -> 3<="};
 
-    TestFastod(kOdTestNormSmall2x3, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
-               std::move(expected_simple_ods_str));
+    TestFastod(kOdTestNormSmall2x3, std::move(expected_asc_ods_str),
+               std::move(expected_desc_ods_str), std::move(expected_simple_ods_str));
 }
 
-TEST_F(FastodTest, TestSmall2) {
+TEST_F(FastodTest, ExactResultTest_NumbersOnly_Small3x3) {
     std::vector<std::string> expected_asc_ods_str = {};
-
     std::vector<std::string> expected_desc_ods_str = {"{} : 3>= ~ 2<=", "{} : 2>= ~ 3<="};
 
     std::vector<std::string> expected_simple_ods_str = {
             "{} : [] -> 1<=", "{3} : [] -> 2<=", "{2} : [] -> 3<="};
 
-    TestFastod(kOdTestNormSmall3x3, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
-               std::move(expected_simple_ods_str));
+    TestFastod(kOdTestNormSmall3x3, std::move(expected_asc_ods_str),
+               std::move(expected_desc_ods_str), std::move(expected_simple_ods_str));
 }
 
-TEST_F(FastodTest, TestSmall3) {
+TEST_F(FastodTest, ExactResultTest_NumbersOnly_OD) {
     std::vector<std::string> expected_asc_ods_str = {
             "{} : 2<= ~ 1<=", "{} : 1<= ~ 2<=", "{1} : 3<= ~ 2<=", "{1} : 2<= ~ 3<="};
 
@@ -144,7 +143,7 @@ TEST_F(FastodTest, TestSmall3) {
                std::move(expected_simple_ods_str));
 }
 
-TEST_F(FastodTest, TestMedium1) {
+TEST_F(FastodTest, ExactResultTest_NumbersOnly_Horse10c) {
     std::vector<std::string> expected_asc_ods_str = {
             "{3} : 9<= ~ 6<=",          "{3} : 6<= ~ 9<=",          "{3} : 7<= ~ 6<=",
             "{3} : 6<= ~ 7<=",          "{3} : 1<= ~ 8<=",          "{3} : 8<= ~ 1<=",
@@ -462,7 +461,130 @@ TEST_F(FastodTest, TestMedium1) {
             "{3,9} : [] -> 7<=",         "{3,7} : [] -> 9<=",  "{1,4,5,6,8} : [] -> 9<=",
             "{1,4,5,6,7,10} : [] -> 9<="};
 
-    TestFastod(kOdTestNormHorse10c, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
+    TestFastod(kOdTestNormHorse10c, std::move(expected_asc_ods_str),
+               std::move(expected_desc_ods_str), std::move(expected_simple_ods_str));
+}
+
+TEST_F(FastodTest, ExactResultTest_NumbersOnly_BernoulliRelation) {
+    std::vector<std::string> expected_asc_ods_str = {
+            "{} : 2<= ~ 1<=",    "{} : 1<= ~ 2<=",   "{} : 4<= ~ 1<=",    "{} : 1<= ~ 4<=",
+            "{} : 6<= ~ 3<=",    "{} : 3<= ~ 6<=",   "{} : 3<= ~ 1<=",    "{} : 1<= ~ 3<=",
+            "{} : 6<= ~ 1<=",    "{} : 1<= ~ 6<=",   "{} : 5<= ~ 4<=",    "{} : 4<= ~ 5<=",
+            "{} : 5<= ~ 1<=",    "{} : 1<= ~ 5<=",   "{4} : 6<= ~ 5<=",   "{4} : 5<= ~ 6<=",
+            "{3} : 6<= ~ 5<=",   "{3} : 5<= ~ 6<=",  "{6} : 2<= ~ 3<=",   "{6} : 3<= ~ 2<=",
+            "{5} : 4<= ~ 2<=",   "{5} : 2<= ~ 4<=",  "{3} : 4<= ~ 2<=",   "{3} : 2<= ~ 4<=",
+            "{4} : 3<= ~ 2<=",   "{4} : 2<= ~ 3<=",  "{2,6} : 5<= ~ 3<=", "{2,6} : 3<= ~ 5<=",
+            "{2,5} : 6<= ~ 4<=", "{2,5} : 4<= ~ 6<="};
+
+    std::vector<std::string> expected_desc_ods_str = {
+            "{} : 6>= ~ 5<=",    "{} : 5>= ~ 6<=",    "{} : 6>= ~ 4<=",    "{} : 4>= ~ 6<=",
+            "{} : 6>= ~ 2<=",    "{} : 2>= ~ 6<=",    "{} : 5>= ~ 3<=",    "{} : 3>= ~ 5<=",
+            "{} : 5>= ~ 2<=",    "{} : 2>= ~ 5<=",    "{3} : 6>= ~ 1<=",   "{3} : 1>= ~ 6<=",
+            "{4} : 1>= ~ 5<=",   "{4} : 5>= ~ 1<=",   "{1} : 4>= ~ 3<=",   "{1} : 3>= ~ 4<=",
+            "{2} : 4>= ~ 3<=",   "{2} : 3>= ~ 4<=",   "{1,6} : 4>= ~ 2<=", "{1,6} : 2>= ~ 4<=",
+            "{2,5} : 4>= ~ 1<=", "{2,5} : 1>= ~ 4<=", "{2,6} : 3>= ~ 1<=", "{2,6} : 1>= ~ 3<=",
+            "{1,5} : 3>= ~ 2<=", "{1,5} : 2>= ~ 3<=", "{1,4} : 6>= ~ 3<=", "{1,4} : 3>= ~ 6<=",
+            "{1,3} : 5>= ~ 4<=", "{1,3} : 4>= ~ 5<="};
+
+    std::vector<std::string> expected_simple_ods_str = {
+            "{2,3} : [] -> 6<=",   "{2,4} : [] -> 5<=",   "{3,4} : [] -> 1<=",
+            "{2,4,6} : [] -> 1<=", "{1,2,4} : [] -> 6<=", "{2,3,5} : [] -> 1<=",
+            "{1,2,3} : [] -> 5<=", "{2,5,6} : [] -> 1<=", "{1,5,6} : [] -> 2<=",
+            "{1,2,6} : [] -> 5<=", "{1,2,5} : [] -> 6<=", "{3,4,5,6} : [] -> 2<="};
+
+    TestFastod(kBernoulliRelation, std::move(expected_asc_ods_str),
+               std::move(expected_desc_ods_str), std::move(expected_simple_ods_str));
+}
+
+TEST_F(FastodTest, ExactResultTest_NumbersOnly_TestFD) {
+    std::vector<std::string> expected_asc_ods_str = {
+            "{} : 6<= ~ 2<=",  "{} : 2<= ~ 6<=",  "{4} : 5<= ~ 3<=", "{4} : 3<= ~ 5<=",
+            "{5} : 4<= ~ 3<=", "{5} : 3<= ~ 4<=", "{4} : 6<= ~ 5<=", "{4} : 5<= ~ 6<=",
+            "{5} : 6<= ~ 4<=", "{5} : 4<= ~ 6<=", "{5} : 3<= ~ 2<=", "{5} : 2<= ~ 3<=",
+            "{4} : 3<= ~ 2<=", "{4} : 2<= ~ 3<=", "{3} : 6<= ~ 5<=", "{3} : 5<= ~ 6<=",
+            "{4} : 5<= ~ 2<=", "{4} : 2<= ~ 5<=", "{5} : 4<= ~ 2<=", "{5} : 2<= ~ 4<="};
+
+    std::vector<std::string> expected_desc_ods_str = {
+            "{3} : 6>= ~ 4<=", "{3} : 4>= ~ 6<=", "{3} : 5>= ~ 4<=",
+            "{3} : 4>= ~ 5<=", "{2} : 5>= ~ 4<=", "{2} : 4>= ~ 5<="};
+
+    std::vector<std::string> expected_simple_ods_str = {
+            "{} : [] -> 1<=",    "{6} : [] -> 5<=",   "{6} : [] -> 4<=",   "{6} : [] -> 3<=",
+            "{6} : [] -> 2<=",   "{3} : [] -> 2<=",   "{3,4} : [] -> 6<=", "{3,5} : [] -> 4<=",
+            "{3,4} : [] -> 5<=", "{3,5} : [] -> 6<=", "{4,5} : [] -> 2<=", "{2,5} : [] -> 4<=",
+            "{2,4} : [] -> 5<="};
+
+    TestFastod(kTestFD, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
+               std::move(expected_simple_ods_str));
+}
+
+TEST_F(FastodTest, ExactResultTest_NumbersOnly_WDCastrology) {
+    std::vector<std::string> expected_asc_ods_str = {
+            "{3} : 6<= ~ 4<=",   "{3} : 4<= ~ 6<=",   "{4} : 5<= ~ 3<=",   "{4} : 3<= ~ 5<=",
+            "{3} : 4<= ~ 1<=",   "{3} : 1<= ~ 4<=",   "{3} : 7<= ~ 2<=",   "{3} : 2<= ~ 7<=",
+            "{4} : 2<= ~ 1<=",   "{4} : 1<= ~ 2<=",   "{3} : 6<= ~ 1<=",   "{3} : 1<= ~ 6<=",
+            "{4} : 7<= ~ 1<=",   "{4} : 1<= ~ 7<=",   "{3} : 7<= ~ 5<=",   "{3} : 5<= ~ 7<=",
+            "{4} : 7<= ~ 2<=",   "{4} : 2<= ~ 7<=",   "{3,7} : 2<= ~ 4<=", "{3,7} : 4<= ~ 2<=",
+            "{3,7} : 2<= ~ 1<=", "{3,7} : 1<= ~ 2<=", "{3,7} : 6<= ~ 2<=", "{3,7} : 2<= ~ 6<="};
+
+    std::vector<std::string> expected_desc_ods_str = {
+            "{4} : 6>= ~ 3<=",   "{4} : 3>= ~ 6<=",  "{3} : 7>= ~ 4<=", "{3} : 4>= ~ 7<=",
+            "{4} : 6>= ~ 5<=",   "{4} : 5>= ~ 6<=",  "{3} : 5>= ~ 4<=", "{3} : 4>= ~ 5<=",
+            "{3} : 5>= ~ 1<=",   "{3} : 1>= ~ 5<=",  "{3} : 6>= ~ 5<=", "{3} : 5>= ~ 6<=",
+            "{3} : 7>= ~ 6<=",   "{3} : 6>= ~ 7<=",  "{3} : 7>= ~ 1<=", "{3} : 1>= ~ 7<=",
+            "{3,7} : 5>= ~ 2<=", "{3,7} : 2>= ~ 5<="};
+
+    std::vector<std::string> expected_simple_ods_str = {
+            "{2} : [] -> 1<=",   "{1} : [] -> 2<=",   "{2} : [] -> 3<=",   "{5} : [] -> 1<=",
+            "{1} : [] -> 5<=",   "{5} : [] -> 2<=",   "{2} : [] -> 5<=",   "{1} : [] -> 4<=",
+            "{6} : [] -> 7<=",   "{5} : [] -> 7<=",   "{6} : [] -> 1<=",   "{1} : [] -> 6<=",
+            "{5} : [] -> 3<=",   "{2} : [] -> 4<=",   "{2} : [] -> 7<=",   "{6} : [] -> 4<=",
+            "{6} : [] -> 5<=",   "{5} : [] -> 6<=",   "{1} : [] -> 7<=",   "{6} : [] -> 3<=",
+            "{1} : [] -> 3<=",   "{6} : [] -> 2<=",   "{2} : [] -> 6<=",   "{5} : [] -> 4<=",
+            "{4,7} : [] -> 6<=", "{3,4} : [] -> 6<=", "{4,7} : [] -> 3<=", "{3,4} : [] -> 7<=",
+            "{3,4} : [] -> 5<=", "{3,4} : [] -> 1<=", "{4,7} : [] -> 1<=", "{3,4} : [] -> 2<=",
+            "{4,7} : [] -> 2<=", "{4,7} : [] -> 5<="};
+
+    TestFastod(kWDC_astrology, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
+               std::move(expected_simple_ods_str));
+}
+
+TEST_F(FastodTest, ExactResultTest_NumbersOnly_WDCgame) {
+    std::vector<std::string> expected_asc_ods_str = {"{} : 4<= ~ 3<=", "{} : 3<= ~ 4<="};
+    std::vector<std::string> expected_desc_ods_str = {};
+
+    std::vector<std::string> expected_simple_ods_str = {
+            "{2} : [] -> 1<=", "{1} : [] -> 2<=", "{3} : [] -> 2<=", "{2} : [] -> 3<=",
+            "{4} : [] -> 1<=", "{1} : [] -> 4<=", "{4} : [] -> 2<=", "{2} : [] -> 4<=",
+            "{4} : [] -> 3<=", "{3} : [] -> 4<=", "{5} : [] -> 1<=", "{1} : [] -> 5<=",
+            "{3} : [] -> 1<=", "{1} : [] -> 3<=", "{5} : [] -> 2<=", "{2} : [] -> 5<=",
+            "{5} : [] -> 3<=", "{3} : [] -> 5<=", "{5} : [] -> 4<=", "{4} : [] -> 5<="};
+
+    TestFastod(kWDC_game, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
+               std::move(expected_simple_ods_str));
+}
+
+TEST_F(FastodTest, ExactResultTest_NumbersOnly_WDCplanetz) {
+    std::vector<std::string> expected_asc_ods_str = {"{} : 5<= ~ 4<=", "{} : 4<= ~ 5<="};
+    std::vector<std::string> expected_desc_ods_str = {};
+
+    std::vector<std::string> expected_simple_ods_str = {
+            "{2} : [] -> 1<=", "{1} : [] -> 2<=", "{3} : [] -> 2<=", "{2} : [] -> 3<=",
+            "{4} : [] -> 1<=", "{1} : [] -> 4<=", "{4} : [] -> 2<=", "{2} : [] -> 4<=",
+            "{4} : [] -> 3<=", "{3} : [] -> 4<=", "{5} : [] -> 1<=", "{1} : [] -> 5<=",
+            "{3} : [] -> 1<=", "{1} : [] -> 3<=", "{5} : [] -> 2<=", "{2} : [] -> 5<=",
+            "{5} : [] -> 3<=", "{3} : [] -> 5<=", "{5} : [] -> 4<=", "{4} : [] -> 5<="};
+
+    TestFastod(kWDC_planetz, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
+               std::move(expected_simple_ods_str));
+}
+
+TEST_F(FastodTest, ExactResultTest_NumbersOnly_WDCsymbols) {
+    std::vector<std::string> expected_asc_ods_str = {"{2} : 3<= ~ 1<=", "{2} : 1<= ~ 3<="};
+    std::vector<std::string> expected_desc_ods_str = {};
+    std::vector<std::string> expected_simple_ods_str = {"{3} : [] -> 2<=", "{1,2} : [] -> 3<="};
+
+    TestFastod(kWDC_symbols, std::move(expected_asc_ods_str), std::move(expected_desc_ods_str),
                std::move(expected_simple_ods_str));
 }
 
@@ -476,22 +598,27 @@ TEST_P(FastodResultHashTest, CorrectnessTest) {
 
 INSTANTIATE_TEST_SUITE_P(
         TestFastodSuite, FastodResultHashTest,
-        ::testing::Values(
-                CSVConfigHash{kOdTestNormOd, 11980520805314995804UL},
-                CSVConfigHash{kOdTestNormSmall2x3, 7457915278574020764UL},
-                CSVConfigHash{kOdTestNormSmall3x3, 3318291924553133612UL},
-                CSVConfigHash{kOdTestNormAbalone, 8494646055080399391UL},
-                CSVConfigHash{kOdTestNormBalanceScale, 0ULL},
-                CSVConfigHash{kOdTestNormBreastCancerWisconsin, 16845062592796597733UL},
-                CSVConfigHash{kOdTestNormClassification, 10775947267660160689UL},
-                CSVConfigHash{kOdTestNormEchocardiogram, 2811588447932787109UL},
-                CSVConfigHash{kOdTestNormHepatitis1, 132585063305091933UL},
-                CSVConfigHash{kOdTestNormHepatitis2, 10199178000978455890UL},
-                CSVConfigHash{kOdTestNormHepatitis3, 3063999440011758644UL},
-                CSVConfigHash{kOdTestNormHepatitis4, 132585063305091933UL},
-                CSVConfigHash{kOdTestNormHepatitis5, 11668977472753401458UL},
-                CSVConfigHash{kOdTestNormHepatitis, 8347405483583260580UL},
-                CSVConfigHash{kOdTestNormHorse10c, 13235589009124491858UL},
-                CSVConfigHash{kOdTestNormIris, 0UL}));
+        ::testing::Values(CSVConfigHash{kOdTestNormOd, 11980520805314995804UL},
+                          CSVConfigHash{kOdTestNormSmall2x3, 7457915278574020764UL},
+                          CSVConfigHash{kOdTestNormSmall3x3, 3318291924553133612UL},
+                          CSVConfigHash{kOdTestNormAbalone, 8494646055080399391UL},
+                          CSVConfigHash{kOdTestNormBalanceScale, 0ULL},
+                          CSVConfigHash{kOdTestNormBreastCancerWisconsin, 16845062592796597733UL},
+                          CSVConfigHash{kOdTestNormClassification, 10775947267660160689UL},
+                          CSVConfigHash{kOdTestNormEchocardiogram, 2811588447932787109UL},
+                          CSVConfigHash{kOdTestNormHepatitis1, 132585063305091933UL},
+                          CSVConfigHash{kOdTestNormHepatitis2, 10199178000978455890UL},
+                          CSVConfigHash{kOdTestNormHepatitis3, 3063999440011758644UL},
+                          CSVConfigHash{kOdTestNormHepatitis4, 132585063305091933UL},
+                          CSVConfigHash{kOdTestNormHepatitis5, 11668977472753401458UL},
+                          CSVConfigHash{kOdTestNormHepatitis, 8347405483583260580UL},
+                          CSVConfigHash{kOdTestNormHorse10c, 13235589009124491858UL},
+                          CSVConfigHash{kOdTestNormIris, 0UL},
+                          CSVConfigHash{kBernoulliRelation, 3072345414994597861UL},
+                          CSVConfigHash{kTestFD, 10356217265356097778UL},
+                          CSVConfigHash{kWDC_astrology, 16412680650821272398UL},
+                          CSVConfigHash{kWDC_game, 17253963663585814974UL},
+                          CSVConfigHash{kWDC_planetz, 16723826645866677286UL},
+                          CSVConfigHash{kWDC_symbols, 4539870310106546587UL}));
 
 }  // namespace tests
