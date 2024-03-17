@@ -35,8 +35,6 @@ private:
     std::vector<DataFrame::value_indexes_t> IntersectWithAttribute(
             algos::fastod::AttributeSet::size_type attribute, size_t group_start, size_t group_end);
 
-    ComplexStrippedPartition();
-
     ComplexStrippedPartition(DataFrame const& data, std::shared_ptr<std::vector<size_t>> indexes,
                              std::shared_ptr<std::vector<size_t>> begins);
 
@@ -45,6 +43,7 @@ private:
                              std::shared_ptr<std::vector<size_t>> begins);
 
 public:
+    ComplexStrippedPartition() = delete;
     ComplexStrippedPartition(ComplexStrippedPartition const& origin) = default;
 
     ComplexStrippedPartition& operator=(ComplexStrippedPartition const& other);
@@ -55,8 +54,6 @@ public:
 
     bool ShouldBeConvertedToStrippedPartition() const;
     void ToStrippedPartition();
-
-    static ComplexStrippedPartition CreateEmpty();
 
 private:
     template <bool ascending>
