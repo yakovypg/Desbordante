@@ -19,7 +19,7 @@ namespace algos::fastod {
 
 class Fastod : public Algorithm {
 private:
-    config::TimeLimitSecondsType time_limit_seconds_;
+    config::TimeLimitSecondsType time_limit_seconds_ = 0u;
     bool is_complete_ = true;
     size_t level_ = 1;
     size_t od_count_ = 0;
