@@ -17,9 +17,9 @@ private:
     std::shared_ptr<std::vector<size_t>> sp_begins_;
     std::shared_ptr<std::vector<DataFrame::range_t>> rb_indexes_;
     std::shared_ptr<std::vector<size_t>> rb_begins_;
+    std::shared_ptr<DataFrame> data_;
     bool is_stripped_partition_;
     bool should_be_converted_to_sp_;
-    DataFrame const& data_;
 
     static constexpr inline double SMALL_RANGES_RATIO_TO_CONVERT = 0.5;
     static constexpr inline size_t MIN_MEANINGFUL_RANGE_SIZE = static_cast<size_t>(40);
@@ -35,15 +35,16 @@ private:
     std::vector<DataFrame::value_indexes_t> IntersectWithAttribute(
             algos::fastod::AttributeSet::size_type attribute, size_t group_start, size_t group_end);
 
-    ComplexStrippedPartition(DataFrame const& data, std::shared_ptr<std::vector<size_t>> indexes,
+    ComplexStrippedPartition(std::shared_ptr<DataFrame> data,
+                             std::shared_ptr<std::vector<size_t>> indexes,
                              std::shared_ptr<std::vector<size_t>> begins);
 
-    ComplexStrippedPartition(DataFrame const& data,
+    ComplexStrippedPartition(std::shared_ptr<DataFrame> data,
                              std::shared_ptr<std::vector<DataFrame::range_t>> indexes,
                              std::shared_ptr<std::vector<size_t>> begins);
 
 public:
-    ComplexStrippedPartition() = delete;
+    ComplexStrippedPartition();
     ComplexStrippedPartition(ComplexStrippedPartition const& origin) = default;
 
     ComplexStrippedPartition& operator=(ComplexStrippedPartition const& other);
@@ -66,8 +67,8 @@ private:
 
             for (size_t i = group_begin; i < group_end; ++i) {
                 const size_t index = (*sp_indexes_)[i];
-                values[i - group_begin] = {data_.GetValue(index, left),
-                                           data_.GetValue(index, right)};
+                values[i - group_begin] = {data_->GetValue(index, left),
+                                           data_->GetValue(index, right)};
             }
 
             if constexpr (ascending) {
@@ -116,7 +117,7 @@ private:
                 const DataFrame::range_t range = (*rb_indexes_)[i];
 
                 for (size_t j = range.first; j <= range.second; ++j) {
-                    values.push_back({data_.GetValue(j, left), data_.GetValue(j, right)});
+                    values.push_back({data_->GetValue(j, left), data_->GetValue(j, right)});
                 }
             }
 
@@ -161,12 +162,12 @@ public:
     }
 
     template <bool range_based_mode>
-    static ComplexStrippedPartition Create(DataFrame const& data) {
+    static ComplexStrippedPartition Create(std::shared_ptr<DataFrame> data) {
         if constexpr (range_based_mode) {
             std::vector<DataFrame::range_t>* rb_indexes = new std::vector<DataFrame::range_t>();
             std::vector<size_t>* rb_begins = new std::vector<size_t>();
 
-            const size_t tuple_count = data.GetTupleCount();
+            const size_t tuple_count = data->GetTupleCount();
             rb_begins->push_back(0);
 
             if (tuple_count != 0) {
@@ -182,17 +183,17 @@ public:
         std::vector<size_t>* sp_indexes = new std::vector<size_t>();
         std::vector<size_t>* sp_begins = new std::vector<size_t>();
 
-        sp_indexes->reserve(data.GetTupleCount());
+        sp_indexes->reserve(data->GetTupleCount());
 
-        for (size_t i = 0; i < data.GetTupleCount(); i++) {
+        for (size_t i = 0; i < data->GetTupleCount(); i++) {
             sp_indexes->push_back(i);
         }
 
-        if (data.GetTupleCount() != 0) {
+        if (data->GetTupleCount() != 0) {
             sp_begins->push_back(0);
         }
 
-        sp_begins->push_back(data.GetTupleCount());
+        sp_begins->push_back(data->GetTupleCount());
 
         return ComplexStrippedPartition(std::move(data),
                                         std::shared_ptr<std::vector<size_t>>(sp_indexes),

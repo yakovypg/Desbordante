@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <memory>
 #include <utility>
 
 #include <boost/unordered/unordered_map.hpp>
@@ -61,7 +62,7 @@ void Fastod::MakeExecuteOptsAvailable() {
 }
 
 void Fastod::LoadDataInternal() {
-    data_ = DataFrame::FromInputTable(input_table_);
+    data_ = std::make_shared<DataFrame>(DataFrame::FromInputTable(input_table_));
 }
 
 void Fastod::ResetState() {
@@ -130,18 +131,18 @@ std::vector<SimpleCanonicalOD> const& Fastod::GetSimpleDependencies() const {
 void Fastod::Initialize() {
     timer_.Start();
 
-    AttributeSet empty_set(data_.GetColumnCount());
+    AttributeSet empty_set(data_->GetColumnCount());
 
     context_in_each_level_.emplace_back();
     context_in_each_level_[0].insert(empty_set);
-    schema_ = AttributeSet(data_.GetColumnCount(), (1 << data_.GetColumnCount()) - 1);
+    schema_ = AttributeSet(data_->GetColumnCount(), (1 << data_->GetColumnCount()) - 1);
     CCPut(empty_set, schema_);
 
     level_ = 1;
     std::unordered_set<AttributeSet> level_1_candidates;
 
-    for (AttributeSet::size_type i = 0; i < data_.GetColumnCount(); ++i)
-        level_1_candidates.emplace(data_.GetColumnCount(), 1 << i);
+    for (AttributeSet::size_type i = 0; i < data_->GetColumnCount(); ++i)
+        level_1_candidates.emplace(data_->GetColumnCount(), 1 << i);
 
     context_in_each_level_.push_back(std::move(level_1_candidates));
 }
@@ -193,8 +194,8 @@ void Fastod::ComputeODs() {
     size_t contextInd = 0;
     for (AttributeSet const& context : context_this_level) {
         auto& delAttrs = deletedAttrs[contextInd++];
-        delAttrs.reserve(data_.GetColumnCount());
-        for (AttributeSet::size_type col = 0; col < data_.GetColumnCount(); ++col)
+        delAttrs.reserve(data_->GetColumnCount());
+        for (AttributeSet::size_type col = 0; col < data_->GetColumnCount(); ++col)
             delAttrs.push_back(deleteAttribute(context, col));
         if (IsTimeUp()) {
             is_complete_ = false;
