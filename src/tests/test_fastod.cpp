@@ -18,6 +18,8 @@
 
 namespace tests {
 
+namespace {
+
 size_t CombineHashes(size_t first, size_t second) {
     size_t wave = second + 2654435769UL + (first << 6) + (first >> 2);
     return first ^ wave;
@@ -104,6 +106,8 @@ protected:
         }
     }
 };
+
+}  // namespace
 
 TEST_F(FastodTest, ExactResultTest_NumbersOnly_Small2x3) {
     std::vector<std::string> expected_asc_ods_str = {
