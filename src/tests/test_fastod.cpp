@@ -45,10 +45,11 @@ size_t RunFastod(CSVConfig const& csv_config) {
 class FastodTest : public ::testing::Test {
 protected:
     static std::unique_ptr<algos::fastod::Fastod> CreateAlgorithmInstance(
-            config::InputTable table, config::TimeLimitSecondsType time_limit_seconds = 0u) {
+            CSVConfig const& csv_config, config::TimeLimitSecondsType time_limit_seconds = 0u) {
         using namespace config::names;
 
-        algos::StdParamsMap params{{kTable, table}, {kTimeLimitSeconds, time_limit_seconds}};
+        algos::StdParamsMap params{{kCsvConfig, csv_config},
+                                   {kTimeLimitSeconds, time_limit_seconds}};
 
         return algos::CreateAndLoadAlgorithm<algos::fastod::Fastod>(params);
     }
@@ -59,9 +60,7 @@ protected:
                            std::vector<std::string> expected_simple_ods_str) {
         using namespace algos::fastod;
 
-        config::InputTable input_table = MakeInputTable(csv_config);
-
-        auto algorithm = CreateAlgorithmInstance(input_table);
+        auto algorithm = CreateAlgorithmInstance(csv_config);
         algorithm->Execute();
 
         std::vector<AscCanonicalOD> asc_ods = algorithm->GetAscendingDependencies();
