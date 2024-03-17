@@ -26,7 +26,7 @@ size_t CombineHashes(size_t first, size_t second) {
 size_t RunFastod(CSVConfig const& csv_config) {
     using namespace config::names;
 
-    algos::StdParamsMap params{{kCsvConfig, csv_config}, {kTimeLimitSeconds, 0u}};
+    algos::StdParamsMap params{{kCsvConfig, csv_config}};
 
     std::unique_ptr<algos::fastod::Fastod> fastod =
             algos::CreateAndLoadAlgorithm<algos::fastod::Fastod>(params);
