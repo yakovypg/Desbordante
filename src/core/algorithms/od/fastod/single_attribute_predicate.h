@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include <optional>
 #include <string>
 
@@ -14,12 +15,13 @@ struct SingleAttributePredicate {
     SingleAttributePredicate(size_t attribute, bool ascending);
     std::string ToString() const;
 
-    bool Satisfy(DataFrame const& data, size_t first_tuple_index, size_t second_tuple_index) const {
+    bool Satisfy(std::shared_ptr<DataFrame> data, size_t first_tuple_index,
+                 size_t second_tuple_index) const {
         if (ascending)
-            return data.GetValue(first_tuple_index, attribute) <
-                   data.GetValue(second_tuple_index, attribute);
-        return data.GetValue(second_tuple_index, attribute) <
-               data.GetValue(first_tuple_index, attribute);
+            return data->GetValue(first_tuple_index, attribute) <
+                   data->GetValue(second_tuple_index, attribute);
+        return data->GetValue(second_tuple_index, attribute) <
+               data->GetValue(first_tuple_index, attribute);
     }
 
     bool Satisfy(int first, int second) const {

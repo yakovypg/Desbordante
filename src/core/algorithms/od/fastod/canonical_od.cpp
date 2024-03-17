@@ -1,5 +1,6 @@
 #include "canonical_od.h"
 
+#include <memory>
 #include <sstream>
 
 #include "timer.h"
@@ -12,7 +13,8 @@ CanonicalOD<ascending>::CanonicalOD(AttributeSet&& context, AttributeSet::size_t
     : context_(std::move(context)), ap_(left, right) {}
 
 template <bool ascending>
-bool CanonicalOD<ascending>::IsValid(DataFrame const& data, StrippedPartitionCache& cache) const {
+bool CanonicalOD<ascending>::IsValid(std::shared_ptr<DataFrame> data,
+                                     StrippedPartitionCache& cache) const {
     return !(cache.GetStrippedPartition(context_, data).Swap<ascending>(ap_.left, ap_.right));
 }
 
@@ -27,7 +29,8 @@ std::string CanonicalOD<ascending>::ToString() const {
 SimpleCanonicalOD::SimpleCanonicalOD(AttributeSet const& context, AttributeSet::size_type right)
     : context_(context), right_(right) {}
 
-bool SimpleCanonicalOD::IsValid(DataFrame const& data, StrippedPartitionCache& cache) const {
+bool SimpleCanonicalOD::IsValid(std::shared_ptr<DataFrame> data,
+                                StrippedPartitionCache& cache) const {
     return !(cache.GetStrippedPartition(context_, data).Split(right_));
 }
 

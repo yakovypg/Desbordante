@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 #include "attribute_pair.h"
 #include "stripped_partition.h"
 #include "stripped_partition_cache.h"
@@ -16,7 +18,7 @@ public:
     CanonicalOD(AttributeSet&& context, AttributeSet::size_type left,
                 AttributeSet::size_type right);
 
-    bool IsValid(DataFrame const& data, StrippedPartitionCache& cache) const;
+    bool IsValid(std::shared_ptr<DataFrame> data, StrippedPartitionCache& cache) const;
     std::string ToString() const;
 };
 
@@ -31,7 +33,7 @@ private:
 public:
     SimpleCanonicalOD(AttributeSet const& context, AttributeSet::size_type right);
 
-    bool IsValid(DataFrame const& data, StrippedPartitionCache& cache) const;
+    bool IsValid(std::shared_ptr<DataFrame> data, StrippedPartitionCache& cache) const;
     std::string ToString() const;
 };
 

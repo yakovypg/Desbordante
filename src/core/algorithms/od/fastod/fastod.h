@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <memory>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -34,7 +35,7 @@ private:
     StrippedPartitionCache partition_cache_;
 
     AttributeSet schema_;
-    DataFrame data_;
+    std::shared_ptr<DataFrame> data_;
     config::InputTable input_table_;
 
     Timer timer_;
@@ -90,7 +91,6 @@ private:
     }
 
     void Initialize();
-
     void ComputeODs();
     void PruneLevels();
     void CalculateNextLevel();
@@ -98,10 +98,10 @@ private:
     template <bool ascending>
     void AddCandidates(AttributeSet const& context, std::vector<AttributeSet> const& delAttrs) {
         if (level_ == 2) {
-            for (AttributeSet::size_type i = 0; i < data_.GetColumnCount(); i++) {
-                for (AttributeSet::size_type j = 0; j < data_.GetColumnCount(); j++) {
+            for (AttributeSet::size_type i = 0; i < data_->GetColumnCount(); i++) {
+                for (AttributeSet::size_type j = 0; j < data_->GetColumnCount(); j++) {
                     if (i == j) continue;
-                    CSPut<ascending>(attributeSet({i, j}, data_.GetColumnCount()),
+                    CSPut<ascending>(attributeSet({i, j}, data_->GetColumnCount()),
                                      AttributePair(i, j));
                 }
             }
