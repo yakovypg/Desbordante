@@ -24,12 +24,14 @@ inline size_t CombineHashes(size_t first, size_t second) {
 }
 
 size_t RunFastod(CSVConfig const& csv_config) {
-    config::InputTable input_table = MakeInputTable(csv_config);
+    using namespace config::names;
 
-    algos::fastod::DataFrame data = algos::fastod::DataFrame::FromInputTable(input_table);
-    algos::fastod::Fastod fastod(std::move(data));
+    algos::StdParamsMap params{{kCsvConfig, csv_config}, {kTimeLimitSeconds, 0u}};
 
-    std::vector<std::string> string_ods = fastod.DiscoverAsStrings();
+    std::unique_ptr<algos::fastod::Fastod> fastod =
+            algos::CreateAndLoadAlgorithm<algos::fastod::Fastod>(params);
+
+    std::vector<std::string> string_ods = fastod->DiscoverAsStrings();
     std::sort(std::begin(string_ods), std::end(string_ods));
 
     std::size_t result_hash = 0;
