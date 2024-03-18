@@ -107,24 +107,25 @@ private:
             }
         } else if (level_ > 2) {
             std::unordered_set<AttributePair> candidates;
-            for (AttributeSet::size_type attr = context.find_first(); attr != context.size();
-                 attr = context.find_next(attr)) {
+            
+            context.iterate([this, &delAttrs, &candidates](AttributeSet::size_type attr) {
                 auto const& tmp = CSGet<ascending>(delAttrs[attr]);
                 candidates.insert(tmp.cbegin(), tmp.cend());
-            }
+            });
+            
             for (AttributePair const& attribute_pair : candidates) {
                 const AttributeSet context_delete_ab =
                         deleteAttribute(delAttrs[attribute_pair.left], attribute_pair.right);
 
                 bool add_context = true;
-                for (AttributeSet::size_type attr = context_delete_ab.find_first();
-                     attr != context_delete_ab.size(); attr = context_delete_ab.find_next(attr)) {
+
+                context_delete_ab.iterate([this, &delAttrs, &attribute_pair, &add_context](AttributeSet::size_type attr) {
                     std::unordered_set<AttributePair> const& cs = CSGet<ascending>(delAttrs[attr]);
                     if (cs.find(attribute_pair) == cs.end()) {
                         add_context = false;
-                        break;
+                        return;
                     }
-                }
+                });
 
                 if (add_context) {
                     CSPut<ascending>(context, attribute_pair);

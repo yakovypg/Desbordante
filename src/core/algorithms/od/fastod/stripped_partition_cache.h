@@ -25,8 +25,7 @@ private:
                                           AttributeSet const& attribute_set) {
         bool is_product_called = false;
 
-        for (AttributeSet::size_type attr = attribute_set.find_first();
-             attr != attribute_set.size(); attr = attribute_set.find_next(attr)) {
+        attribute_set.iterate([this, &attribute_set, &result, &is_product_called](AttributeSet::size_type attr) {
             AttributeSet one_less = deleteAttribute(attribute_set, attr);
 
             if (one_less.any() && cache_.Contains(one_less)) {
@@ -34,7 +33,7 @@ private:
                 CallProductWithAttribute(result, attr);
                 is_product_called = true;
             }
-        }
+        });
 
         return is_product_called;
     }
@@ -57,10 +56,10 @@ public:
             result_partition = data->IsAttributesMostlyRangeBased(attribute_set)
                                        ? ComplexStrippedPartition::Create<true>(data)
                                        : ComplexStrippedPartition::Create<false>(data);
-            for (AttributeSet::size_type attr = attribute_set.find_first();
-                 attr != attribute_set.size(); attr = attribute_set.find_next(attr)) {
+            
+            attribute_set.iterate([this, &result_partition](AttributeSet::size_type attr) {
                 CallProductWithAttribute(result_partition, attr);
-            }
+            });
         }
 
         cache_.Set(attribute_set, result_partition);

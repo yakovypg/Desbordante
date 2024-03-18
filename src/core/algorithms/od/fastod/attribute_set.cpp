@@ -2,22 +2,33 @@
 
 #include <numeric>
 #include <sstream>
+#include <functional>
 
 namespace algos::fastod {
+
+void AttributeSet::iterate(std::function<void(size_type)> callback) const {
+    for (size_type attr = find_first(); attr != size(); attr = find_next(attr)) {
+        callback(attr);
+    }
+}
 
 std::string ASToString(AttributeSet const& value) {
     std::stringstream ss;
     ss << "{";
+
     bool first = true;
-    for (AttributeSet::size_type i = value.find_first(); i != value.size();
-         i = value.find_next(i)) {
+
+    value.iterate([&ss, &first](AttributeSet::size_type i) {
         if (first)
             first = false;
         else
             ss << ",";
+
         ss << i + 1;
-    }
+    });
+
     ss << "}";
+
     return ss.str();
 }
 
