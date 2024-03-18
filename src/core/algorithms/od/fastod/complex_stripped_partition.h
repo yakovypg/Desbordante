@@ -7,7 +7,6 @@
 
 #include "attribute_set.h"
 #include "range_based_stripped_partition.h"
-#include "single_attribute_predicate.h"
 
 namespace algos::fastod {
 
