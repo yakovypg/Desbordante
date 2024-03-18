@@ -200,10 +200,10 @@ void Fastod::ComputeODs() {
         }
 
         AttributeSet context_cc = schema_;
-        for (AttributeSet::size_type attr = context.find_first(); attr != context.size();
-             attr = context.find_next(attr)) {
+
+        context.iterate([this, &context_cc, &delAttrs](AttributeSet::size_type attr) {
             context_cc = intersect(context_cc, CCGet(delAttrs[attr]));
-        }
+        });
 
         CCPut(context, context_cc);
 
@@ -219,9 +219,8 @@ void Fastod::ComputeODs() {
         }
 
         AttributeSet context_intersect_cc_context = intersect(context, CCGet(context));
-        for (AttributeSet::size_type attr = context_intersect_cc_context.find_first();
-             attr != context_intersect_cc_context.size();
-             attr = context_intersect_cc_context.find_next(attr)) {
+        
+        context_intersect_cc_context.iterate([this, &context, &delAttrs](AttributeSet::size_type attr) {
             SimpleCanonicalOD od(delAttrs[attr], attr);
 
             if (od.IsValid(data_, partition_cache_)) {
@@ -230,11 +229,13 @@ void Fastod::ComputeODs() {
                 CCPut(context, deleteAttribute(CCGet(context), attr));
 
                 const AttributeSet diff = difference(schema_, context);
-                for (AttributeSet::size_type i = diff.find_first(); i != diff.size();
-                     i = diff.find_next(i))
+
+                diff.iterate([this, &context](AttributeSet::size_type i) {
                     CCPut(context, deleteAttribute(CCGet(context), i));
+                });
             }
-        }
+        });
+        
         CalcODs<false>(context, delAttrs);
         CalcODs<true>(context, delAttrs);
     }
@@ -261,10 +262,9 @@ void Fastod::CalculateNextLevel() {
     auto const& context_this_level = context_in_each_level_[level_];
 
     for (AttributeSet const& attribute_set : context_this_level) {
-        for (AttributeSet::size_type attr = attribute_set.find_first();
-             attr != attribute_set.size(); attr = attribute_set.find_next(attr)) {
+        attribute_set.iterate([&prefix_blocks, &attribute_set](AttributeSet::size_type attr) {
             prefix_blocks[deleteAttribute(attribute_set, attr)].push_back(attr);
-        }
+        });
     }
 
     for (auto const& [prefix, single_attributes] : prefix_blocks) {
@@ -280,14 +280,14 @@ void Fastod::CalculateNextLevel() {
                 bool create_context = true;
                 const AttributeSet candidate = addAttribute(
                         addAttribute(prefix, single_attributes[i]), single_attributes[j]);
-                for (AttributeSet::size_type attr = candidate.find_first();
-                     attr != candidate.size(); attr = candidate.find_next(attr)) {
+
+                candidate.iterate([&context_this_level, &candidate, &create_context](AttributeSet::size_type attr) {
                     if (context_this_level.find(deleteAttribute(candidate, attr)) ==
                         context_this_level.end()) {
                         create_context = false;
-                        break;
+                        return;
                     }
-                }
+                });
 
                 if (create_context) {
                     context_next_level.insert(candidate);

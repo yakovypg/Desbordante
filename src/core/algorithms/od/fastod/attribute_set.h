@@ -96,6 +96,8 @@ public:
         return bitset_._Find_next(pos);
     }
 
+    void iterate(std::function<void(size_type)> callback) const;
+
     friend AttributeSet operator&(AttributeSet const& b1, AttributeSet const& b2) noexcept;
     friend AttributeSet operator|(AttributeSet const& b1, AttributeSet const& b2) noexcept;
     friend AttributeSet operator^(AttributeSet const& b1, AttributeSet const& b2) noexcept;
