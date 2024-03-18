@@ -218,23 +218,24 @@ void Fastod::ComputeODs() {
         }
 
         AttributeSet context_intersect_cc_context = intersect(context, CCGet(context));
-        
-        context_intersect_cc_context.iterate([this, &context, &delAttrs](AttributeSet::size_type attr) {
-            SimpleCanonicalOD od(delAttrs[attr], attr);
 
-            if (od.IsValid(data_, partition_cache_)) {
-                addToRes(std::move(od));
-                fd_count_++;
-                CCPut(context, deleteAttribute(CCGet(context), attr));
+        context_intersect_cc_context.iterate(
+                [this, &context, &delAttrs](AttributeSet::size_type attr) {
+                    SimpleCanonicalOD od(delAttrs[attr], attr);
 
-                const AttributeSet diff = difference(schema_, context);
+                    if (od.IsValid(data_, partition_cache_)) {
+                        addToRes(std::move(od));
+                        fd_count_++;
+                        CCPut(context, deleteAttribute(CCGet(context), attr));
 
-                diff.iterate([this, &context](AttributeSet::size_type i) {
-                    CCPut(context, deleteAttribute(CCGet(context), i));
+                        const AttributeSet diff = difference(schema_, context);
+
+                        diff.iterate([this, &context](AttributeSet::size_type i) {
+                            CCPut(context, deleteAttribute(CCGet(context), i));
+                        });
+                    }
                 });
-            }
-        });
-        
+
         CalcODs<false>(context, delAttrs);
         CalcODs<true>(context, delAttrs);
     }
@@ -280,7 +281,8 @@ void Fastod::CalculateNextLevel() {
                 const AttributeSet candidate = addAttribute(
                         addAttribute(prefix, single_attributes[i]), single_attributes[j]);
 
-                candidate.iterate([&context_this_level, &candidate, &create_context](AttributeSet::size_type attr) {
+                candidate.iterate([&context_this_level, &candidate,
+                                   &create_context](AttributeSet::size_type attr) {
                     if (context_this_level.find(deleteAttribute(candidate, attr)) ==
                         context_this_level.end()) {
                         create_context = false;

@@ -25,15 +25,16 @@ private:
                                           AttributeSet const& attribute_set) {
         bool is_product_called = false;
 
-        attribute_set.iterate([this, &attribute_set, &result, &is_product_called](AttributeSet::size_type attr) {
-            AttributeSet one_less = deleteAttribute(attribute_set, attr);
+        attribute_set.iterate(
+                [this, &attribute_set, &result, &is_product_called](AttributeSet::size_type attr) {
+                    AttributeSet one_less = deleteAttribute(attribute_set, attr);
 
-            if (one_less.any() && cache_.Contains(one_less)) {
-                result = cache_.Get(one_less);
-                CallProductWithAttribute(result, attr);
-                is_product_called = true;
-            }
-        });
+                    if (one_less.any() && cache_.Contains(one_less)) {
+                        result = cache_.Get(one_less);
+                        CallProductWithAttribute(result, attr);
+                        is_product_called = true;
+                    }
+                });
 
         return is_product_called;
     }
@@ -56,7 +57,7 @@ public:
             result_partition = data->IsAttributesMostlyRangeBased(attribute_set)
                                        ? ComplexStrippedPartition::Create<true>(data)
                                        : ComplexStrippedPartition::Create<false>(data);
-            
+
             attribute_set.iterate([this, &result_partition](AttributeSet::size_type attr) {
                 CallProductWithAttribute(result_partition, attr);
             });
