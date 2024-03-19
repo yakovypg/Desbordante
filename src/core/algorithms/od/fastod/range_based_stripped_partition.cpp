@@ -1,3 +1,5 @@
+// This part of code not currently used
+
 #include "range_based_stripped_partition.h"
 
 #include <iostream>
