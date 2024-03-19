@@ -1,3 +1,5 @@
+// This part of code not currently used
+
 #include "stripped_partition.h"
 
 #include <cstdint>
