@@ -75,7 +75,7 @@ public:
             if (is_stripped_partition_) {
                 for (size_t i = group_begin; i < group_end; ++i) {
                     const size_t index = (*sp_indexes_)[i];
-                    
+
                     values.emplace_back(data_->GetValue(index, left),
                                         data_->GetValue(index, right));
                 }
