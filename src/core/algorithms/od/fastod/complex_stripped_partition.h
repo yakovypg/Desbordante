@@ -55,109 +55,71 @@ public:
     bool ShouldBeConvertedToStrippedPartition() const;
     void ToStrippedPartition();
 
-private:
-    template <bool ascending>
-    bool sp_Swap(short left, short right) const {
-        for (size_t begin_pointer = 0; begin_pointer < sp_begins_->size() - 1; begin_pointer++) {
-            const size_t group_begin = (*sp_begins_)[begin_pointer];
-            const size_t group_end = (*sp_begins_)[begin_pointer + 1];
-
-            std::vector<std::pair<int, int>> values(group_end - group_begin);
-
-            for (size_t i = group_begin; i < group_end; ++i) {
-                const size_t index = (*sp_indexes_)[i];
-                values[i - group_begin] = {data_->GetValue(index, left),
-                                           data_->GetValue(index, right)};
-            }
-
-            if constexpr (ascending) {
-                std::sort(values.begin(), values.end(),
-                          [](auto const& p1, auto const& p2) { return p1.first < p2.first; });
-            } else {
-                std::sort(values.begin(), values.end(),
-                          [](auto const& p1, auto const& p2) { return p2.first < p1.first; });
-            }
-
-            size_t prev_group_max_index = 0;
-            size_t current_group_max_index = 0;
-            bool is_first_group = true;
-
-            for (size_t i = 0; i < values.size(); i++) {
-                auto const& first = values[i].first;
-                auto const& second = values[i].second;
-
-                if (i != 0 && values[i - 1].first != first) {
-                    is_first_group = false;
-                    prev_group_max_index = current_group_max_index;
-                    current_group_max_index = i;
-                } else if (values[current_group_max_index].second <= second) {
-                    current_group_max_index = i;
-                }
-
-                if (!is_first_group && values[prev_group_max_index].second > second) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    template <bool ascending>
-    bool rb_Swap(short left, short right) const {
-        for (size_t begin_pointer = 0; begin_pointer < rb_begins_->size() - 1; begin_pointer++) {
-            const size_t group_begin = (*rb_begins_)[begin_pointer];
-            const size_t group_end = (*rb_begins_)[begin_pointer + 1];
-
-            std::vector<std::pair<int, int>> values;
-            // values.reserve(...)?
-
-            for (size_t i = group_begin; i < group_end; ++i) {
-                const DataFrame::range_t range = (*rb_indexes_)[i];
-
-                for (size_t j = range.first; j <= range.second; ++j) {
-                    values.push_back({data_->GetValue(j, left), data_->GetValue(j, right)});
-                }
-            }
-
-            if constexpr (ascending) {
-                std::sort(values.begin(), values.end(),
-                          [](auto const& p1, auto const& p2) { return p1.first < p2.first; });
-            } else {
-                std::sort(values.begin(), values.end(),
-                          [](auto const& p1, auto const& p2) { return p2.first < p1.first; });
-            }
-
-            size_t prev_group_max_index = 0;
-            size_t current_group_max_index = 0;
-            bool is_first_group = true;
-
-            for (size_t i = 0; i < values.size(); i++) {
-                auto const& first = values[i].first;
-                auto const& second = values[i].second;
-
-                if (i != 0 && values[i - 1].first != first) {
-                    is_first_group = false;
-                    prev_group_max_index = current_group_max_index;
-                    current_group_max_index = i;
-                } else if (values[current_group_max_index].second <= second) {
-                    current_group_max_index = i;
-                }
-
-                if (!is_first_group && values[prev_group_max_index].second > second) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-public:
     template <bool ascending>
     bool Swap(short left, short right) const {
-        return is_stripped_partition_ ? sp_Swap<ascending>(left, right)
-                                      : rb_Swap<ascending>(left, right);
+        const size_t group_count = is_stripped_partition_ ? sp_begins_->size() : rb_begins_->size();
+
+        for (size_t begin_pointer = 0; begin_pointer < group_count - 1; begin_pointer++) {
+            const size_t group_begin = is_stripped_partition_ ? (*sp_begins_)[begin_pointer]
+                                                              : (*rb_begins_)[begin_pointer];
+
+            const size_t group_end = is_stripped_partition_ ? (*sp_begins_)[begin_pointer + 1]
+                                                            : (*rb_begins_)[begin_pointer + 1];
+
+            std::vector<std::pair<int, int>> values;
+
+            if (is_stripped_partition_) {
+                values.reserve(group_end - group_begin);
+            }
+
+            if (is_stripped_partition_) {
+                for (size_t i = group_begin; i < group_end; ++i) {
+                    const size_t index = (*sp_indexes_)[i];
+                    
+                    values.emplace_back(data_->GetValue(index, left),
+                                        data_->GetValue(index, right));
+                }
+            } else {
+                for (size_t i = group_begin; i < group_end; ++i) {
+                    const DataFrame::range_t range = (*rb_indexes_)[i];
+
+                    for (size_t j = range.first; j <= range.second; ++j) {
+                        values.emplace_back(data_->GetValue(j, left), data_->GetValue(j, right));
+                    }
+                }
+            }
+
+            if constexpr (ascending) {
+                std::sort(values.begin(), values.end(),
+                          [](auto const& p1, auto const& p2) { return p1.first < p2.first; });
+            } else {
+                std::sort(values.begin(), values.end(),
+                          [](auto const& p1, auto const& p2) { return p2.first < p1.first; });
+            }
+
+            size_t prev_group_max_index = 0;
+            size_t current_group_max_index = 0;
+            bool is_first_group = true;
+
+            for (size_t i = 0; i < values.size(); i++) {
+                auto const& first = values[i].first;
+                auto const& second = values[i].second;
+
+                if (i != 0 && values[i - 1].first != first) {
+                    is_first_group = false;
+                    prev_group_max_index = current_group_max_index;
+                    current_group_max_index = i;
+                } else if (values[current_group_max_index].second <= second) {
+                    current_group_max_index = i;
+                }
+
+                if (!is_first_group && values[prev_group_max_index].second > second) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     template <bool range_based_mode>
