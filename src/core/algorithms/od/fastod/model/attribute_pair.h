@@ -9,7 +9,7 @@ public:
     AttributeSet::SizeType left;
     AttributeSet::SizeType right;
 
-    AttributePair(AttributeSet::SizeType, AttributeSet::SizeType);
+    AttributePair(AttributeSet::SizeType left, AttributeSet::SizeType right);
     std::string ToString() const;
 };
 
