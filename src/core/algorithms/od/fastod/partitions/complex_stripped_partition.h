@@ -23,12 +23,12 @@ private:
     static constexpr inline size_t MIN_MEANINGFUL_RANGE_SIZE = static_cast<size_t>(40);
 
     std::string CommonToString() const;
-    void CommonProduct(short attribute);
-    bool CommonSplit(short right) const;
+    void CommonProduct(model::ColumnIndex attribute);
+    bool CommonSplit(model::ColumnIndex right) const;
 
     std::string RangeBasedToString() const;
-    void RangeBasedProduct(short attribute);
-    bool RangeBasedSplit(short right) const;
+    void RangeBasedProduct(model::ColumnIndex attribute);
+    bool RangeBasedSplit(model::ColumnIndex right) const;
 
     std::vector<DataFrame::ValueIndices> IntersectWithAttribute(model::ColumnIndex attribute,
                                                                 size_t group_start,
@@ -49,14 +49,14 @@ public:
     ComplexStrippedPartition& operator=(ComplexStrippedPartition const& other);
 
     std::string ToString() const;
-    void Product(short attribute);
-    bool Split(short right) const;
+    void Product(model::ColumnIndex attribute);
+    bool Split(model::ColumnIndex right) const;
 
     bool ShouldBeConvertedToStrippedPartition() const;
     void ToStrippedPartition();
 
     template <bool ascending>
-    bool Swap(short left, short right) const {
+    bool Swap(model::ColumnIndex left, model::ColumnIndex right) const {
         const size_t group_count = is_stripped_partition_ ? sp_begins_->size() : rb_begins_->size();
 
         for (size_t begin_pointer = 0; begin_pointer < group_count - 1; begin_pointer++) {

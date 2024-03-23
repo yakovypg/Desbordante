@@ -31,9 +31,9 @@ public:
 
     std::string ToString() const;
 
-    void Product(short attribute);
-    bool Split(short right) const;
-    bool Swap(short left, short right, bool ascending) const;
+    void Product(model::ColumnIndex attribute);
+    bool Split(model::ColumnIndex right) const;
+    bool Swap(model::ColumnIndex left, model::ColumnIndex right, bool ascending) const;
 };
 
 }  // namespace algos::fastod
