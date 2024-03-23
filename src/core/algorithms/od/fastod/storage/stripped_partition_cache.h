@@ -9,7 +9,7 @@
 
 namespace algos::fastod {
 
-class StrippedPartitionCache {
+class PartitionCache {
 private:
     CacheWithLimit<AttributeSet, ComplexStrippedPartition> cache_{static_cast<size_t>(1e8)};
 

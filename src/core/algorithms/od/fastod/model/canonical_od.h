@@ -16,7 +16,7 @@ private:
 public:
     CanonicalOD(AttributeSet&& context, AttributeSet::SizeType left, AttributeSet::SizeType right);
 
-    bool IsValid(std::shared_ptr<DataFrame> data, StrippedPartitionCache& cache) const;
+    bool IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const;
     std::string ToString() const;
 };
 
@@ -31,7 +31,7 @@ private:
 public:
     SimpleCanonicalOD(AttributeSet const& context, AttributeSet::SizeType right);
 
-    bool IsValid(std::shared_ptr<DataFrame> data, StrippedPartitionCache& cache) const;
+    bool IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const;
     std::string ToString() const;
 };
 

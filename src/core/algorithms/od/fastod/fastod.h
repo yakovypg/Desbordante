@@ -24,7 +24,7 @@ private:
     using SimpleCanonicalOD = fastod::SimpleCanonicalOD;
     using AttributePair = fastod::AttributePair;
     using AttributeSet = fastod::AttributeSet;
-    using StrippedPartitionCache = fastod::StrippedPartitionCache;
+    using PartitionCache = fastod::PartitionCache;
     using DataFrame = fastod::DataFrame;
     using Timer = fastod::Timer;
 
@@ -43,7 +43,7 @@ private:
     std::unordered_map<AttributeSet, std::unordered_set<AttributePair>> cs_asc_;
     std::unordered_map<AttributeSet, std::unordered_set<AttributePair>> cs_desc_;
 
-    StrippedPartitionCache partition_cache_;
+    PartitionCache partition_cache_;
 
     AttributeSet schema_;
     std::shared_ptr<DataFrame> data_;
