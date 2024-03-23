@@ -6,30 +6,30 @@
 
 namespace algos::fastod {
 
-void AttributeSet::iterate(std::function<void(size_type)> callback) const {
-    for (size_type attr = find_first(); attr != size(); attr = find_next(attr)) {
-        callback(attr);
-    }
-}
-
-std::string ASToString(AttributeSet const& value) {
-    std::stringstream ss;
-    ss << "{";
+std::string AttributeSet::ToString() const {
+    std::stringstream result;
+    result << "{";
 
     bool first = true;
 
-    value.iterate([&ss, &first](AttributeSet::size_type i) {
+    Iterate([&result, &first](AttributeSet::size_type i) {
         if (first)
             first = false;
         else
-            ss << ",";
+            result << ",";
 
-        ss << i + 1;
+        result << i + 1;
     });
 
-    ss << "}";
+    result << "}";
 
-    return ss.str();
+    return result.str();
+}
+
+void AttributeSet::Iterate(std::function<void(size_type)> callback) const {
+    for (size_type attr = FindFirst(); attr != Size(); attr = FindNext(attr)) {
+        callback(attr);
+    }
 }
 
 }  // namespace algos::fastod

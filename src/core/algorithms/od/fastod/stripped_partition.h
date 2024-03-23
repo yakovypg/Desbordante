@@ -21,6 +21,7 @@ private:
 
     StrippedPartition(DataFrame const& data, std::vector<size_t> const& indexes,
                       std::vector<size_t> const& begins);
+
     friend class RangeBasedStrippedPartition;
 
 public:
