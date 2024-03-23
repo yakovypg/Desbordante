@@ -3,8 +3,8 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
-#include "algorithms/od/fastod/canonical_od.h"
 #include "algorithms/od/fastod/fastod.h"
+#include "algorithms/od/fastod/model/canonical_od.h"
 #include "algorithms/od/mining_algorithms.h"
 #include "config/indices/type.h"
 #include "py_util/bind_primitive.h"
