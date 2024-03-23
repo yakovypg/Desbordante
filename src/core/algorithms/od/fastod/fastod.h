@@ -150,8 +150,8 @@ private:
     void CalculateODs(AttributeSet const& context, std::vector<AttributeSet> const& delAttrs) {
         auto& cs_for_con = CSGet<ascending>(context);
         for (auto it = cs_for_con.begin(); it != cs_for_con.end();) {
-            short a = it->left;
-            short b = it->right;
+            model::ColumnIndex a = it->left;
+            model::ColumnIndex b = it->right;
 
             if (ContainsAttribute(CCGet(delAttrs[b]), a) &&
                 ContainsAttribute(CCGet(delAttrs[a]), b)) {

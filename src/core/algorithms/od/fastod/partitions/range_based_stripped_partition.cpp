@@ -93,7 +93,7 @@ RangeBasedStrippedPartition& RangeBasedStrippedPartition::operator=(
     return *this;
 }
 
-void RangeBasedStrippedPartition::Product(short attribute) {
+void RangeBasedStrippedPartition::Product(model::ColumnIndex attribute) {
     std::vector<size_t> new_begins;
     std::vector<DataFrame::Range> new_indexes;
 
@@ -156,7 +156,7 @@ void RangeBasedStrippedPartition::Product(short attribute) {
     begins_ = std::move(new_begins);
 }
 
-bool RangeBasedStrippedPartition::Split(short right) const {
+bool RangeBasedStrippedPartition::Split(model::ColumnIndex right) const {
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; ++begin_pointer) {
         const size_t group_begin = begins_[begin_pointer];
         const size_t group_end = begins_[begin_pointer + 1];
@@ -177,7 +177,8 @@ bool RangeBasedStrippedPartition::Split(short right) const {
     return false;
 }
 
-bool RangeBasedStrippedPartition::Swap(short left, short right, bool ascending) const {
+bool RangeBasedStrippedPartition::Swap(model::ColumnIndex left, model::ColumnIndex right,
+                                       bool ascending) const {
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
         const size_t group_begin = begins_[begin_pointer];
         const size_t group_end = begins_[begin_pointer + 1];

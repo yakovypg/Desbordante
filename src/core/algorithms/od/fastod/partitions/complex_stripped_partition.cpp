@@ -47,7 +47,7 @@ std::string ComplexStrippedPartition::ToString() const {
     return is_stripped_partition_ ? CommonToString() : RangeBasedToString();
 }
 
-void ComplexStrippedPartition::Product(short attribute) {
+void ComplexStrippedPartition::Product(model::ColumnIndex attribute) {
     if (is_stripped_partition_) {
         CommonProduct(attribute);
     } else {
@@ -55,7 +55,7 @@ void ComplexStrippedPartition::Product(short attribute) {
     }
 }
 
-bool ComplexStrippedPartition::Split(short right) const {
+bool ComplexStrippedPartition::Split(model::ColumnIndex right) const {
     return is_stripped_partition_ ? CommonSplit(right) : RangeBasedSplit(right);
 }
 
@@ -121,7 +121,7 @@ std::string ComplexStrippedPartition::CommonToString() const {
     return result.str();
 }
 
-void ComplexStrippedPartition::CommonProduct(short attribute) {
+void ComplexStrippedPartition::CommonProduct(model::ColumnIndex attribute) {
     auto new_indexes = std::make_unique<std::vector<size_t>>();
     new_indexes->reserve(data_->GetColumnCount());
 
@@ -173,7 +173,7 @@ void ComplexStrippedPartition::CommonProduct(short attribute) {
     sp_begins_ = std::move(new_begins);
 }
 
-bool ComplexStrippedPartition::CommonSplit(short right) const {
+bool ComplexStrippedPartition::CommonSplit(model::ColumnIndex right) const {
     for (size_t begin_pointer = 0; begin_pointer < sp_begins_->size() - 1; begin_pointer++) {
         const size_t group_begin = (*sp_begins_)[begin_pointer];
         const size_t group_end = (*sp_begins_)[begin_pointer + 1];
@@ -219,7 +219,7 @@ std::string ComplexStrippedPartition::RangeBasedToString() const {
     return result.str();
 }
 
-void ComplexStrippedPartition::RangeBasedProduct(short attribute) {
+void ComplexStrippedPartition::RangeBasedProduct(model::ColumnIndex attribute) {
     auto new_begins = std::make_unique<std::vector<size_t>>();
     auto new_indexes = std::make_unique<std::vector<DataFrame::Range>>();
 
@@ -283,7 +283,7 @@ void ComplexStrippedPartition::RangeBasedProduct(short attribute) {
     rb_begins_ = std::move(new_begins);
 }
 
-bool ComplexStrippedPartition::RangeBasedSplit(short right) const {
+bool ComplexStrippedPartition::RangeBasedSplit(model::ColumnIndex right) const {
     for (size_t begin_pointer = 0; begin_pointer < rb_begins_->size() - 1; ++begin_pointer) {
         const size_t group_begin = (*rb_begins_)[begin_pointer];
         const size_t group_end = (*rb_begins_)[begin_pointer + 1];

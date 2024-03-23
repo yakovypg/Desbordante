@@ -63,7 +63,7 @@ StrippedPartition& StrippedPartition::operator=(StrippedPartition const& other) 
     return *this;
 }
 
-void StrippedPartition::Product(short attribute) {
+void StrippedPartition::Product(model::ColumnIndex attribute) {
     std::vector<size_t> new_indexes;
     new_indexes.reserve(data_.GetColumnCount());
 
@@ -118,7 +118,7 @@ void StrippedPartition::Product(short attribute) {
     begins_.push_back(indexes_.size());
 }
 
-bool StrippedPartition::Split(short right) const {
+bool StrippedPartition::Split(model::ColumnIndex right) const {
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
         const size_t group_begin = begins_[begin_pointer];
         const size_t group_end = begins_[begin_pointer + 1];
@@ -135,7 +135,8 @@ bool StrippedPartition::Split(short right) const {
     return false;
 }
 
-bool StrippedPartition::Swap(short left, short right, bool ascending) const {
+bool StrippedPartition::Swap(model::ColumnIndex left, model::ColumnIndex right,
+                             bool ascending) const {
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
         const size_t group_begin = begins_[begin_pointer];
         const size_t group_end = begins_[begin_pointer + 1];
