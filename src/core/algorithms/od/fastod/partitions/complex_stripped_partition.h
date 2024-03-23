@@ -30,7 +30,7 @@ private:
     void RangeBasedProduct(short attribute);
     bool RangeBasedSplit(short right) const;
 
-    std::vector<DataFrame::ValueIndices> IntersectWithAttribute(AttributeSet::SizeType attribute,
+    std::vector<DataFrame::ValueIndices> IntersectWithAttribute(model::ColumnIndex attribute,
                                                                 size_t group_start,
                                                                 size_t group_end);
 

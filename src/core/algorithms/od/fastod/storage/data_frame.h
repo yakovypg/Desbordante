@@ -47,11 +47,11 @@ public:
 
     explicit DataFrame(std::vector<model::TypedColumnData> const& columns_data);
 
-    int GetValue(int tuple_index, AttributeSet::SizeType attribute_index) const;
+    int GetValue(int tuple_index, model::ColumnIndex attribute_index) const;
     std::vector<std::vector<DataFrame::ValueIndices>> const& GetDataRanges() const;
-    size_t GetRangeIndexByItem(size_t item, AttributeSet::SizeType attribute) const;
+    size_t GetRangeIndexByItem(size_t item, model::ColumnIndex attribute) const;
 
-    AttributeSet::SizeType GetColumnCount() const;
+    model::ColumnIndex GetColumnCount() const;
     std::size_t GetTupleCount() const;
 
     bool IsAttributesMostlyRangeBased(AttributeSet attributes) const;

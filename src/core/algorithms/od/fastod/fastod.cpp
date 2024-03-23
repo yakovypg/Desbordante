@@ -133,7 +133,7 @@ void Fastod::Initialize() {
     level_ = 1;
     std::unordered_set<AttributeSet> level_1_candidates;
 
-    for (AttributeSet::SizeType i = 0; i < data_->GetColumnCount(); ++i)
+    for (model::ColumnIndex i = 0; i < data_->GetColumnCount(); ++i)
         level_1_candidates.emplace(data_->GetColumnCount(), 1 << i);
 
     context_in_each_level_.push_back(std::move(level_1_candidates));
@@ -198,7 +198,7 @@ void Fastod::ComputeODs() {
         auto& del_attrs = deleted_attrs[context_ind++];
         del_attrs.reserve(data_->GetColumnCount());
 
-        for (AttributeSet::SizeType column = 0; column < data_->GetColumnCount(); ++column) {
+        for (model::ColumnIndex column = 0; column < data_->GetColumnCount(); ++column) {
             del_attrs.push_back(fastod::DeleteAttribute(context, column));
         }
 
@@ -209,7 +209,7 @@ void Fastod::ComputeODs() {
 
         AttributeSet context_cc = schema_;
 
-        context.Iterate([this, &context_cc, &del_attrs](AttributeSet::SizeType attr) {
+        context.Iterate([this, &context_cc, &del_attrs](model::ColumnIndex attr) {
             context_cc = fastod::Intersect(context_cc, CCGet(del_attrs[attr]));
         });
 
@@ -231,23 +231,22 @@ void Fastod::ComputeODs() {
 
         AttributeSet context_intersect_cc_context = fastod::Intersect(context, CCGet(context));
 
-        context_intersect_cc_context.Iterate(
-                [this, &context, &delAttrs](AttributeSet::SizeType attr) {
-                    SimpleCanonicalOD od(delAttrs[attr], attr);
+        context_intersect_cc_context.Iterate([this, &context, &delAttrs](model::ColumnIndex attr) {
+            SimpleCanonicalOD od(delAttrs[attr], attr);
 
-                    if (od.IsValid(data_, partition_cache_)) {
-                        AddToResult(std::move(od));
-                        fd_count_++;
+            if (od.IsValid(data_, partition_cache_)) {
+                AddToResult(std::move(od));
+                fd_count_++;
 
-                        CCPut(context, fastod::DeleteAttribute(CCGet(context), attr));
+                CCPut(context, fastod::DeleteAttribute(CCGet(context), attr));
 
-                        const AttributeSet diff = fastod::Difference(schema_, context);
+                const AttributeSet diff = fastod::Difference(schema_, context);
 
-                        diff.Iterate([this, &context](AttributeSet::SizeType i) {
-                            CCPut(context, fastod::DeleteAttribute(CCGet(context), i));
-                        });
-                    }
+                diff.Iterate([this, &context](model::ColumnIndex i) {
+                    CCPut(context, fastod::DeleteAttribute(CCGet(context), i));
                 });
+            }
+        });
 
         CalculateODs<false>(context, delAttrs);
         CalculateODs<true>(context, delAttrs);
@@ -276,7 +275,7 @@ void Fastod::CalculateNextLevel() {
     auto const& context_this_level = context_in_each_level_[level_];
 
     for (AttributeSet const& attribute_set : context_this_level) {
-        attribute_set.Iterate([&prefix_blocks, &attribute_set](AttributeSet::SizeType attr) {
+        attribute_set.Iterate([&prefix_blocks, &attribute_set](model::ColumnIndex attr) {
             prefix_blocks[fastod::DeleteAttribute(attribute_set, attr)].push_back(attr);
         });
     }
@@ -299,7 +298,7 @@ void Fastod::CalculateNextLevel() {
                         fastod::AddAttribute(prefix, single_attributes[i]), single_attributes[j]);
 
                 candidate.Iterate([&context_this_level, &candidate,
-                                   &create_context](AttributeSet::SizeType attr) {
+                                   &create_context](model::ColumnIndex attr) {
                     if (context_this_level.find(fastod::DeleteAttribute(candidate, attr)) ==
                         context_this_level.end()) {
                         create_context = false;

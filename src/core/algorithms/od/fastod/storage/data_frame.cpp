@@ -9,7 +9,7 @@
 namespace algos::fastod {
 
 DataFrame::DataFrame(std::vector<model::TypedColumnData> const& columns_data) {
-    AttributeSet::SizeType cols_num = columns_data.size();
+    model::ColumnIndex cols_num = columns_data.size();
 
     if (cols_num <= 0) {
         throw std::invalid_argument("Number of columns must be greater than zero");
@@ -47,7 +47,7 @@ DataFrame::DataFrame(std::vector<model::TypedColumnData> const& columns_data) {
     RecognizeAttributesWithRanges();
 }
 
-int DataFrame::GetValue(int tuple_index, AttributeSet::SizeType attribute_index) const {
+int DataFrame::GetValue(int tuple_index, model::ColumnIndex attribute_index) const {
     return data_[attribute_index][tuple_index];
 }
 
@@ -55,11 +55,11 @@ std::vector<std::vector<DataFrame::ValueIndices>> const& DataFrame::GetDataRange
     return data_ranges_;
 }
 
-size_t DataFrame::GetRangeIndexByItem(size_t item, AttributeSet::SizeType attribute) const {
+size_t DataFrame::GetRangeIndexByItem(size_t item, model::ColumnIndex attribute) const {
     return range_item_placement_[attribute][item];
 }
 
-AttributeSet::SizeType DataFrame::GetColumnCount() const {
+model::ColumnIndex DataFrame::GetColumnCount() const {
     return data_.size();
 }
 
@@ -74,8 +74,8 @@ bool DataFrame::IsAttributesMostlyRangeBased(AttributeSet attributes) const {
 
     AttributeSet remaining_attrs = Intersect(attrs_with_ranges_, attributes);
 
-    AttributeSet::SizeType attrs_count = attributes.Count();
-    AttributeSet::SizeType remaining_attrs_count = remaining_attrs.Count();
+    model::ColumnIndex attrs_count = attributes.Count();
+    model::ColumnIndex remaining_attrs_count = remaining_attrs.Count();
 
     double constexpr accept_range_based_partition_factor = 0.5;
 

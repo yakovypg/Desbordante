@@ -25,7 +25,7 @@ private:
     RangeBasedStrippedPartition(DataFrame const& data, std::vector<DataFrame::Range> const& indexes,
                                 std::vector<size_t> const& begins);
 
-    std::vector<DataFrame::ValueIndices> IntersectWithAttribute(AttributeSet::SizeType attribute,
+    std::vector<DataFrame::ValueIndices> IntersectWithAttribute(model::ColumnIndex attribute,
                                                                 size_t group_start,
                                                                 size_t group_end);
 

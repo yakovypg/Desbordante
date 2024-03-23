@@ -10,7 +10,7 @@ std::string AttributeSet::ToString() const {
 
     bool first = true;
 
-    Iterate([&result, &first](AttributeSet::SizeType i) {
+    Iterate([&result, &first](model::ColumnIndex i) {
         if (first)
             first = false;
         else
@@ -24,8 +24,8 @@ std::string AttributeSet::ToString() const {
     return result.str();
 }
 
-void AttributeSet::Iterate(std::function<void(SizeType)> callback) const {
-    for (SizeType attr = FindFirst(); attr != Size(); attr = FindNext(attr)) {
+void AttributeSet::Iterate(std::function<void(model::ColumnIndex)> callback) const {
+    for (model::ColumnIndex attr = FindFirst(); attr != Size(); attr = FindNext(attr)) {
         callback(attr);
     }
 }

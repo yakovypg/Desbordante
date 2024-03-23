@@ -14,7 +14,7 @@ private:
     AttributePair ap_;
 
 public:
-    CanonicalOD(AttributeSet&& context, AttributeSet::SizeType left, AttributeSet::SizeType right);
+    CanonicalOD(AttributeSet&& context, model::ColumnIndex left, model::ColumnIndex right);
 
     bool IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const;
     std::string ToString() const;
@@ -26,10 +26,10 @@ using DescCanonicalOD = CanonicalOD<false>;
 class SimpleCanonicalOD {
 private:
     AttributeSet context_;
-    AttributeSet::SizeType right_;
+    model::ColumnIndex right_;
 
 public:
-    SimpleCanonicalOD(AttributeSet const& context, AttributeSet::SizeType right);
+    SimpleCanonicalOD(AttributeSet const& context, model::ColumnIndex right);
 
     bool IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const;
     std::string ToString() const;
