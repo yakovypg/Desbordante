@@ -14,7 +14,7 @@ class ComplexStrippedPartition {
 private:
     std::shared_ptr<std::vector<size_t>> sp_indexes_;
     std::shared_ptr<std::vector<size_t>> sp_begins_;
-    std::shared_ptr<std::vector<DataFrame::range_t>> rb_indexes_;
+    std::shared_ptr<std::vector<DataFrame::Range>> rb_indexes_;
     std::shared_ptr<std::vector<size_t>> rb_begins_;
     std::shared_ptr<DataFrame> data_;
     bool is_stripped_partition_;
@@ -31,15 +31,15 @@ private:
     void RangeBasedProduct(short attribute);
     bool RangeBasedSplit(short right) const;
 
-    std::vector<DataFrame::value_indexes_t> IntersectWithAttribute(
-            algos::fastod::AttributeSet::size_type attribute, size_t group_start, size_t group_end);
+    std::vector<DataFrame::ValueIndices> IntersectWithAttribute(
+            algos::fastod::AttributeSet::SizeType attribute, size_t group_start, size_t group_end);
 
     ComplexStrippedPartition(std::shared_ptr<DataFrame> data,
                              std::shared_ptr<std::vector<size_t>> indexes,
                              std::shared_ptr<std::vector<size_t>> begins);
 
     ComplexStrippedPartition(std::shared_ptr<DataFrame> data,
-                             std::shared_ptr<std::vector<DataFrame::range_t>> indexes,
+                             std::shared_ptr<std::vector<DataFrame::Range>> indexes,
                              std::shared_ptr<std::vector<size_t>> begins);
 
 public:
@@ -81,7 +81,7 @@ public:
                 }
             } else {
                 for (size_t i = group_begin; i < group_end; ++i) {
-                    const DataFrame::range_t range = (*rb_indexes_)[i];
+                    const DataFrame::Range range = (*rb_indexes_)[i];
 
                     for (size_t j = range.first; j <= range.second; ++j) {
                         values.emplace_back(data_->GetValue(j, left), data_->GetValue(j, right));
@@ -125,7 +125,7 @@ public:
     template <bool range_based_mode>
     static ComplexStrippedPartition Create(std::shared_ptr<DataFrame> data) {
         if constexpr (range_based_mode) {
-            std::vector<DataFrame::range_t>* rb_indexes = new std::vector<DataFrame::range_t>();
+            std::vector<DataFrame::Range>* rb_indexes = new std::vector<DataFrame::Range>();
             std::vector<size_t>* rb_begins = new std::vector<size_t>();
 
             const size_t tuple_count = data->GetTupleCount();
@@ -137,7 +137,7 @@ public:
             }
 
             return ComplexStrippedPartition(
-                    std::move(data), std::shared_ptr<std::vector<DataFrame::range_t>>(rb_indexes),
+                    std::move(data), std::shared_ptr<std::vector<DataFrame::Range>>(rb_indexes),
                     std::shared_ptr<std::vector<size_t>>(rb_begins));
         }
 

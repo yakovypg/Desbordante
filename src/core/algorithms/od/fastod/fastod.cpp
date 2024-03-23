@@ -138,7 +138,7 @@ void Fastod::Initialize() {
     level_ = 1;
     std::unordered_set<AttributeSet> level_1_candidates;
 
-    for (AttributeSet::size_type i = 0; i < data_->GetColumnCount(); ++i)
+    for (AttributeSet::SizeType i = 0; i < data_->GetColumnCount(); ++i)
         level_1_candidates.emplace(data_->GetColumnCount(), 1 << i);
 
     context_in_each_level_.push_back(std::move(level_1_candidates));
@@ -203,7 +203,7 @@ void Fastod::ComputeODs() {
         auto& del_attrs = deleted_attrs[context_ind++];
         del_attrs.reserve(data_->GetColumnCount());
 
-        for (AttributeSet::size_type column = 0; column < data_->GetColumnCount(); ++column) {
+        for (AttributeSet::SizeType column = 0; column < data_->GetColumnCount(); ++column) {
             del_attrs.push_back(DeleteAttribute(context, column));
         }
 
@@ -214,7 +214,7 @@ void Fastod::ComputeODs() {
 
         AttributeSet context_cc = schema_;
 
-        context.Iterate([this, &context_cc, &del_attrs](AttributeSet::size_type attr) {
+        context.Iterate([this, &context_cc, &del_attrs](AttributeSet::SizeType attr) {
             context_cc = Intersect(context_cc, CCGet(del_attrs[attr]));
         });
 
@@ -237,7 +237,7 @@ void Fastod::ComputeODs() {
         AttributeSet context_intersect_cc_context = Intersect(context, CCGet(context));
 
         context_intersect_cc_context.Iterate(
-                [this, &context, &delAttrs](AttributeSet::size_type attr) {
+                [this, &context, &delAttrs](AttributeSet::SizeType attr) {
                     SimpleCanonicalOD od(delAttrs[attr], attr);
 
                     if (od.IsValid(data_, partition_cache_)) {
@@ -248,7 +248,7 @@ void Fastod::ComputeODs() {
 
                         const AttributeSet diff = Difference(schema_, context);
 
-                        diff.Iterate([this, &context](AttributeSet::size_type i) {
+                        diff.Iterate([this, &context](AttributeSet::SizeType i) {
                             CCPut(context, DeleteAttribute(CCGet(context), i));
                         });
                     }
@@ -281,7 +281,7 @@ void Fastod::CalculateNextLevel() {
     auto const& context_this_level = context_in_each_level_[level_];
 
     for (AttributeSet const& attribute_set : context_this_level) {
-        attribute_set.Iterate([&prefix_blocks, &attribute_set](AttributeSet::size_type attr) {
+        attribute_set.Iterate([&prefix_blocks, &attribute_set](AttributeSet::SizeType attr) {
             prefix_blocks[DeleteAttribute(attribute_set, attr)].push_back(attr);
         });
     }
@@ -304,7 +304,7 @@ void Fastod::CalculateNextLevel() {
                         AddAttribute(prefix, single_attributes[i]), single_attributes[j]);
 
                 candidate.Iterate([&context_this_level, &candidate,
-                                   &create_context](AttributeSet::size_type attr) {
+                                   &create_context](AttributeSet::SizeType attr) {
                     if (context_this_level.find(DeleteAttribute(candidate, attr)) ==
                         context_this_level.end()) {
                         create_context = false;

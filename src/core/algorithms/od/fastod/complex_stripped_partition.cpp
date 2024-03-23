@@ -22,7 +22,7 @@ ComplexStrippedPartition::ComplexStrippedPartition(std::shared_ptr<DataFrame> da
       should_be_converted_to_sp_(false) {}
 
 ComplexStrippedPartition::ComplexStrippedPartition(
-        std::shared_ptr<DataFrame> data, std::shared_ptr<std::vector<DataFrame::range_t>> indexes,
+        std::shared_ptr<DataFrame> data, std::shared_ptr<std::vector<DataFrame::Range>> indexes,
         std::shared_ptr<std::vector<size_t>> begins)
     : rb_indexes_(indexes),
       rb_begins_(begins),
@@ -80,7 +80,7 @@ void ComplexStrippedPartition::ToStrippedPartition() {
         const size_t group_end = (*rb_begins_)[begin_pointer + 1];
 
         for (size_t i = group_begin; i < group_end; ++i) {
-            const DataFrame::range_t range = (*rb_indexes_)[i];
+            const DataFrame::Range range = (*rb_indexes_)[i];
             sp_begin += range_size(range);
 
             for (size_t sp_index = range.first; sp_index <= range.second; ++sp_index) {
@@ -226,7 +226,7 @@ std::string ComplexStrippedPartition::RangeBasedToString() const {
 
 void ComplexStrippedPartition::RangeBasedProduct(short attribute) {
     std::vector<size_t>* new_begins = new std::vector<size_t>();
-    std::vector<DataFrame::range_t>* new_indexes = new std::vector<DataFrame::range_t>();
+    std::vector<DataFrame::Range>* new_indexes = new std::vector<DataFrame::Range>();
 
     size_t curr_begin = 0;
 
@@ -234,7 +234,7 @@ void ComplexStrippedPartition::RangeBasedProduct(short attribute) {
         const size_t group_begin = (*rb_begins_)[begin_pointer];
         const size_t group_end = (*rb_begins_)[begin_pointer + 1];
 
-        std::vector<DataFrame::value_indexes_t> intersection =
+        std::vector<DataFrame::ValueIndices> intersection =
                 IntersectWithAttribute(attribute, group_begin, group_end - 1);
 
         const size_t intersection_size = intersection.size();
@@ -243,7 +243,7 @@ void ComplexStrippedPartition::RangeBasedProduct(short attribute) {
         auto add_group = [&new_indexes, &new_begins, &intersection, &curr_begin,
                           &small_ranges_count](size_t start_index, size_t end_index) {
             if (start_index == end_index) {
-                DataFrame::range_t range = intersection[start_index].second;
+                DataFrame::Range range = intersection[start_index].second;
 
                 if (range.second == range.first) {
                     return;
@@ -251,7 +251,7 @@ void ComplexStrippedPartition::RangeBasedProduct(short attribute) {
             }
 
             for (size_t i = start_index; i <= end_index; ++i) {
-                DataFrame::range_t const& range = intersection[i].second;
+                DataFrame::Range const& range = intersection[i].second;
 
                 if (range_size(range) < MIN_MEANINGFUL_RANGE_SIZE) {
                     small_ranges_count++;
@@ -284,7 +284,7 @@ void ComplexStrippedPartition::RangeBasedProduct(short attribute) {
 
     new_begins->push_back(new_indexes->size());
 
-    rb_indexes_ = std::shared_ptr<std::vector<DataFrame::range_t>>(new_indexes);
+    rb_indexes_ = std::shared_ptr<std::vector<DataFrame::Range>>(new_indexes);
     rb_begins_ = std::shared_ptr<std::vector<size_t>>(new_begins);
 }
 
@@ -296,7 +296,7 @@ bool ComplexStrippedPartition::RangeBasedSplit(short right) const {
         int const group_value = data_->GetValue((*rb_indexes_)[group_begin].first, right);
 
         for (size_t i = group_begin; i < group_end; ++i) {
-            const DataFrame::range_t range = (*rb_indexes_)[i];
+            const DataFrame::Range range = (*rb_indexes_)[i];
 
             for (size_t j = range.first; j <= range.second; ++j) {
                 if (data_->GetValue(j, right) != group_value) {
@@ -309,21 +309,21 @@ bool ComplexStrippedPartition::RangeBasedSplit(short right) const {
     return false;
 }
 
-std::vector<DataFrame::value_indexes_t> ComplexStrippedPartition::IntersectWithAttribute(
-        algos::fastod::AttributeSet::size_type attribute, size_t group_start, size_t group_end) {
-    std::vector<DataFrame::value_indexes_t> result;
+std::vector<DataFrame::ValueIndices> ComplexStrippedPartition::IntersectWithAttribute(
+        algos::fastod::AttributeSet::SizeType attribute, size_t group_start, size_t group_end) {
+    std::vector<DataFrame::ValueIndices> result;
 
-    std::vector<DataFrame::value_indexes_t> const& attr_ranges = data_->GetDataRanges()[attribute];
+    std::vector<DataFrame::ValueIndices> const& attr_ranges = data_->GetDataRanges()[attribute];
 
     for (size_t i = group_start; i <= group_end; ++i) {
-        DataFrame::range_t const& range = (*rb_indexes_)[i];
+        DataFrame::Range const& range = (*rb_indexes_)[i];
 
         const size_t lower_bound_range_index = data_->GetRangeIndexByItem(range.first, attribute);
         const size_t upper_bound_range_index = data_->GetRangeIndexByItem(range.second, attribute);
 
         for (size_t j = lower_bound_range_index; j <= upper_bound_range_index; ++j) {
-            DataFrame::value_indexes_t const& attr_value_range = attr_ranges[j];
-            DataFrame::range_t const& attr_range = attr_value_range.second;
+            DataFrame::ValueIndices const& attr_value_range = attr_ranges[j];
+            DataFrame::Range const& attr_range = attr_value_range.second;
 
             const size_t start = std::max(range.first, attr_range.first);
             const size_t end = std::min(range.second, attr_range.second);
