@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "attribute_set.h"
+#include "algorithms/od/fastod/model/attribute_set.h"
 #include "range_based_stripped_partition.h"
 
 namespace algos::fastod {

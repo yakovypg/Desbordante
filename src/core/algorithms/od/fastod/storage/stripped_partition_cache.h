@@ -2,10 +2,10 @@
 
 #include <memory>
 
-#include "attribute_pair.h"
-#include "attribute_set.h"
+#include "algorithms/od/fastod/model/attribute_pair.h"
+#include "algorithms/od/fastod/model/attribute_set.h"
 #include "cache_with_limit.h"
-#include "complex_stripped_partition.h"
+#include "algorithms/od/fastod/partitions/complex_stripped_partition.h"
 
 namespace algos::fastod {
 
