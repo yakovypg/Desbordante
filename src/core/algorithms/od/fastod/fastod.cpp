@@ -15,7 +15,7 @@
 #include "config/time_limit/option.h"
 #include "stripped_partition.h"
 
-namespace algos::fastod {
+namespace algos {
 
 Fastod::Fastod() : Algorithm({}) {
     PrepareOptions();
@@ -29,7 +29,7 @@ void Fastod::CCPut(AttributeSet const& key, AttributeSet attribute_set) {
     cc_[key] = std::move(attribute_set);
 }
 
-AttributeSet const& Fastod::CCGet(AttributeSet const& key) {
+fastod::AttributeSet const& Fastod::CCGet(AttributeSet const& key) {
     return cc_[key];
 }
 
@@ -112,15 +112,15 @@ bool Fastod::IsComplete() const {
     return is_complete_;
 }
 
-std::vector<AscCanonicalOD> const& Fastod::GetAscendingDependencies() const {
+std::vector<fastod::AscCanonicalOD> const& Fastod::GetAscendingDependencies() const {
     return result_asc_;
 }
 
-std::vector<DescCanonicalOD> const& Fastod::GetDescendingDependencies() const {
+std::vector<fastod::DescCanonicalOD> const& Fastod::GetDescendingDependencies() const {
     return result_desc_;
 }
 
-std::vector<SimpleCanonicalOD> const& Fastod::GetSimpleDependencies() const {
+std::vector<fastod::SimpleCanonicalOD> const& Fastod::GetSimpleDependencies() const {
     return result_simple_;
 }
 
@@ -144,8 +144,8 @@ void Fastod::Initialize() {
     context_in_each_level_.push_back(std::move(level_1_candidates));
 }
 
-std::tuple<std::vector<CanonicalOD<true>> const&, std::vector<CanonicalOD<false>> const&,
-           std::vector<SimpleCanonicalOD> const&>
+std::tuple<std::vector<fastod::AscCanonicalOD> const&, std::vector<fastod::DescCanonicalOD> const&,
+           std::vector<fastod::SimpleCanonicalOD> const&>
 Fastod::Discover() {
     Initialize();
 
@@ -204,7 +204,7 @@ void Fastod::ComputeODs() {
         del_attrs.reserve(data_->GetColumnCount());
 
         for (AttributeSet::SizeType column = 0; column < data_->GetColumnCount(); ++column) {
-            del_attrs.push_back(DeleteAttribute(context, column));
+            del_attrs.push_back(fastod::DeleteAttribute(context, column));
         }
 
         if (IsTimeUp()) {
@@ -215,7 +215,7 @@ void Fastod::ComputeODs() {
         AttributeSet context_cc = schema_;
 
         context.Iterate([this, &context_cc, &del_attrs](AttributeSet::SizeType attr) {
-            context_cc = Intersect(context_cc, CCGet(del_attrs[attr]));
+            context_cc = fastod::Intersect(context_cc, CCGet(del_attrs[attr]));
         });
 
         CCPut(context, context_cc);
@@ -234,7 +234,7 @@ void Fastod::ComputeODs() {
             return;
         }
 
-        AttributeSet context_intersect_cc_context = Intersect(context, CCGet(context));
+        AttributeSet context_intersect_cc_context = fastod::Intersect(context, CCGet(context));
 
         context_intersect_cc_context.Iterate(
                 [this, &context, &delAttrs](AttributeSet::SizeType attr) {
@@ -244,12 +244,12 @@ void Fastod::ComputeODs() {
                         AddToResult(std::move(od));
                         fd_count_++;
 
-                        CCPut(context, DeleteAttribute(CCGet(context), attr));
+                        CCPut(context, fastod::DeleteAttribute(CCGet(context), attr));
 
-                        const AttributeSet diff = Difference(schema_, context);
+                        const AttributeSet diff = fastod::Difference(schema_, context);
 
                         diff.Iterate([this, &context](AttributeSet::SizeType i) {
-                            CCPut(context, DeleteAttribute(CCGet(context), i));
+                            CCPut(context, fastod::DeleteAttribute(CCGet(context), i));
                         });
                     }
                 });
@@ -282,7 +282,7 @@ void Fastod::CalculateNextLevel() {
 
     for (AttributeSet const& attribute_set : context_this_level) {
         attribute_set.Iterate([&prefix_blocks, &attribute_set](AttributeSet::SizeType attr) {
-            prefix_blocks[DeleteAttribute(attribute_set, attr)].push_back(attr);
+            prefix_blocks[fastod::DeleteAttribute(attribute_set, attr)].push_back(attr);
         });
     }
 
@@ -300,12 +300,12 @@ void Fastod::CalculateNextLevel() {
             for (size_t j = i + 1; j < single_attributes.size(); ++j) {
                 bool create_context = true;
 
-                const AttributeSet candidate = AddAttribute(
-                        AddAttribute(prefix, single_attributes[i]), single_attributes[j]);
+                const AttributeSet candidate = fastod::AddAttribute(
+                        fastod::AddAttribute(prefix, single_attributes[i]), single_attributes[j]);
 
                 candidate.Iterate([&context_this_level, &candidate,
                                    &create_context](AttributeSet::SizeType attr) {
-                    if (context_this_level.find(DeleteAttribute(candidate, attr)) ==
+                    if (context_this_level.find(fastod::DeleteAttribute(candidate, attr)) ==
                         context_this_level.end()) {
                         create_context = false;
                         return;
@@ -322,4 +322,4 @@ void Fastod::CalculateNextLevel() {
     context_in_each_level_.push_back(std::move(context_next_level));
 }
 
-}  // namespace algos::fastod
+}  // namespace algos
