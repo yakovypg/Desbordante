@@ -30,8 +30,8 @@ size_t RunFastod(CSVConfig const& csv_config) {
 
     algos::StdParamsMap params{{kCsvConfig, csv_config}};
 
-    std::unique_ptr<algos::fastod::Fastod> fastod =
-            algos::CreateAndLoadAlgorithm<algos::fastod::Fastod>(params);
+    std::unique_ptr<algos::Fastod> fastod =
+            algos::CreateAndLoadAlgorithm<algos::Fastod>(params);
 
     std::vector<std::string> string_ods = fastod->DiscoverAsStrings();
     std::sort(std::begin(string_ods), std::end(string_ods));
@@ -48,14 +48,14 @@ size_t RunFastod(CSVConfig const& csv_config) {
 
 class FastodTest : public ::testing::Test {
 protected:
-    static std::unique_ptr<algos::fastod::Fastod> CreateAlgorithmInstance(
+    static std::unique_ptr<algos::Fastod> CreateAlgorithmInstance(
             CSVConfig const& csv_config, config::TimeLimitSecondsType time_limit_seconds = 0u) {
         using namespace config::names;
 
         algos::StdParamsMap params{{kCsvConfig, csv_config},
                                    {kTimeLimitSeconds, time_limit_seconds}};
 
-        return algos::CreateAndLoadAlgorithm<algos::fastod::Fastod>(params);
+        return algos::CreateAndLoadAlgorithm<algos::Fastod>(params);
     }
 
     static void TestFastod(CSVConfig const& csv_config,

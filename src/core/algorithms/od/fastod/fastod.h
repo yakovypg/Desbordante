@@ -15,10 +15,19 @@
 #include "stripped_partition_cache.h"
 #include "timer.h"
 
-namespace algos::fastod {
+namespace algos {
 
 class Fastod : public Algorithm {
 private:
+    using AscCanonicalOD = fastod::AscCanonicalOD;
+    using DescCanonicalOD = fastod::DescCanonicalOD;
+    using SimpleCanonicalOD = fastod::SimpleCanonicalOD;
+    using AttributePair = fastod::AttributePair;
+    using AttributeSet = fastod::AttributeSet;
+    using StrippedPartitionCache = fastod::StrippedPartitionCache;
+    using DataFrame = fastod::DataFrame;
+    using Timer = fastod::Timer;
+    
     config::TimeLimitSecondsType time_limit_seconds_ = 0u;
     bool is_complete_ = true;
     size_t level_ = 1;
@@ -26,8 +35,8 @@ private:
     size_t fd_count_ = 0;
     size_t ocd_count_ = 0;
 
-    std::vector<CanonicalOD<true>> result_asc_;
-    std::vector<CanonicalOD<false>> result_desc_;
+    std::vector<AscCanonicalOD> result_asc_;
+    std::vector<DescCanonicalOD> result_desc_;
     std::vector<SimpleCanonicalOD> result_simple_;
     std::vector<std::unordered_set<AttributeSet>> context_in_each_level_;
     std::unordered_map<AttributeSet, AttributeSet> cc_;
@@ -52,7 +61,7 @@ private:
     void MakeLoadOptionsAvailable();
 
     template <bool ascending>
-    void AddToResult(CanonicalOD<ascending>&& od) {
+    void AddToResult(fastod::CanonicalOD<ascending>&& od) {
         if constexpr (ascending)
             result_asc_.emplace_back(std::move(od));
         else
@@ -103,7 +112,7 @@ private:
             for (AttributeSet::SizeType i = 0; i < data_->GetColumnCount(); i++) {
                 for (AttributeSet::SizeType j = 0; j < data_->GetColumnCount(); j++) {
                     if (i == j) continue;
-                    CSPut<ascending>(CreateAttributeSet({i, j}, data_->GetColumnCount()),
+                    CSPut<ascending>(fastod::CreateAttributeSet({i, j}, data_->GetColumnCount()),
                                      AttributePair(i, j));
                 }
             }
@@ -117,7 +126,7 @@ private:
 
             for (AttributePair const& attribute_pair : candidates) {
                 const AttributeSet context_delete_ab =
-                        DeleteAttribute(delAttrs[attribute_pair.left], attribute_pair.right);
+                        fastod::DeleteAttribute(delAttrs[attribute_pair.left], attribute_pair.right);
 
                 bool add_context = true;
 
@@ -146,7 +155,7 @@ private:
 
             if (ContainsAttribute(CCGet(delAttrs[b]), a) &&
                 ContainsAttribute(CCGet(delAttrs[a]), b)) {
-                CanonicalOD<ascending> od(DeleteAttribute(delAttrs[a], b), a, b);
+                fastod::CanonicalOD<ascending> od(fastod::DeleteAttribute(delAttrs[a], b), a, b);
                 if (od.IsValid(data_, partition_cache_)) {
                     ++ocd_count_;
                     AddToResult(std::move(od));
@@ -170,11 +179,11 @@ public:
     std::vector<DescCanonicalOD> const& GetDescendingDependencies() const;
     std::vector<SimpleCanonicalOD> const& GetSimpleDependencies() const;
 
-    std::tuple<std::vector<CanonicalOD<true>> const&, std::vector<CanonicalOD<false>> const&,
+    std::tuple<std::vector<AscCanonicalOD> const&, std::vector<DescCanonicalOD> const&,
                std::vector<SimpleCanonicalOD> const&>
     Discover();
 
     std::vector<std::string> DiscoverAsStrings();
 };
 
-}  // namespace algos::fastod
+}  // namespace algos
