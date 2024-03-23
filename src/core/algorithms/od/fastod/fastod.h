@@ -10,7 +10,7 @@
 #include "algorithms/od/fastod/model/attribute_pair.h"
 #include "algorithms/od/fastod/model/attribute_set.h"
 #include "algorithms/od/fastod/model/canonical_od.h"
-#include "algorithms/od/fastod/storage/stripped_partition_cache.h"
+#include "algorithms/od/fastod/storage/partition_cache.h"
 #include "algorithms/od/fastod/util/timer.h"
 #include "config/tabular_data/input_table_type.h"
 #include "config/time_limit/type.h"

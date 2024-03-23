@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "algorithms/od/fastod/storage/stripped_partition_cache.h"
+#include "algorithms/od/fastod/storage/partition_cache.h"
 #include "attribute_pair.h"
 
 namespace algos::fastod {

@@ -11,8 +11,7 @@ CanonicalOD<ascending>::CanonicalOD(AttributeSet&& context, AttributeSet::SizeTy
     : context_(std::move(context)), ap_(left, right) {}
 
 template <bool ascending>
-bool CanonicalOD<ascending>::IsValid(std::shared_ptr<DataFrame> data,
-                                     PartitionCache& cache) const {
+bool CanonicalOD<ascending>::IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const {
     return !(cache.GetStrippedPartition(context_, data).Swap<ascending>(ap_.left, ap_.right));
 }
 
@@ -29,8 +28,7 @@ std::string CanonicalOD<ascending>::ToString() const {
 SimpleCanonicalOD::SimpleCanonicalOD(AttributeSet const& context, AttributeSet::SizeType right)
     : context_(context), right_(right) {}
 
-bool SimpleCanonicalOD::IsValid(std::shared_ptr<DataFrame> data,
-                                PartitionCache& cache) const {
+bool SimpleCanonicalOD::IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const {
     return !(cache.GetStrippedPartition(context_, data).Split(right_));
 }
 
