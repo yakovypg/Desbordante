@@ -69,8 +69,8 @@ bool ComplexStrippedPartition::ShouldBeConvertedToStrippedPartition() const {
 }
 
 void ComplexStrippedPartition::ToStrippedPartition() {
-    sp_begins_ = std::shared_ptr<std::vector<size_t>>(new std::vector<size_t>());
-    sp_indexes_ = std::shared_ptr<std::vector<size_t>>(new std::vector<size_t>());
+    sp_begins_ = std::make_unique<std::vector<size_t>>();
+    sp_indexes_ = std::make_unique<std::vector<size_t>>();
 
     size_t sp_begin = 0;
     sp_begins_->push_back(sp_begin);
@@ -127,10 +127,10 @@ std::string ComplexStrippedPartition::CommonToString() const {
 }
 
 void ComplexStrippedPartition::CommonProduct(short attribute) {
-    std::vector<size_t>* new_indexes = new std::vector<size_t>();
+    auto new_indexes = std::make_unique<std::vector<size_t>>();
     new_indexes->reserve(data_->GetColumnCount());
 
-    std::vector<size_t>* new_begins = new std::vector<size_t>();
+    auto new_begins = std::make_unique<std::vector<size_t>>();
     size_t fill_pointer = 0;
 
     for (size_t begin_pointer = 0; begin_pointer < sp_begins_->size() - 1; begin_pointer++) {
@@ -174,8 +174,8 @@ void ComplexStrippedPartition::CommonProduct(short attribute) {
 
     new_begins->push_back(new_indexes->size());
 
-    sp_indexes_ = std::shared_ptr<std::vector<size_t>>(new_indexes);
-    sp_begins_ = std::shared_ptr<std::vector<size_t>>(new_begins);
+    sp_indexes_ = std::move(new_indexes);
+    sp_begins_ = std::move(new_begins);
 }
 
 bool ComplexStrippedPartition::CommonSplit(short right) const {
@@ -225,8 +225,8 @@ std::string ComplexStrippedPartition::RangeBasedToString() const {
 }
 
 void ComplexStrippedPartition::RangeBasedProduct(short attribute) {
-    std::vector<size_t>* new_begins = new std::vector<size_t>();
-    std::vector<DataFrame::Range>* new_indexes = new std::vector<DataFrame::Range>();
+    auto new_begins = std::make_unique<std::vector<size_t>>();
+    auto new_indexes = std::make_unique<std::vector<DataFrame::Range>>();
 
     size_t curr_begin = 0;
 
@@ -284,8 +284,8 @@ void ComplexStrippedPartition::RangeBasedProduct(short attribute) {
 
     new_begins->push_back(new_indexes->size());
 
-    rb_indexes_ = std::shared_ptr<std::vector<DataFrame::Range>>(new_indexes);
-    rb_begins_ = std::shared_ptr<std::vector<size_t>>(new_begins);
+    rb_indexes_ = std::move(new_indexes);
+    rb_begins_ = std::move(new_begins);
 }
 
 bool ComplexStrippedPartition::RangeBasedSplit(short right) const {
