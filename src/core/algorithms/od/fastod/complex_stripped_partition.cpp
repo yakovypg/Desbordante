@@ -49,19 +49,19 @@ ComplexStrippedPartition& ComplexStrippedPartition::operator=(
 }
 
 std::string ComplexStrippedPartition::ToString() const {
-    return is_stripped_partition_ ? sp_ToString() : rb_ToString();
+    return is_stripped_partition_ ? CommonToString() : RangeBasedToString();
 }
 
 void ComplexStrippedPartition::Product(short attribute) {
     if (is_stripped_partition_) {
-        sp_Product(attribute);
+        CommonProduct(attribute);
     } else {
-        rb_Product(attribute);
+        RangeBasedProduct(attribute);
     }
 }
 
 bool ComplexStrippedPartition::Split(short right) const {
-    return is_stripped_partition_ ? sp_Split(right) : rb_Split(right);
+    return is_stripped_partition_ ? CommonSplit(right) : RangeBasedSplit(right);
 }
 
 bool ComplexStrippedPartition::ShouldBeConvertedToStrippedPartition() const {
@@ -98,8 +98,8 @@ void ComplexStrippedPartition::ToStrippedPartition() {
     should_be_converted_to_sp_ = false;
 }
 
-std::string ComplexStrippedPartition::sp_ToString() const {
-    std::stringstream ss;
+std::string ComplexStrippedPartition::CommonToString() const {
+    std::stringstream result;
     std::string indexes_string;
 
     for (size_t i = 0; i < sp_indexes_->size(); i++) {
@@ -120,13 +120,13 @@ std::string ComplexStrippedPartition::sp_ToString() const {
         begins_string += std::to_string((*sp_begins_)[i]);
     }
 
-    ss << "ComplexStrippedPartition[SP mode] { indexes = [ " << indexes_string << " ]; begins = [ "
-       << begins_string << " ] }";
+    result << "ComplexStrippedPartition[SP mode] { indexes = [ " << indexes_string
+           << " ]; begins = [ " << begins_string << " ] }";
 
-    return ss.str();
+    return result.str();
 }
 
-void ComplexStrippedPartition::sp_Product(short attribute) {
+void ComplexStrippedPartition::CommonProduct(short attribute) {
     std::vector<size_t>* new_indexes = new std::vector<size_t>();
     new_indexes->reserve(data_->GetColumnCount());
 
@@ -150,7 +150,7 @@ void ComplexStrippedPartition::sp_Product(short attribute) {
         size_t group_start = 0;
         size_t i = 1;
 
-        auto AddGroup = [&]() {
+        auto add_group = [&]() {
             const size_t group_size = i - group_start;
 
             if (group_size > 1) {
@@ -161,14 +161,15 @@ void ComplexStrippedPartition::sp_Product(short attribute) {
                     new_indexes->push_back(values[j].second);
                 }
             }
+
             group_start = i;
         };
 
         for (; i < values.size(); ++i) {
-            if (values[i - 1].first != values[i].first) AddGroup();
+            if (values[i - 1].first != values[i].first) add_group();
         }
 
-        AddGroup();
+        add_group();
     }
 
     new_begins->push_back(new_indexes->size());
@@ -177,7 +178,7 @@ void ComplexStrippedPartition::sp_Product(short attribute) {
     sp_begins_ = std::shared_ptr<std::vector<size_t>>(new_begins);
 }
 
-bool ComplexStrippedPartition::sp_Split(short right) const {
+bool ComplexStrippedPartition::CommonSplit(short right) const {
     for (size_t begin_pointer = 0; begin_pointer < sp_begins_->size() - 1; begin_pointer++) {
         const size_t group_begin = (*sp_begins_)[begin_pointer];
         const size_t group_end = (*sp_begins_)[begin_pointer + 1];
@@ -194,8 +195,8 @@ bool ComplexStrippedPartition::sp_Split(short right) const {
     return false;
 }
 
-std::string ComplexStrippedPartition::rb_ToString() const {
-    std::stringstream ss;
+std::string ComplexStrippedPartition::RangeBasedToString() const {
+    std::stringstream result;
     std::string indexes_string;
 
     for (size_t i = 0; i < rb_indexes_->size(); i++) {
@@ -217,13 +218,13 @@ std::string ComplexStrippedPartition::rb_ToString() const {
         begins_string += std::to_string((*rb_begins_)[i]);
     }
 
-    ss << "ComplexStrippedPartition[RB mode] { indexes = [ " << indexes_string << " ]; begins = [ "
-       << begins_string << " ] }";
+    result << "ComplexStrippedPartition[RB mode] { indexes = [ " << indexes_string
+           << " ]; begins = [ " << begins_string << " ] }";
 
-    return ss.str();
+    return result.str();
 }
 
-void ComplexStrippedPartition::rb_Product(short attribute) {
+void ComplexStrippedPartition::RangeBasedProduct(short attribute) {
     std::vector<size_t>* new_begins = new std::vector<size_t>();
     std::vector<DataFrame::range_t>* new_indexes = new std::vector<DataFrame::range_t>();
 
@@ -239,8 +240,8 @@ void ComplexStrippedPartition::rb_Product(short attribute) {
         const size_t intersection_size = intersection.size();
         size_t small_ranges_count = 0;
 
-        auto AddGroup = [&new_indexes, &new_begins, &intersection, &curr_begin,
-                         &small_ranges_count](size_t start_index, size_t end_index) {
+        auto add_group = [&new_indexes, &new_begins, &intersection, &curr_begin,
+                          &small_ranges_count](size_t start_index, size_t end_index) {
             if (start_index == end_index) {
                 DataFrame::range_t range = intersection[start_index].second;
 
@@ -267,12 +268,12 @@ void ComplexStrippedPartition::rb_Product(short attribute) {
 
         for (size_t i = 1; i < intersection_size; ++i) {
             if (intersection[i].first != intersection[i - 1].first) {
-                AddGroup(group_start, i - 1);
+                add_group(group_start, i - 1);
                 group_start = i;
             }
         }
 
-        AddGroup(group_start, intersection_size - 1);
+        add_group(group_start, intersection_size - 1);
 
         if (!should_be_converted_to_sp_ && intersection_size > 0 &&
             small_ranges_count / static_cast<double>(intersection_size) >=
@@ -287,7 +288,7 @@ void ComplexStrippedPartition::rb_Product(short attribute) {
     rb_begins_ = std::shared_ptr<std::vector<size_t>>(new_begins);
 }
 
-bool ComplexStrippedPartition::rb_Split(short right) const {
+bool ComplexStrippedPartition::RangeBasedSplit(short right) const {
     for (size_t begin_pointer = 0; begin_pointer < rb_begins_->size() - 1; ++begin_pointer) {
         const size_t group_begin = (*rb_begins_)[begin_pointer];
         const size_t group_end = (*rb_begins_)[begin_pointer + 1];

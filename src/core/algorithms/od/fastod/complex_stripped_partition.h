@@ -23,13 +23,13 @@ private:
     static constexpr inline double SMALL_RANGES_RATIO_TO_CONVERT = 0.5;
     static constexpr inline size_t MIN_MEANINGFUL_RANGE_SIZE = static_cast<size_t>(40);
 
-    std::string sp_ToString() const;
-    void sp_Product(short attribute);
-    bool sp_Split(short right) const;
+    std::string CommonToString() const;
+    void CommonProduct(short attribute);
+    bool CommonSplit(short right) const;
 
-    std::string rb_ToString() const;
-    void rb_Product(short attribute);
-    bool rb_Split(short right) const;
+    std::string RangeBasedToString() const;
+    void RangeBasedProduct(short attribute);
+    bool RangeBasedSplit(short right) const;
 
     std::vector<DataFrame::value_indexes_t> IntersectWithAttribute(
             algos::fastod::AttributeSet::size_type attribute, size_t group_start, size_t group_end);

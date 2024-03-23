@@ -1,9 +1,11 @@
 #include "timer.h"
 
-using namespace algos::fastod;
+namespace algos::fastod {
 
 Timer::Timer(bool start) : is_started_(false) {
-    if (start) Start();
+    if (start) {
+        Start();
+    }
 }
 
 void Timer::Start() {
@@ -12,7 +14,9 @@ void Timer::Start() {
 }
 
 void Timer::Stop() {
-    if (!is_started_) return;
+    if (!is_started_) {
+        return;
+    }
 
     end_time_ = std::chrono::high_resolution_clock::now();
     is_started_ = false;
@@ -29,3 +33,5 @@ double Timer::GetElapsedSeconds() const {
 
     return std::chrono::duration<double>(elapsed_nanoseconds).count();
 }
+
+}  // namespace algos::fastod

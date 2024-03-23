@@ -30,7 +30,7 @@ bool RangeBasedStrippedPartition::ShouldBeConvertedToStrippedPartition() const {
 }
 
 std::string RangeBasedStrippedPartition::ToString() const {
-    std::stringstream ss;
+    std::stringstream result;
     std::string indexes_string;
 
     for (size_t i = 0; i < indexes_.size(); i++) {
@@ -52,10 +52,10 @@ std::string RangeBasedStrippedPartition::ToString() const {
         begins_string += std::to_string(begins_[i]);
     }
 
-    ss << "RangeBasedStrippedPartition { indexes = [ " << indexes_string << " ]; begins = [ "
-       << begins_string << " ] }";
+    result << "RangeBasedStrippedPartition { indexes = [ " << indexes_string << " ]; begins = [ "
+           << begins_string << " ] }";
 
-    return ss.str();
+    return result.str();
 }
 
 StrippedPartition RangeBasedStrippedPartition::ToStrippedPartition() const {
@@ -112,8 +112,8 @@ void RangeBasedStrippedPartition::Product(short attribute) {
         const size_t intersection_size = intersection.size();
         size_t small_ranges_count = 0;
 
-        auto AddGroup = [&new_indexes, &new_begins, &intersection, &curr_begin,
-                         &small_ranges_count](size_t start_index, size_t end_index) {
+        auto add_group = [&new_indexes, &new_begins, &intersection, &curr_begin,
+                          &small_ranges_count](size_t start_index, size_t end_index) {
             if (start_index == end_index) {
                 DataFrame::range_t range = intersection[start_index].second;
 
@@ -140,12 +140,12 @@ void RangeBasedStrippedPartition::Product(short attribute) {
 
         for (size_t i = 1; i < intersection_size; ++i) {
             if (intersection[i].first != intersection[i - 1].first) {
-                AddGroup(group_start, i - 1);
+                add_group(group_start, i - 1);
                 group_start = i;
             }
         }
 
-        AddGroup(group_start, intersection_size - 1);
+        add_group(group_start, intersection_size - 1);
 
         if (intersection_size > 0 && small_ranges_count / static_cast<double>(intersection_size) >=
                                              SMALL_RANGES_RATIO_TO_CONVERT) {
@@ -186,7 +186,6 @@ bool RangeBasedStrippedPartition::Swap(short left, short right, bool ascending) 
         const size_t group_end = begins_[begin_pointer + 1];
 
         std::vector<std::pair<int, int>> values;
-        // values.reserve(...)?
 
         for (size_t i = group_begin; i < group_end; ++i) {
             const DataFrame::range_t range = indexes_[i];

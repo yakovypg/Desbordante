@@ -28,7 +28,7 @@ StrippedPartition::StrippedPartition(DataFrame const& data, std::vector<size_t> 
     : indexes_(indexes), begins_(begins), data_(data) {}
 
 std::string StrippedPartition::ToString() const {
-    std::stringstream ss;
+    std::stringstream result;
     std::string indexes_string;
 
     for (size_t i = 0; i < indexes_.size(); i++) {
@@ -49,10 +49,10 @@ std::string StrippedPartition::ToString() const {
         begins_string += std::to_string(begins_[i]);
     }
 
-    ss << "StrippedPartition { indexes = [ " << indexes_string << " ]; begins = [ " << begins_string
-       << " ] }";
+    result << "StrippedPartition { indexes = [ " << indexes_string << " ]; begins = [ "
+           << begins_string << " ] }";
 
-    return ss.str();
+    return result.str();
 }
 
 StrippedPartition& StrippedPartition::operator=(StrippedPartition const& other) {
@@ -76,7 +76,7 @@ void StrippedPartition::Product(short attribute) {
     for (size_t begin_pointer = 0; begin_pointer < begins_.size() - 1; begin_pointer++) {
         const size_t group_begin = begins_[begin_pointer];
         const size_t group_end = begins_[begin_pointer + 1];
-        // CHANGE: utilize column types
+
         std::vector<std::pair<int, size_t>> values(group_end - group_begin);
 
         for (size_t i = group_begin; i < group_end; i++) {
@@ -88,28 +88,36 @@ void StrippedPartition::Product(short attribute) {
                   [](auto const& p1, auto const& p2) { return p1.first < p2.first; });
 
         size_t group_start = 0;
-        size_t i = 1;
+        size_t group_index = 1;
 
-        auto addGroup = [&]() {
-            size_t group_size = i - group_start;
+        auto add_group = [&new_begins, &new_indexes, &values, &fill_pointer, &group_start,
+                          &group_index]() {
+            size_t group_size = group_index - group_start;
+
             if (group_size > 1) {
                 new_begins.push_back(fill_pointer);
                 fill_pointer += group_size;
-                for (size_t j = group_start; j < group_start + group_size; ++j)
+
+                for (size_t j = group_start; j < group_start + group_size; ++j) {
                     new_indexes.push_back(values[j].second);
+                }
             }
-            group_start = i;
+
+            group_start = group_index;
         };
 
-        for (; i < values.size(); ++i) {
-            if (values[i - 1].first != values[i].first) addGroup();
+        for (; group_index < values.size(); ++group_index) {
+            if (values[group_index - 1].first != values[group_index].first) {
+                add_group();
+            }
         }
 
-        addGroup();
+        add_group();
     }
 
     indexes_ = std::move(new_indexes);
     begins_ = std::move(new_begins);
+
     begins_.push_back(indexes_.size());
 }
 
@@ -142,12 +150,13 @@ bool StrippedPartition::Swap(short left, short right, bool ascending) const {
             values[i - group_begin] = {data_.GetValue(index, left), data_.GetValue(index, right)};
         }
 
-        if (ascending)
+        if (ascending) {
             std::sort(values.begin(), values.end(),
                       [](auto const& p1, auto const& p2) { return p1.first < p2.first; });
-        else
+        } else {
             std::sort(values.begin(), values.end(),
                       [](auto const& p1, auto const& p2) { return p2.first < p1.first; });
+        }
 
         size_t prev_group_max_index = 0;
         size_t current_group_max_index = 0;

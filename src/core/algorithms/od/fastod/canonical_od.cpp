@@ -20,10 +20,12 @@ bool CanonicalOD<ascending>::IsValid(std::shared_ptr<DataFrame> data,
 
 template <bool ascending>
 std::string CanonicalOD<ascending>::ToString() const {
-    std::stringstream ss;
-    ss << ASToString(context_) << " : " << ap_.left + 1 << (ascending ? "<=" : ">=") << " ~ "
-       << ap_.right + 1 << "<=";
-    return ss.str();
+    std::stringstream result;
+
+    result << context_.ToString() << " : " << ap_.left + 1 << (ascending ? "<=" : ">=") << " ~ "
+           << ap_.right + 1 << "<=";
+
+    return result.str();
 }
 
 SimpleCanonicalOD::SimpleCanonicalOD(AttributeSet const& context, AttributeSet::size_type right)
@@ -35,9 +37,10 @@ bool SimpleCanonicalOD::IsValid(std::shared_ptr<DataFrame> data,
 }
 
 std::string SimpleCanonicalOD::ToString() const {
-    std::stringstream ss;
-    ss << ASToString(context_) << " : [] -> " << right_ + 1 << "<=";
-    return ss.str();
+    std::stringstream result;
+    result << context_.ToString() << " : [] -> " << right_ + 1 << "<=";
+
+    return result.str();
 }
 
 template class CanonicalOD<true>;

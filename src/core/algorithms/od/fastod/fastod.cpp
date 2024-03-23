@@ -37,7 +37,7 @@ void Fastod::PrepareOptions() {
     using namespace config::names;
 
     RegisterOptions();
-    MakeLoadOptsAvailable();
+    MakeLoadOptionsAvailable();
 }
 
 void Fastod::RegisterOptions() {
@@ -47,7 +47,7 @@ void Fastod::RegisterOptions() {
     RegisterOption(config::TimeLimitSecondsOpt(&time_limit_seconds_));
 }
 
-void Fastod::MakeLoadOptsAvailable() {
+void Fastod::MakeLoadOptionsAvailable() {
     using namespace config::names;
     MakeOptionsAvailable({config::TableOpt.GetName()});
 }
@@ -83,18 +83,18 @@ void Fastod::ResetState() {
 
 unsigned long long Fastod::ExecuteInternal() {
     auto const start_time = std::chrono::system_clock::now();
-    auto const [odsAsc, odsDesc, odsSimple] = Discover();
+    auto const [ods_asc, ods_desc, ods_simple] = Discover();
 
     auto const elapsed_milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::system_clock::now() - start_time);
 
-    for (auto const& od : odsAsc) {
+    for (auto const& od : ods_asc) {
         LOG(DEBUG) << od.ToString() << '\n';
     }
-    for (auto const& od : odsDesc) {
+    for (auto const& od : ods_desc) {
         LOG(DEBUG) << od.ToString() << '\n';
     }
-    for (auto const& od : odsSimple) {
+    for (auto const& od : ods_simple) {
         LOG(DEBUG) << od.ToString() << '\n';
     }
 
@@ -132,6 +132,7 @@ void Fastod::Initialize() {
     context_in_each_level_.emplace_back();
     context_in_each_level_[0].insert(empty_set);
     schema_ = AttributeSet(data_->GetColumnCount(), (1 << data_->GetColumnCount()) - 1);
+
     CCPut(empty_set, schema_);
 
     level_ = 1;
@@ -150,11 +151,14 @@ Fastod::Discover() {
 
     while (!context_in_each_level_[level_].empty()) {
         ComputeODs();
+
         if (IsTimeUp()) {
             break;
         }
+
         PruneLevels();
         CalculateNextLevel();
+
         if (IsTimeUp()) {
             break;
         }
@@ -169,30 +173,40 @@ Fastod::Discover() {
     } else {
         LOG(DEBUG) << "FastOD finished with a time-out" << '\n';
     }
+
     PrintStatistics();
+
     return {result_asc_, result_desc_, result_simple_};
 }
 
 std::vector<std::string> Fastod::DiscoverAsStrings() {
-    auto const [odsAsc, odsDesc, odsSimple] = Discover();
+    auto const [ods_asc, ods_desc, ods_simple] = Discover();
+
     std::vector<std::string> result;
-    result.reserve(odsAsc.size() + odsDesc.size() + odsSimple.size());
-    for (auto const& od : odsAsc) result.push_back(od.ToString());
-    for (auto const& od : odsDesc) result.push_back(od.ToString());
-    for (auto const& od : odsSimple) result.push_back(od.ToString());
+    result.reserve(ods_asc.size() + ods_desc.size() + ods_simple.size());
+
+    for (auto const& od : ods_asc) result.push_back(od.ToString());
+    for (auto const& od : ods_desc) result.push_back(od.ToString());
+    for (auto const& od : ods_simple) result.push_back(od.ToString());
+
     return result;
 }
 
 void Fastod::ComputeODs() {
     auto const& context_this_level = context_in_each_level_[level_];
+
     Timer timer(true);
-    std::vector<std::vector<AttributeSet>> deletedAttrs(context_this_level.size());
-    size_t contextInd = 0;
+    std::vector<std::vector<AttributeSet>> deleted_attrs(context_this_level.size());
+    size_t context_ind = 0;
+
     for (AttributeSet const& context : context_this_level) {
-        auto& delAttrs = deletedAttrs[contextInd++];
-        delAttrs.reserve(data_->GetColumnCount());
-        for (AttributeSet::size_type col = 0; col < data_->GetColumnCount(); ++col)
-            delAttrs.push_back(deleteAttribute(context, col));
+        auto& del_attrs = deleted_attrs[context_ind++];
+        del_attrs.reserve(data_->GetColumnCount());
+
+        for (AttributeSet::size_type column = 0; column < data_->GetColumnCount(); ++column) {
+            del_attrs.push_back(DeleteAttribute(context, column));
+        }
+
         if (IsTimeUp()) {
             is_complete_ = false;
             return;
@@ -200,44 +214,48 @@ void Fastod::ComputeODs() {
 
         AttributeSet context_cc = schema_;
 
-        context.iterate([this, &context_cc, &delAttrs](AttributeSet::size_type attr) {
-            context_cc = intersect(context_cc, CCGet(delAttrs[attr]));
+        context.Iterate([this, &context_cc, &del_attrs](AttributeSet::size_type attr) {
+            context_cc = Intersect(context_cc, CCGet(del_attrs[attr]));
         });
 
         CCPut(context, context_cc);
 
-        AddCandidates<false>(context, delAttrs);
-        AddCandidates<true>(context, delAttrs);
+        AddCandidates<false>(context, del_attrs);
+        AddCandidates<true>(context, del_attrs);
     }
-    size_t condInd = 0;
+
+    size_t delete_index = 0;
+
     for (AttributeSet const& context : context_this_level) {
-        auto const& delAttrs = deletedAttrs[condInd++];
+        auto const& delAttrs = deleted_attrs[delete_index++];
+
         if (IsTimeUp()) {
             is_complete_ = false;
             return;
         }
 
-        AttributeSet context_intersect_cc_context = intersect(context, CCGet(context));
+        AttributeSet context_intersect_cc_context = Intersect(context, CCGet(context));
 
-        context_intersect_cc_context.iterate(
+        context_intersect_cc_context.Iterate(
                 [this, &context, &delAttrs](AttributeSet::size_type attr) {
                     SimpleCanonicalOD od(delAttrs[attr], attr);
 
                     if (od.IsValid(data_, partition_cache_)) {
-                        addToRes(std::move(od));
+                        AddToResult(std::move(od));
                         fd_count_++;
-                        CCPut(context, deleteAttribute(CCGet(context), attr));
 
-                        const AttributeSet diff = difference(schema_, context);
+                        CCPut(context, DeleteAttribute(CCGet(context), attr));
 
-                        diff.iterate([this, &context](AttributeSet::size_type i) {
-                            CCPut(context, deleteAttribute(CCGet(context), i));
+                        const AttributeSet diff = Difference(schema_, context);
+
+                        diff.Iterate([this, &context](AttributeSet::size_type i) {
+                            CCPut(context, DeleteAttribute(CCGet(context), i));
                         });
                     }
                 });
 
-        CalcODs<false>(context, delAttrs);
-        CalcODs<true>(context, delAttrs);
+        CalculateODs<false>(context, delAttrs);
+        CalculateODs<true>(context, delAttrs);
     }
 }
 
@@ -246,11 +264,12 @@ void Fastod::PruneLevels() {
         auto& contexts = context_in_each_level_[level_];
 
         for (auto attribute_set_it = contexts.begin(); attribute_set_it != contexts.end();) {
-            if (isEmptyAS(CCGet(*attribute_set_it)) && CSGet<true>(*attribute_set_it).empty() &&
-                CSGet<false>(*attribute_set_it).empty())
+            if (IsEmptySet(CCGet(*attribute_set_it)) && CSGet<true>(*attribute_set_it).empty() &&
+                CSGet<false>(*attribute_set_it).empty()) {
                 contexts.erase(attribute_set_it++);
-            else
+            } else {
                 ++attribute_set_it;
+            }
         }
     }
 }
@@ -262,8 +281,8 @@ void Fastod::CalculateNextLevel() {
     auto const& context_this_level = context_in_each_level_[level_];
 
     for (AttributeSet const& attribute_set : context_this_level) {
-        attribute_set.iterate([&prefix_blocks, &attribute_set](AttributeSet::size_type attr) {
-            prefix_blocks[deleteAttribute(attribute_set, attr)].push_back(attr);
+        attribute_set.Iterate([&prefix_blocks, &attribute_set](AttributeSet::size_type attr) {
+            prefix_blocks[DeleteAttribute(attribute_set, attr)].push_back(attr);
         });
     }
 
@@ -273,17 +292,20 @@ void Fastod::CalculateNextLevel() {
             return;
         }
 
-        if (single_attributes.size() <= 1) continue;
+        if (single_attributes.size() <= 1) {
+            continue;
+        }
 
         for (size_t i = 0; i < single_attributes.size(); ++i) {
             for (size_t j = i + 1; j < single_attributes.size(); ++j) {
                 bool create_context = true;
-                const AttributeSet candidate = addAttribute(
-                        addAttribute(prefix, single_attributes[i]), single_attributes[j]);
 
-                candidate.iterate([&context_this_level, &candidate,
+                const AttributeSet candidate = AddAttribute(
+                        AddAttribute(prefix, single_attributes[i]), single_attributes[j]);
+
+                candidate.Iterate([&context_this_level, &candidate,
                                    &create_context](AttributeSet::size_type attr) {
-                    if (context_this_level.find(deleteAttribute(candidate, attr)) ==
+                    if (context_this_level.find(DeleteAttribute(candidate, attr)) ==
                         context_this_level.end()) {
                         create_context = false;
                         return;

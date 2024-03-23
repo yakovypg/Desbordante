@@ -29,9 +29,12 @@ private:
 
     static std::vector<std::pair<std::byte const*, int>> CreateIndexedColumnData(
             model::TypedColumnData const& column);
+
     static std::vector<int> ConvertColumnDataToIntegers(model::TypedColumnData const& column);
+
     static std::vector<DataFrame::value_indexes_t> ExtractRangesFromColumn(
             std::vector<int> const& column);
+
     static std::optional<size_t> FindRangeIndexByItem(
             size_t item, std::vector<DataFrame::value_indexes_t> const& ranges);
 

@@ -67,14 +67,14 @@ std::size_t DataFrame::GetTupleCount() const {
 }
 
 bool DataFrame::IsAttributesMostlyRangeBased(AttributeSet attributes) const {
-    if (!attributes.any()) {
+    if (!attributes.Any()) {
         return false;
     }
 
-    AttributeSet remaining_attrs = intersect(attrs_with_ranges_, attributes);
+    AttributeSet remaining_attrs = Intersect(attrs_with_ranges_, attributes);
 
-    AttributeSet::size_type attrs_count = attributes.count();
-    AttributeSet::size_type remaining_attrs_count = remaining_attrs.count();
+    AttributeSet::size_type attrs_count = attributes.Count();
+    AttributeSet::size_type remaining_attrs_count = remaining_attrs.Count();
 
     double constexpr accept_range_based_partition_factor = 0.5;
 
@@ -104,7 +104,7 @@ void DataFrame::RecognizeAttributesWithRanges() {
         const size_t ranges_count = data_ranges_[i].size();
 
         if (static_cast<double>(ranges_count) / items_count >= accept_factor) {
-            attrs_with_ranges_.set(i, true);
+            attrs_with_ranges_.Set(i, true);
         }
     }
 }
