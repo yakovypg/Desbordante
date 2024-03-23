@@ -5,7 +5,6 @@
 namespace algos::fastod {
 
 struct AttributePair {
-public:
     AttributeSet::SizeType left;
     AttributeSet::SizeType right;
 
