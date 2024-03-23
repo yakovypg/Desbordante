@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 #include "attribute_set.h"
 
 namespace algos::fastod {

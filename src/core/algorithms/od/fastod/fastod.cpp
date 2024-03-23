@@ -1,14 +1,10 @@
 #include "fastod.h"
 
-#include <algorithm>
-#include <iostream>
 #include <memory>
-#include <utility>
 
 #include <boost/unordered/unordered_map.hpp>
 #include <easylogging++.h>
 
-#include "config/equal_nulls/option.h"
 #include "config/names_and_descriptions.h"
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"

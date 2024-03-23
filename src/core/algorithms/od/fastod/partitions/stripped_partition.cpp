@@ -2,10 +2,7 @@
 
 #include "stripped_partition.h"
 
-#include <cstdint>
 #include <sstream>
-
-#include "algorithms/od/fastod/storage/cache_with_limit.h"
 
 namespace algos::fastod {
 

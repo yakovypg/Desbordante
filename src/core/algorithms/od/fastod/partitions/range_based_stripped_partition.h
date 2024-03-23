@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include <string>
 #include <vector>
 
 #include "algorithms/od/fastod/storage/data_frame.h"
@@ -24,8 +25,9 @@ private:
     RangeBasedStrippedPartition(DataFrame const& data, std::vector<DataFrame::Range> const& indexes,
                                 std::vector<size_t> const& begins);
 
-    std::vector<DataFrame::ValueIndices> IntersectWithAttribute(
-            algos::fastod::AttributeSet::SizeType attribute, size_t group_start, size_t group_end);
+    std::vector<DataFrame::ValueIndices> IntersectWithAttribute(AttributeSet::SizeType attribute,
+                                                                size_t group_start,
+                                                                size_t group_end);
 
 public:
     RangeBasedStrippedPartition() = delete;

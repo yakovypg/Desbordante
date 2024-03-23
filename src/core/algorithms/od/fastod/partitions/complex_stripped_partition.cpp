@@ -1,11 +1,6 @@
 #include "complex_stripped_partition.h"
 
-#include <cstdint>
-#include <memory>
 #include <sstream>
-
-#include "algorithms/od/fastod/storage/cache_with_limit.h"
-#include "algorithms/od/fastod/storage/data_frame.h"
 
 namespace algos::fastod {
 
@@ -310,7 +305,7 @@ bool ComplexStrippedPartition::RangeBasedSplit(short right) const {
 }
 
 std::vector<DataFrame::ValueIndices> ComplexStrippedPartition::IntersectWithAttribute(
-        algos::fastod::AttributeSet::SizeType attribute, size_t group_start, size_t group_end) {
+        AttributeSet::SizeType attribute, size_t group_start, size_t group_end) {
     std::vector<DataFrame::ValueIndices> result;
 
     std::vector<DataFrame::ValueIndices> const& attr_ranges = data_->GetDataRanges()[attribute];

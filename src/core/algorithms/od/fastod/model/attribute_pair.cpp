@@ -1,7 +1,5 @@
 #include "attribute_pair.h"
 
-#include <string>
-
 namespace algos::fastod {
 
 AttributePair::AttributePair(AttributeSet::SizeType left, AttributeSet::SizeType right)

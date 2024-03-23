@@ -2,10 +2,7 @@
 
 #include "range_based_stripped_partition.h"
 
-#include <iostream>
 #include <sstream>
-
-#include "stripped_partition.h"
 
 namespace algos::fastod {
 
@@ -229,7 +226,7 @@ bool RangeBasedStrippedPartition::Swap(short left, short right, bool ascending) 
 }
 
 std::vector<DataFrame::ValueIndices> RangeBasedStrippedPartition::IntersectWithAttribute(
-        algos::fastod::AttributeSet::SizeType attribute, size_t group_start, size_t group_end) {
+        AttributeSet::SizeType attribute, size_t group_start, size_t group_end) {
     std::vector<DataFrame::ValueIndices> result;
     std::vector<DataFrame::ValueIndices> const& attr_ranges = data_.GetDataRanges()[attribute];
 
