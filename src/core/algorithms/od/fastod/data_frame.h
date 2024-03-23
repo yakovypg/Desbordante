@@ -15,12 +15,12 @@ namespace algos::fastod {
 
 class DataFrame {
 public:
-    using range_t = std::pair<size_t, size_t>;
-    using value_indexes_t = std::pair<int, range_t>;
+    using Range = std::pair<size_t, size_t>;
+    using ValueIndices = std::pair<int, Range>;
 
 private:
     std::vector<std::vector<int>> data_;
-    std::vector<std::vector<DataFrame::value_indexes_t>> data_ranges_;
+    std::vector<std::vector<DataFrame::ValueIndices>> data_ranges_;
     std::vector<std::vector<size_t>> range_item_placement_;
 
     AttributeSet attrs_with_ranges_;
@@ -32,11 +32,11 @@ private:
 
     static std::vector<int> ConvertColumnDataToIntegers(model::TypedColumnData const& column);
 
-    static std::vector<DataFrame::value_indexes_t> ExtractRangesFromColumn(
+    static std::vector<DataFrame::ValueIndices> ExtractRangesFromColumn(
             std::vector<int> const& column);
 
     static std::optional<size_t> FindRangeIndexByItem(
-            size_t item, std::vector<DataFrame::value_indexes_t> const& ranges);
+            size_t item, std::vector<DataFrame::ValueIndices> const& ranges);
 
 public:
     DataFrame(DataFrame const&) = delete;
@@ -49,11 +49,11 @@ public:
 
     explicit DataFrame(std::vector<model::TypedColumnData> const& columns_data);
 
-    int GetValue(int tuple_index, AttributeSet::size_type attribute_index) const;
-    std::vector<std::vector<DataFrame::value_indexes_t>> const& GetDataRanges() const;
-    size_t GetRangeIndexByItem(size_t item, AttributeSet::size_type attribute) const;
+    int GetValue(int tuple_index, AttributeSet::SizeType attribute_index) const;
+    std::vector<std::vector<DataFrame::ValueIndices>> const& GetDataRanges() const;
+    size_t GetRangeIndexByItem(size_t item, AttributeSet::SizeType attribute) const;
 
-    AttributeSet::size_type GetColumnCount() const;
+    AttributeSet::SizeType GetColumnCount() const;
     std::size_t GetTupleCount() const;
 
     bool IsAttributesMostlyRangeBased(AttributeSet attributes) const;
@@ -65,7 +65,7 @@ public:
                                     config::EqNullsType is_null_equal_null = true);
 };
 
-inline size_t range_size(DataFrame::range_t const& range) {
+inline size_t range_size(DataFrame::Range const& range) {
     return range.second - range.first + 1;
 }
 

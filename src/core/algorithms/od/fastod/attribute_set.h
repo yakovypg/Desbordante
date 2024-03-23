@@ -13,10 +13,10 @@ namespace algos::fastod {
 
 class AttributeSet {
 public:
-    using size_type = size_t;
+    using SizeType = size_t;
 
 private:
-    static constexpr size_type kBitsNum = 64;
+    static constexpr SizeType kBitsNum = 64;
 
     std::bitset<kBitsNum> bitset_;
 
@@ -25,11 +25,11 @@ private:
 public:
     AttributeSet() noexcept = default;
 
-    explicit AttributeSet([[maybe_unused]] size_type attrs) noexcept {
+    explicit AttributeSet([[maybe_unused]] SizeType attrs) noexcept {
         assert(attrs < kBitsNum);
     }
 
-    explicit AttributeSet([[maybe_unused]] size_type attrs, size_type value) noexcept
+    explicit AttributeSet([[maybe_unused]] SizeType attrs, SizeType value) noexcept
         : bitset_(value) {
         assert(attrs < kBitsNum);
     }
@@ -54,17 +54,17 @@ public:
         return as;
     }
 
-    AttributeSet& Set(size_type n, bool value = true) {
+    AttributeSet& Set(SizeType n, bool value = true) {
         bitset_.set(n, value);
         return *this;
     }
 
-    AttributeSet& Reset(size_type n) {
+    AttributeSet& Reset(SizeType n) {
         bitset_.reset(n);
         return *this;
     }
 
-    bool Test(size_type n) const noexcept {
+    bool Test(SizeType n) const noexcept {
         return bitset_.test(n);
     }
 
@@ -80,24 +80,24 @@ public:
         return bitset_.none();
     }
 
-    size_type Count() const noexcept {
+    SizeType Count() const noexcept {
         return bitset_.count();
     }
 
-    size_type Size() const noexcept {
+    SizeType Size() const noexcept {
         return bitset_.size();
     }
 
-    size_type FindFirst() const noexcept {
+    SizeType FindFirst() const noexcept {
         return bitset_._Find_first();
     }
 
-    size_type FindNext(size_type pos) const noexcept {
+    SizeType FindNext(SizeType pos) const noexcept {
         return bitset_._Find_next(pos);
     }
 
     std::string ToString() const;
-    void Iterate(std::function<void(size_type)> callback) const;
+    void Iterate(std::function<void(SizeType)> callback) const;
 
     friend AttributeSet operator&(AttributeSet const& b1, AttributeSet const& b2) noexcept;
     friend AttributeSet operator|(AttributeSet const& b1, AttributeSet const& b2) noexcept;
@@ -149,8 +149,8 @@ struct boost::hash<algos::fastod::AttributeSet> {
 
 namespace algos::fastod {
 
-inline AttributeSet CreateAttributeSet(std::initializer_list<AttributeSet::size_type> attributes,
-                                       AttributeSet::size_type size) {
+inline AttributeSet CreateAttributeSet(std::initializer_list<AttributeSet::SizeType> attributes,
+                                       AttributeSet::SizeType size) {
     AttributeSet attr_set(size);
 
     for (auto const attr : attributes) {
@@ -161,16 +161,16 @@ inline AttributeSet CreateAttributeSet(std::initializer_list<AttributeSet::size_
 }
 
 inline bool ContainsAttribute(AttributeSet const& value,
-                              AttributeSet::size_type attribute) noexcept {
+                              AttributeSet::SizeType attribute) noexcept {
     return value.Test(attribute);
 }
 
-inline AttributeSet AddAttribute(AttributeSet const& value, AttributeSet::size_type attribute) {
+inline AttributeSet AddAttribute(AttributeSet const& value, AttributeSet::SizeType attribute) {
     auto value_copy = value;
     return value_copy.Set(attribute);
 }
 
-inline AttributeSet DeleteAttribute(AttributeSet const& value, AttributeSet::size_type attribute) {
+inline AttributeSet DeleteAttribute(AttributeSet const& value, AttributeSet::SizeType attribute) {
     auto value_copy = value;
     return value_copy.Reset(attribute);
 }
@@ -187,7 +187,7 @@ inline bool IsEmptySet(AttributeSet const& value) noexcept {
     return value.None();
 }
 
-inline AttributeSet::size_type GetAttributeCount(AttributeSet const& value) noexcept {
+inline AttributeSet::SizeType GetAttributeCount(AttributeSet const& value) noexcept {
     return value.Count();
 }
 

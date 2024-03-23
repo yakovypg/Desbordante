@@ -8,8 +8,8 @@
 namespace algos::fastod {
 
 template <bool ascending>
-CanonicalOD<ascending>::CanonicalOD(AttributeSet&& context, AttributeSet::size_type left,
-                                    AttributeSet::size_type right)
+CanonicalOD<ascending>::CanonicalOD(AttributeSet&& context, AttributeSet::SizeType left,
+                                    AttributeSet::SizeType right)
     : context_(std::move(context)), ap_(left, right) {}
 
 template <bool ascending>
@@ -28,7 +28,7 @@ std::string CanonicalOD<ascending>::ToString() const {
     return result.str();
 }
 
-SimpleCanonicalOD::SimpleCanonicalOD(AttributeSet const& context, AttributeSet::size_type right)
+SimpleCanonicalOD::SimpleCanonicalOD(AttributeSet const& context, AttributeSet::SizeType right)
     : context_(context), right_(right) {}
 
 bool SimpleCanonicalOD::IsValid(std::shared_ptr<DataFrame> data,

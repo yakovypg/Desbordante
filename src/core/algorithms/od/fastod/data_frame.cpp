@@ -11,10 +11,10 @@
 #include "config/tabular_data/input_table_type.h"
 #include "csv_parser/csv_parser.h"
 
-using namespace algos::fastod;
+namespace algos::fastod {
 
 DataFrame::DataFrame(std::vector<model::TypedColumnData> const& columns_data) {
-    AttributeSet::size_type cols_num = columns_data.size();
+    AttributeSet::SizeType cols_num = columns_data.size();
     assert(cols_num != 0);
 
     data_.reserve(cols_num);
@@ -46,19 +46,19 @@ DataFrame::DataFrame(std::vector<model::TypedColumnData> const& columns_data) {
     RecognizeAttributesWithRanges();
 }
 
-int DataFrame::GetValue(int tuple_index, AttributeSet::size_type attribute_index) const {
+int DataFrame::GetValue(int tuple_index, AttributeSet::SizeType attribute_index) const {
     return data_[attribute_index][tuple_index];
 }
 
-std::vector<std::vector<DataFrame::value_indexes_t>> const& DataFrame::GetDataRanges() const {
+std::vector<std::vector<DataFrame::ValueIndices>> const& DataFrame::GetDataRanges() const {
     return data_ranges_;
 }
 
-size_t DataFrame::GetRangeIndexByItem(size_t item, AttributeSet::size_type attribute) const {
+size_t DataFrame::GetRangeIndexByItem(size_t item, AttributeSet::SizeType attribute) const {
     return range_item_placement_[attribute][item];
 }
 
-AttributeSet::size_type DataFrame::GetColumnCount() const {
+AttributeSet::SizeType DataFrame::GetColumnCount() const {
     return data_.size();
 }
 
@@ -73,8 +73,8 @@ bool DataFrame::IsAttributesMostlyRangeBased(AttributeSet attributes) const {
 
     AttributeSet remaining_attrs = Intersect(attrs_with_ranges_, attributes);
 
-    AttributeSet::size_type attrs_count = attributes.Count();
-    AttributeSet::size_type remaining_attrs_count = remaining_attrs.Count();
+    AttributeSet::SizeType attrs_count = attributes.Count();
+    AttributeSet::SizeType remaining_attrs_count = remaining_attrs.Count();
 
     double constexpr accept_range_based_partition_factor = 0.5;
 
@@ -122,24 +122,24 @@ std::vector<std::pair<std::byte const*, int>> DataFrame::CreateIndexedColumnData
 }
 
 std::vector<int> DataFrame::ConvertColumnDataToIntegers(model::TypedColumnData const& column) {
-    using data_t = std::pair<std::byte const*, int>;
+    using DataAndIndex = std::pair<std::byte const*, int>;
 
-    std::function<bool(data_t, data_t)> less_mixed = [&column](data_t l, data_t r) {
+    std::function<bool(DataAndIndex, DataAndIndex)> less_mixed = [&column](DataAndIndex l, DataAndIndex r) {
         const model::MixedType* mixed_type = column.GetIfMixed();
         return mixed_type->ValueToString(l.first) < mixed_type->ValueToString(r.first);
     };
 
-    std::function<bool(data_t, data_t)> less_not_mixed = [&column](data_t l, data_t r) {
+    std::function<bool(DataAndIndex, DataAndIndex)> less_not_mixed = [&column](DataAndIndex l, DataAndIndex r) {
         const model::Type& type = column.GetType();
         return type.Compare(l.first, r.first) == model::CompareResult::kLess;
     };
 
-    std::function<bool(data_t, data_t)> equal_mixed = [&column](data_t l, data_t r) {
+    std::function<bool(DataAndIndex, DataAndIndex)> equal_mixed = [&column](DataAndIndex l, DataAndIndex r) {
         const model::MixedType* mixed_type = column.GetIfMixed();
         return mixed_type->ValueToString(l.first) == mixed_type->ValueToString(r.first);
     };
 
-    std::function<bool(data_t, data_t)> equal_not_mixed = [&column](data_t l, data_t r) {
+    std::function<bool(DataAndIndex, DataAndIndex)> equal_not_mixed = [&column](DataAndIndex l, DataAndIndex r) {
         const model::Type& type = column.GetType();
         return type.Compare(l.first, r.first) == model::CompareResult::kEqual;
     };
@@ -168,9 +168,9 @@ std::vector<int> DataFrame::ConvertColumnDataToIntegers(model::TypedColumnData c
     return converted_column;
 }
 
-std::vector<DataFrame::value_indexes_t> DataFrame::ExtractRangesFromColumn(
+std::vector<DataFrame::ValueIndices> DataFrame::ExtractRangesFromColumn(
         std::vector<int> const& column) {
-    std::vector<value_indexes_t> ranges;
+    std::vector<ValueIndices> ranges;
 
     size_t start = 0;
 
@@ -190,11 +190,13 @@ std::vector<DataFrame::value_indexes_t> DataFrame::ExtractRangesFromColumn(
 }
 
 std::optional<size_t> DataFrame::FindRangeIndexByItem(
-        size_t item, std::vector<DataFrame::value_indexes_t> const& ranges) {
+        size_t item, std::vector<DataFrame::ValueIndices> const& ranges) {
     auto iter = std::find_if(ranges.cbegin(), ranges.cend(), [item](auto const& p) {
-        range_t const& range = p.second;
+        Range const& range = p.second;
         return item >= range.first && item <= range.second;
     });
 
     return (iter != ranges.cend()) ? std::optional<size_t>{iter - ranges.cbegin()} : std::nullopt;
 }
+
+} // namespace algos::fastod

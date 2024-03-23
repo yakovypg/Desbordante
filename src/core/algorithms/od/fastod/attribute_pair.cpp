@@ -4,7 +4,7 @@
 
 namespace algos::fastod {
 
-AttributePair::AttributePair(AttributeSet::size_type left, AttributeSet::size_type right)
+AttributePair::AttributePair(AttributeSet::SizeType left, AttributeSet::SizeType right)
     : left(left), right(right) {}
 
 std::string AttributePair::ToString() const {

@@ -13,7 +13,7 @@ class StrippedPartition;
 
 class RangeBasedStrippedPartition {
 private:
-    std::vector<DataFrame::range_t> indexes_;
+    std::vector<DataFrame::Range> indexes_;
     std::vector<size_t> begins_;
     DataFrame const& data_;
     bool should_be_converted_to_sp_;
@@ -22,11 +22,11 @@ private:
     static constexpr inline size_t MIN_MEANINGFUL_RANGE_SIZE = static_cast<size_t>(10);
 
     RangeBasedStrippedPartition(DataFrame const& data,
-                                std::vector<DataFrame::range_t> const& indexes,
+                                std::vector<DataFrame::Range> const& indexes,
                                 std::vector<size_t> const& begins);
 
-    std::vector<DataFrame::value_indexes_t> IntersectWithAttribute(
-            algos::fastod::AttributeSet::size_type attribute, size_t group_start, size_t group_end);
+    std::vector<DataFrame::ValueIndices> IntersectWithAttribute(
+            algos::fastod::AttributeSet::SizeType attribute, size_t group_start, size_t group_end);
 
 public:
     RangeBasedStrippedPartition() = delete;

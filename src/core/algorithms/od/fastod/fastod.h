@@ -100,8 +100,8 @@ private:
     template <bool ascending>
     void AddCandidates(AttributeSet const& context, std::vector<AttributeSet> const& delAttrs) {
         if (level_ == 2) {
-            for (AttributeSet::size_type i = 0; i < data_->GetColumnCount(); i++) {
-                for (AttributeSet::size_type j = 0; j < data_->GetColumnCount(); j++) {
+            for (AttributeSet::SizeType i = 0; i < data_->GetColumnCount(); i++) {
+                for (AttributeSet::SizeType j = 0; j < data_->GetColumnCount(); j++) {
                     if (i == j) continue;
                     CSPut<ascending>(CreateAttributeSet({i, j}, data_->GetColumnCount()),
                                      AttributePair(i, j));
@@ -110,7 +110,7 @@ private:
         } else if (level_ > 2) {
             std::unordered_set<AttributePair> candidates;
 
-            context.Iterate([this, &delAttrs, &candidates](AttributeSet::size_type attr) {
+            context.Iterate([this, &delAttrs, &candidates](AttributeSet::SizeType attr) {
                 auto const& tmp = CSGet<ascending>(delAttrs[attr]);
                 candidates.insert(tmp.cbegin(), tmp.cend());
             });
@@ -122,7 +122,7 @@ private:
                 bool add_context = true;
 
                 context_delete_ab.Iterate([this, &delAttrs, &attribute_pair,
-                                           &add_context](AttributeSet::size_type attr) {
+                                           &add_context](AttributeSet::SizeType attr) {
                     std::unordered_set<AttributePair> const& cs = CSGet<ascending>(delAttrs[attr]);
                     if (cs.find(attribute_pair) == cs.end()) {
                         add_context = false;

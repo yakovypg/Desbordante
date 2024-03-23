@@ -6,10 +6,10 @@ namespace algos::fastod {
 
 struct AttributePair {
 public:
-    AttributeSet::size_type left;
-    AttributeSet::size_type right;
+    AttributeSet::SizeType left;
+    AttributeSet::SizeType right;
 
-    AttributePair(AttributeSet::size_type, AttributeSet::size_type);
+    AttributePair(AttributeSet::SizeType, AttributeSet::SizeType);
     std::string ToString() const;
 };
 
