@@ -21,8 +21,7 @@ private:
     static constexpr inline double SMALL_RANGES_RATIO_TO_CONVERT = 0.5;
     static constexpr inline size_t MIN_MEANINGFUL_RANGE_SIZE = static_cast<size_t>(10);
 
-    RangeBasedStrippedPartition(DataFrame const& data,
-                                std::vector<DataFrame::Range> const& indexes,
+    RangeBasedStrippedPartition(DataFrame const& data, std::vector<DataFrame::Range> const& indexes,
                                 std::vector<size_t> const& begins);
 
     std::vector<DataFrame::ValueIndices> IntersectWithAttribute(

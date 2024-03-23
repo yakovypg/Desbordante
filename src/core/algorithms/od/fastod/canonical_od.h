@@ -15,8 +15,7 @@ private:
     AttributePair ap_;
 
 public:
-    CanonicalOD(AttributeSet&& context, AttributeSet::SizeType left,
-                AttributeSet::SizeType right);
+    CanonicalOD(AttributeSet&& context, AttributeSet::SizeType left, AttributeSet::SizeType right);
 
     bool IsValid(std::shared_ptr<DataFrame> data, StrippedPartitionCache& cache) const;
     std::string ToString() const;
