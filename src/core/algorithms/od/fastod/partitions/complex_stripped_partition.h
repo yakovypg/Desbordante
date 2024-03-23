@@ -100,8 +100,7 @@ public:
             bool is_first_group = true;
 
             for (size_t i = 0; i < values.size(); i++) {
-                auto const& first = values[i].first;
-                auto const& second = values[i].second;
+                auto const& [first, second] = values[i];
 
                 if (i != 0 && values[i - 1].first != first) {
                     is_first_group = false;
