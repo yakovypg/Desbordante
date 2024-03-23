@@ -1,8 +1,8 @@
 #include "data_frame.h"
 
-#include <cassert>
 #include <functional>
 #include <memory>
+#include <stdexcept>
 
 #include "csv_parser/csv_parser.h"
 
@@ -10,7 +10,10 @@ namespace algos::fastod {
 
 DataFrame::DataFrame(std::vector<model::TypedColumnData> const& columns_data) {
     AttributeSet::SizeType cols_num = columns_data.size();
-    assert(cols_num != 0);
+
+    if (cols_num <= 0) {
+        throw std::invalid_argument("Number of columns must be greater than zero");
+    }
 
     data_.reserve(cols_num);
     data_ranges_.reserve(cols_num);
@@ -30,7 +33,10 @@ DataFrame::DataFrame(std::vector<model::TypedColumnData> const& columns_data) {
 
         for (size_t i = 0; i < tuple_count; ++i) {
             const std::optional<size_t> range_index = FindRangeIndexByItem(i, data_ranges_[column]);
-            assert(range_index.has_value());
+
+            if (!range_index.has_value()) {
+                throw std::logic_error("Range index not found");
+            }
 
             curr_column_item_placement.push_back(range_index.value());
         }
