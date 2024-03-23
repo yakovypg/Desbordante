@@ -124,22 +124,26 @@ std::vector<std::pair<std::byte const*, int>> DataFrame::CreateIndexedColumnData
 std::vector<int> DataFrame::ConvertColumnDataToIntegers(model::TypedColumnData const& column) {
     using DataAndIndex = std::pair<std::byte const*, int>;
 
-    std::function<bool(DataAndIndex, DataAndIndex)> less_mixed = [&column](DataAndIndex l, DataAndIndex r) {
+    std::function<bool(DataAndIndex, DataAndIndex)> less_mixed = [&column](DataAndIndex l,
+                                                                           DataAndIndex r) {
         const model::MixedType* mixed_type = column.GetIfMixed();
         return mixed_type->ValueToString(l.first) < mixed_type->ValueToString(r.first);
     };
 
-    std::function<bool(DataAndIndex, DataAndIndex)> less_not_mixed = [&column](DataAndIndex l, DataAndIndex r) {
+    std::function<bool(DataAndIndex, DataAndIndex)> less_not_mixed = [&column](DataAndIndex l,
+                                                                               DataAndIndex r) {
         const model::Type& type = column.GetType();
         return type.Compare(l.first, r.first) == model::CompareResult::kLess;
     };
 
-    std::function<bool(DataAndIndex, DataAndIndex)> equal_mixed = [&column](DataAndIndex l, DataAndIndex r) {
+    std::function<bool(DataAndIndex, DataAndIndex)> equal_mixed = [&column](DataAndIndex l,
+                                                                            DataAndIndex r) {
         const model::MixedType* mixed_type = column.GetIfMixed();
         return mixed_type->ValueToString(l.first) == mixed_type->ValueToString(r.first);
     };
 
-    std::function<bool(DataAndIndex, DataAndIndex)> equal_not_mixed = [&column](DataAndIndex l, DataAndIndex r) {
+    std::function<bool(DataAndIndex, DataAndIndex)> equal_not_mixed = [&column](DataAndIndex l,
+                                                                                DataAndIndex r) {
         const model::Type& type = column.GetType();
         return type.Compare(l.first, r.first) == model::CompareResult::kEqual;
     };
@@ -199,4 +203,4 @@ std::optional<size_t> DataFrame::FindRangeIndexByItem(
     return (iter != ranges.cend()) ? std::optional<size_t>{iter - ranges.cbegin()} : std::nullopt;
 }
 
-} // namespace algos::fastod
+}  // namespace algos::fastod

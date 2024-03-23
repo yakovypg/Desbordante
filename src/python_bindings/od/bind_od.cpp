@@ -15,6 +15,7 @@ namespace py = pybind11;
 }  // namespace
 
 namespace python_bindings {
+
 void BindOd(py::module_& main_module) {
     using namespace algos::fastod;
 
@@ -56,4 +57,5 @@ void BindOd(py::module_& main_module) {
 
     main_module.attr("od_module") = od_module;
 }
+
 }  // namespace python_bindings
