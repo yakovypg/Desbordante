@@ -1,8 +1,8 @@
 #pragma once
 
 #include <bitset>
-#include <cassert>
 #include <functional>
+#include <stdexcept>
 #include <string>
 
 #include <boost/functional/hash.hpp>
@@ -23,13 +23,19 @@ private:
 public:
     AttributeSet() noexcept = default;
 
-    explicit AttributeSet([[maybe_unused]] SizeType attrs) noexcept {
-        assert(attrs < kBitsNum);
+    explicit AttributeSet([[maybe_unused]] SizeType attribute_count) {
+        if (attribute_count >= kBitsNum) {
+            throw std::invalid_argument("Maximum possible number of attributes is " +
+                                        std::to_string(kBitsNum - 1));
+        }
     }
 
-    explicit AttributeSet([[maybe_unused]] SizeType attrs, SizeType value) noexcept
+    explicit AttributeSet([[maybe_unused]] SizeType attribute_count, SizeType value)
         : bitset_(value) {
-        assert(attrs < kBitsNum);
+        if (attribute_count >= kBitsNum) {
+            throw std::invalid_argument("Maximum possible number of attributes is " +
+                                        std::to_string(kBitsNum - 1));
+        }
     }
 
     AttributeSet& operator&=(AttributeSet const& b) noexcept {
