@@ -2,8 +2,6 @@
 
 #include <bitset>
 #include <cassert>
-#include <climits>
-#include <cstddef>
 #include <functional>
 #include <string>
 

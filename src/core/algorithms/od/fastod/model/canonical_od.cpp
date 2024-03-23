@@ -1,6 +1,5 @@
 #include "canonical_od.h"
 
-#include <memory>
 #include <sstream>
 
 namespace algos::fastod {

@@ -2,8 +2,6 @@
 
 #include <filesystem>
 #include <optional>
-#include <string>
-#include <type_traits>
 #include <vector>
 
 #include "algorithms/od/fastod/model/attribute_set.h"

@@ -1,14 +1,9 @@
 #include "data_frame.h"
 
-#include <assert.h>
-#include <filesystem>
+#include <cassert>
 #include <functional>
-#include <iostream>
 #include <memory>
-#include <optional>
-#include <utility>
 
-#include "config/tabular_data/input_table_type.h"
 #include "csv_parser/csv_parser.h"
 
 namespace algos::fastod {

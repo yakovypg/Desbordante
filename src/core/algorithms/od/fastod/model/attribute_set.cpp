@@ -1,7 +1,5 @@
 #include "attribute_set.h"
 
-#include <functional>
-#include <numeric>
 #include <sstream>
 
 namespace algos::fastod {

@@ -1,8 +1,7 @@
 #pragma once
 
-#include <algorithm>
 #include <memory>
-#include <unordered_map>
+#include <string>
 #include <vector>
 
 #include "algorithms/od/fastod/model/attribute_set.h"
@@ -31,8 +30,9 @@ private:
     void RangeBasedProduct(short attribute);
     bool RangeBasedSplit(short right) const;
 
-    std::vector<DataFrame::ValueIndices> IntersectWithAttribute(
-            algos::fastod::AttributeSet::SizeType attribute, size_t group_start, size_t group_end);
+    std::vector<DataFrame::ValueIndices> IntersectWithAttribute(AttributeSet::SizeType attribute,
+                                                                size_t group_start,
+                                                                size_t group_end);
 
     ComplexStrippedPartition(std::shared_ptr<DataFrame> data,
                              std::shared_ptr<std::vector<size_t>> indexes,
