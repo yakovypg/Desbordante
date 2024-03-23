@@ -70,9 +70,7 @@ public:
 
             if (is_stripped_partition_) {
                 values.reserve(group_end - group_begin);
-            }
 
-            if (is_stripped_partition_) {
                 for (size_t i = group_begin; i < group_end; ++i) {
                     const size_t index = (*sp_indexes_)[i];
 
@@ -125,8 +123,8 @@ public:
     template <bool range_based_mode>
     static ComplexStrippedPartition Create(std::shared_ptr<DataFrame> data) {
         if constexpr (range_based_mode) {
-            std::vector<DataFrame::Range>* rb_indexes = new std::vector<DataFrame::Range>();
-            std::vector<size_t>* rb_begins = new std::vector<size_t>();
+            auto rb_indexes = std::make_unique<std::vector<DataFrame::Range>>();
+            auto rb_begins = std::make_unique<std::vector<size_t>>();
 
             const size_t tuple_count = data->GetTupleCount();
             rb_begins->push_back(0);
@@ -136,13 +134,12 @@ public:
                 rb_begins->push_back(1);
             }
 
-            return ComplexStrippedPartition(
-                    std::move(data), std::shared_ptr<std::vector<DataFrame::Range>>(rb_indexes),
-                    std::shared_ptr<std::vector<size_t>>(rb_begins));
+            return ComplexStrippedPartition(std::move(data), std::move(rb_indexes),
+                                            std::move(rb_begins));
         }
 
-        std::vector<size_t>* sp_indexes = new std::vector<size_t>();
-        std::vector<size_t>* sp_begins = new std::vector<size_t>();
+        auto sp_indexes = std::make_unique<std::vector<size_t>>();
+        auto sp_begins = std::make_unique<std::vector<size_t>>();
 
         sp_indexes->reserve(data->GetTupleCount());
 
@@ -156,9 +153,8 @@ public:
 
         sp_begins->push_back(data->GetTupleCount());
 
-        return ComplexStrippedPartition(std::move(data),
-                                        std::shared_ptr<std::vector<size_t>>(sp_indexes),
-                                        std::shared_ptr<std::vector<size_t>>(sp_begins));
+        return ComplexStrippedPartition(std::move(data), std::move(sp_indexes),
+                                        std::move(sp_begins));
     }
 };
 
