@@ -3,14 +3,15 @@
 #include <string>
 
 #include "attribute_set.h"
+#include "model/table/column_index.h"
 
 namespace algos::fastod {
 
 struct AttributePair {
-    AttributeSet::SizeType left;
-    AttributeSet::SizeType right;
+    model::ColumnIndex left;
+    model::ColumnIndex right;
 
-    AttributePair(AttributeSet::SizeType left, AttributeSet::SizeType right);
+    AttributePair(model::ColumnIndex left, model::ColumnIndex right);
     std::string ToString() const;
 };
 

@@ -226,7 +226,7 @@ bool RangeBasedStrippedPartition::Swap(short left, short right, bool ascending) 
 }
 
 std::vector<DataFrame::ValueIndices> RangeBasedStrippedPartition::IntersectWithAttribute(
-        AttributeSet::SizeType attribute, size_t group_start, size_t group_end) {
+        model::ColumnIndex attribute, size_t group_start, size_t group_end) {
     std::vector<DataFrame::ValueIndices> result;
     std::vector<DataFrame::ValueIndices> const& attr_ranges = data_.GetDataRanges()[attribute];
 

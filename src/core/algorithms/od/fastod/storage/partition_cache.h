@@ -25,7 +25,7 @@ private:
         bool is_product_called = false;
 
         attribute_set.Iterate(
-                [this, &attribute_set, &result, &is_product_called](AttributeSet::SizeType attr) {
+                [this, &attribute_set, &result, &is_product_called](model::ColumnIndex attr) {
                     AttributeSet one_less = DeleteAttribute(attribute_set, attr);
 
                     if (one_less.Any() && cache_.Contains(one_less)) {
@@ -57,7 +57,7 @@ public:
                                        ? ComplexStrippedPartition::Create<true>(data)
                                        : ComplexStrippedPartition::Create<false>(data);
 
-            attribute_set.Iterate([this, &result_partition](AttributeSet::SizeType attr) {
+            attribute_set.Iterate([this, &result_partition](model::ColumnIndex attr) {
                 CallProductWithAttribute(result_partition, attr);
             });
         }

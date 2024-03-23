@@ -7,14 +7,13 @@
 
 #include <boost/functional/hash.hpp>
 
+#include "model/table/column_index.h"
+
 namespace algos::fastod {
 
 class AttributeSet {
-public:
-    using SizeType = size_t;
-
 private:
-    static constexpr SizeType kBitsNum = 64;
+    static constexpr model::ColumnIndex kBitsNum = 64;
 
     std::bitset<kBitsNum> bitset_;
 
@@ -23,14 +22,15 @@ private:
 public:
     AttributeSet() noexcept = default;
 
-    explicit AttributeSet([[maybe_unused]] SizeType attribute_count) {
+    explicit AttributeSet([[maybe_unused]] model::ColumnIndex attribute_count) {
         if (attribute_count >= kBitsNum) {
             throw std::invalid_argument("Maximum possible number of attributes is " +
                                         std::to_string(kBitsNum - 1));
         }
     }
 
-    explicit AttributeSet([[maybe_unused]] SizeType attribute_count, SizeType value)
+    explicit AttributeSet([[maybe_unused]] model::ColumnIndex attribute_count,
+                          model::ColumnIndex value)
         : bitset_(value) {
         if (attribute_count >= kBitsNum) {
             throw std::invalid_argument("Maximum possible number of attributes is " +
@@ -58,17 +58,17 @@ public:
         return as;
     }
 
-    AttributeSet& Set(SizeType n, bool value = true) {
+    AttributeSet& Set(model::ColumnIndex n, bool value = true) {
         bitset_.set(n, value);
         return *this;
     }
 
-    AttributeSet& Reset(SizeType n) {
+    AttributeSet& Reset(model::ColumnIndex n) {
         bitset_.reset(n);
         return *this;
     }
 
-    bool Test(SizeType n) const noexcept {
+    bool Test(model::ColumnIndex n) const noexcept {
         return bitset_.test(n);
     }
 
@@ -84,24 +84,24 @@ public:
         return bitset_.none();
     }
 
-    SizeType Count() const noexcept {
+    model::ColumnIndex Count() const noexcept {
         return bitset_.count();
     }
 
-    SizeType Size() const noexcept {
+    model::ColumnIndex Size() const noexcept {
         return bitset_.size();
     }
 
-    SizeType FindFirst() const noexcept {
+    model::ColumnIndex FindFirst() const noexcept {
         return bitset_._Find_first();
     }
 
-    SizeType FindNext(SizeType pos) const noexcept {
+    model::ColumnIndex FindNext(model::ColumnIndex pos) const noexcept {
         return bitset_._Find_next(pos);
     }
 
     std::string ToString() const;
-    void Iterate(std::function<void(SizeType)> callback) const;
+    void Iterate(std::function<void(model::ColumnIndex)> callback) const;
 
     friend AttributeSet operator&(AttributeSet const& b1, AttributeSet const& b2) noexcept;
     friend AttributeSet operator|(AttributeSet const& b1, AttributeSet const& b2) noexcept;
@@ -153,8 +153,8 @@ struct boost::hash<algos::fastod::AttributeSet> {
 
 namespace algos::fastod {
 
-inline AttributeSet CreateAttributeSet(std::initializer_list<AttributeSet::SizeType> attributes,
-                                       AttributeSet::SizeType size) {
+inline AttributeSet CreateAttributeSet(std::initializer_list<model::ColumnIndex> attributes,
+                                       model::ColumnIndex size) {
     AttributeSet attr_set(size);
 
     for (auto const attr : attributes) {
@@ -164,17 +164,16 @@ inline AttributeSet CreateAttributeSet(std::initializer_list<AttributeSet::SizeT
     return attr_set;
 }
 
-inline bool ContainsAttribute(AttributeSet const& value,
-                              AttributeSet::SizeType attribute) noexcept {
+inline bool ContainsAttribute(AttributeSet const& value, model::ColumnIndex attribute) noexcept {
     return value.Test(attribute);
 }
 
-inline AttributeSet AddAttribute(AttributeSet const& value, AttributeSet::SizeType attribute) {
+inline AttributeSet AddAttribute(AttributeSet const& value, model::ColumnIndex attribute) {
     auto value_copy = value;
     return value_copy.Set(attribute);
 }
 
-inline AttributeSet DeleteAttribute(AttributeSet const& value, AttributeSet::SizeType attribute) {
+inline AttributeSet DeleteAttribute(AttributeSet const& value, model::ColumnIndex attribute) {
     auto value_copy = value;
     return value_copy.Reset(attribute);
 }
@@ -191,7 +190,7 @@ inline bool IsEmptySet(AttributeSet const& value) noexcept {
     return value.None();
 }
 
-inline AttributeSet::SizeType GetAttributeCount(AttributeSet const& value) noexcept {
+inline model::ColumnIndex GetAttributeCount(AttributeSet const& value) noexcept {
     return value.Count();
 }
 
