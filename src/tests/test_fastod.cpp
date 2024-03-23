@@ -9,8 +9,8 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/od/fastod/model/canonical_od.h"
 #include "algorithms/od/fastod/fastod.h"
+#include "algorithms/od/fastod/model/canonical_od.h"
 #include "all_csv_configs.h"
 #include "config/names.h"
 #include "config/time_limit/type.h"
@@ -30,8 +30,7 @@ size_t RunFastod(CSVConfig const& csv_config) {
 
     algos::StdParamsMap params{{kCsvConfig, csv_config}};
 
-    std::unique_ptr<algos::Fastod> fastod =
-            algos::CreateAndLoadAlgorithm<algos::Fastod>(params);
+    std::unique_ptr<algos::Fastod> fastod = algos::CreateAndLoadAlgorithm<algos::Fastod>(params);
 
     std::vector<std::string> string_ods = fastod->DiscoverAsStrings();
     std::sort(std::begin(string_ods), std::end(string_ods));
