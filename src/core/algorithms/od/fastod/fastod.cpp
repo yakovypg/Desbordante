@@ -13,7 +13,6 @@
 #include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
 #include "config/time_limit/option.h"
-#include "stripped_partition.h"
 
 namespace algos {
 

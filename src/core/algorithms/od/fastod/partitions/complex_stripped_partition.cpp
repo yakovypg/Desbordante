@@ -4,8 +4,8 @@
 #include <memory>
 #include <sstream>
 
-#include "cache_with_limit.h"
-#include "data_frame.h"
+#include "algorithms/od/fastod/storage/cache_with_limit.h"
+#include "algorithms/od/fastod/storage/data_frame.h"
 
 namespace algos::fastod {
 

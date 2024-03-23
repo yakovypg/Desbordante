@@ -4,7 +4,7 @@
 
 #include <vector>
 
-#include "data_frame.h"
+#include "algorithms/od/fastod/storage/data_frame.h"
 #include "stripped_partition.h"
 
 namespace algos::fastod {

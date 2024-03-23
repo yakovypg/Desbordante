@@ -9,7 +9,7 @@
 #include <gtest/gtest.h>
 
 #include "algorithms/algo_factory.h"
-#include "algorithms/od/fastod/canonical_od.h"
+#include "algorithms/od/fastod/model/canonical_od.h"
 #include "algorithms/od/fastod/fastod.h"
 #include "all_csv_configs.h"
 #include "config/names.h"

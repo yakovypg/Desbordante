@@ -3,8 +3,6 @@
 #include <memory>
 #include <sstream>
 
-#include "timer.h"
-
 namespace algos::fastod {
 
 template <bool ascending>
