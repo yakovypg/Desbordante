@@ -10,10 +10,10 @@
 #include "algorithms/od/fastod/model/attribute_pair.h"
 #include "algorithms/od/fastod/model/attribute_set.h"
 #include "algorithms/od/fastod/model/canonical_od.h"
-#include "config/tabular_data/input_table_type.h"
-#include "config/time_limit/type.h"
 #include "algorithms/od/fastod/storage/stripped_partition_cache.h"
 #include "algorithms/od/fastod/util/timer.h"
+#include "config/tabular_data/input_table_type.h"
+#include "config/time_limit/type.h"
 
 namespace algos {
 
@@ -27,7 +27,7 @@ private:
     using StrippedPartitionCache = fastod::StrippedPartitionCache;
     using DataFrame = fastod::DataFrame;
     using Timer = fastod::Timer;
-    
+
     config::TimeLimitSecondsType time_limit_seconds_ = 0u;
     bool is_complete_ = true;
     size_t level_ = 1;
@@ -125,8 +125,8 @@ private:
             });
 
             for (AttributePair const& attribute_pair : candidates) {
-                const AttributeSet context_delete_ab =
-                        fastod::DeleteAttribute(delAttrs[attribute_pair.left], attribute_pair.right);
+                const AttributeSet context_delete_ab = fastod::DeleteAttribute(
+                        delAttrs[attribute_pair.left], attribute_pair.right);
 
                 bool add_context = true;
 
