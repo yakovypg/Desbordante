@@ -12,8 +12,14 @@ struct AttributePair {
     model::ColumnIndex left;
     model::ColumnIndex right;
 
+    AttributePair();
     AttributePair(model::ColumnIndex left, model::ColumnIndex right);
+
     std::string ToString() const;
+
+    friend bool operator==(AttributePair const& x, AttributePair const& y);
+    friend bool operator!=(AttributePair const& x, AttributePair const& y);
+    friend bool operator<(AttributePair const& x, AttributePair const& y);
 };
 
 bool operator==(AttributePair const& x, AttributePair const& y);
