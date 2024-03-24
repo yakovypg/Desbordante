@@ -403,6 +403,9 @@ def get_algo_result(algo: desbordante.Algorithm, algo_name: str) -> Any:
                 result = algo.get_fds()
             case Algorithm.fastod:
                 result = algo.get_asc_ods() + algo.get_desc_ods() + algo.get_simple_ods()
+                ocd_count = len(algo.get_asc_ods()) + len(algo.get_desc_ods())
+                fd_count = len(algo.get_simple_ods())
+                result.append(f'RESULT: Time={algo.get_elapsed_seconds()}, OD={ocd_count + fd_count}, FD={fd_count}, OCD={ocd_count}')
             case _:
                 assert False, 'No matching get_result function.'
         return result
