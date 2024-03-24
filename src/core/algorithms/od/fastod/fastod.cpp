@@ -107,6 +107,10 @@ bool Fastod::IsComplete() const {
     return is_complete_;
 }
 
+size_t Fastod::GetElapsedSeconds() const {
+    return timer_.GetElapsedSeconds();
+}
+
 std::vector<fastod::AscCanonicalOD> const& Fastod::GetAscendingDependencies() const {
     return result_asc_;
 }
