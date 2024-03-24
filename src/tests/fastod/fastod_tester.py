@@ -86,6 +86,10 @@ def is_algorithm_results_equal(first_result_path: str, second_result_path: str, 
 
     return equality_data == 'Equal'
 
+def extract_algorithm_dependencies(output: str) -> list[str]:
+    lines = output.split('\n')
+    return list(filter(lambda t: t.startswith('{') and ('}' in t), lines))
+
 def parse_algorithm_result(output: str) -> AlgorithmResult:
     result_prefix = 'RESULT: '
     time_prefix = 'Time='
@@ -100,8 +104,8 @@ def parse_algorithm_result(output: str) -> AlgorithmResult:
         raise Exception(f'No result line found.')
 
     result_line = result_lines[0].replace(result_prefix, '')
-
     data = result_line.split(', ')
+
     time_data = list(filter(lambda t: t.startswith(time_prefix), data))[0].replace(time_prefix, '').replace(',', '.')
     od_data = list(filter(lambda t: t.startswith(od_prefix), data))[0].replace(od_prefix, '')
     fd_data = list(filter(lambda t: t.startswith(fd_prefix), data))[0].replace(fd_prefix, '')
@@ -120,6 +124,11 @@ def execute_algorithm(dataset_path: str,
     
     result = subprocess.run(algorithm_execute_args, stdout=subprocess.PIPE)
     output = result.stdout.decode('utf-8')
+
+    algorithm_dependencies = list(map(lambda t: t + '\n',extract_algorithm_dependencies(output)))
+
+    with open(output_file_path, 'w') as output_file:
+        output_file.writelines(algorithm_dependencies)
 
     algorith_result = parse_algorithm_result(output)
     algorith_result.result_path = output_file_path
