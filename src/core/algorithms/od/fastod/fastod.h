@@ -175,7 +175,6 @@ public:
     void PrintStatistics() const;
     bool IsComplete() const;
 
-    size_t GetElapsedSeconds() const;
     std::vector<AscCanonicalOD> const& GetAscendingDependencies() const;
     std::vector<DescCanonicalOD> const& GetDescendingDependencies() const;
     std::vector<SimpleCanonicalOD> const& GetSimpleDependencies() const;
