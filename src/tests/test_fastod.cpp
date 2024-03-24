@@ -36,7 +36,8 @@ size_t RunFastod(CSVConfig const& csv_config) {
     size_t ods_desc_sorted_hash = algos::fastod::hashing::CombineHashes(ods_desc_sorted);
     size_t ods_simple_sorted_hash = algos::fastod::hashing::CombineHashes(ods_simple_sorted);
 
-    std::vector<size_t> od_hashes = {ods_asc_sorted_hash, ods_desc_sorted_hash, ods_simple_sorted_hash};
+    std::vector<size_t> od_hashes = {ods_asc_sorted_hash, ods_desc_sorted_hash,
+                                     ods_simple_sorted_hash};
     size_t result_hash = algos::fastod::hashing::CombineHashes(od_hashes);
 
     return result_hash;
