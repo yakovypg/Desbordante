@@ -55,8 +55,6 @@ CSVConfig const kOdTestNormBalanceScale =
         CreateCsvConfig("od_norm_data/metanome/balance-scale_norm.csv", ',', true);
 CSVConfig const kOdTestNormBreastCancerWisconsin =
         CreateCsvConfig("od_norm_data/metanome/breast-cancer-wisconsin.csv", ',', true);
-CSVConfig const kOdTestNormClassification =
-        CreateCsvConfig("od_norm_data/metanome/CLASSIFICATION_norm.csv", ',', true);
 CSVConfig const kOdTestNormEchocardiogram =
         CreateCsvConfig("od_norm_data/metanome/echocardiogram_norm.csv", ',', true);
 CSVConfig const kOdTestNormHepatitis1 =

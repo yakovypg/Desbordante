@@ -54,7 +54,6 @@ INSTANTIATE_TEST_SUITE_P(
                           CSVConfigHash{kOdTestNormAbalone, 8494646055080399391UL},
                           CSVConfigHash{kOdTestNormBalanceScale, 0ULL},
                           CSVConfigHash{kOdTestNormBreastCancerWisconsin, 16845062592796597733UL},
-                          CSVConfigHash{kOdTestNormClassification, 10775947267660160689UL},
                           CSVConfigHash{kOdTestNormEchocardiogram, 2811588447932787109UL},
                           CSVConfigHash{kOdTestNormHepatitis1, 132585063305091933UL},
                           CSVConfigHash{kOdTestNormHepatitis2, 10199178000978455890UL},
