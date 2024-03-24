@@ -63,7 +63,6 @@ void Fastod::ResetState() {
     od_count_ = 0;
     fd_count_ = 0;
     ocd_count_ = 0;
-    elapsed_seconds_ = 0;
 
     result_asc_.clear();
     result_desc_.clear();
@@ -109,7 +108,7 @@ bool Fastod::IsComplete() const {
 }
 
 size_t Fastod::GetElapsedSeconds() const {
-    return is_complete_ ? elapsed_seconds_ : timer_.GetElapsedSeconds();
+    return timer_.GetElapsedSeconds();
 }
 
 std::vector<fastod::AscCanonicalOD> const& Fastod::GetAscendingDependencies() const {
@@ -167,15 +166,12 @@ Fastod::Discover() {
     }
 
     timer_.Stop();
-    elapsed_seconds_ = timer_.GetElapsedSeconds();
 
     if (IsComplete()) {
         LOG(DEBUG) << "FastOD finished successfully" << '\n';
     } else {
         LOG(DEBUG) << "FastOD finished with a time-out" << '\n';
     }
-
-    is_complete_ = true;
 
     PrintStatistics();
 
