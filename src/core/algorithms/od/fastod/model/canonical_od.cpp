@@ -5,7 +5,7 @@
 namespace algos::fastod {
 
 template <bool ascending>
-CanonicalOD<ascending>::CanonicalOD(AttributeSet&& context, model::ColumnIndex left,
+CanonicalOD<ascending>::CanonicalOD(AttributeSet const& context, model::ColumnIndex left,
                                     model::ColumnIndex right)
     : context_(std::move(context)), ap_(left, right) {}
 
@@ -24,6 +24,8 @@ std::string CanonicalOD<ascending>::ToString() const {
     return result.str();
 }
 
+SimpleCanonicalOD::SimpleCanonicalOD() : right_(0) {}
+
 SimpleCanonicalOD::SimpleCanonicalOD(AttributeSet const& context, model::ColumnIndex right)
     : context_(context), right_(right) {}
 
@@ -36,6 +38,54 @@ std::string SimpleCanonicalOD::ToString() const {
     result << context_.ToString() << " : [] -> " << right_ + 1 << "<=";
 
     return result.str();
+}
+
+bool operator==(CanonicalOD<true> const& x, CanonicalOD<true> const& y) {
+    return x.context_ == y.context_ && x.ap_ == y.ap_;
+}
+
+bool operator!=(CanonicalOD<true> const& x, CanonicalOD<true> const& y) {
+    return !(x == y);
+}
+
+bool operator<(CanonicalOD<true> const& x, CanonicalOD<true> const& y) {
+    if (x.ap_ != y.ap_) {
+        return x.ap_ < y.ap_;
+    }
+
+    return x.context_ < y.context_;
+}
+
+bool operator==(CanonicalOD<false> const& x, CanonicalOD<false> const& y) {
+    return x.context_ == y.context_ && x.ap_ == y.ap_;
+}
+
+bool operator!=(CanonicalOD<false> const& x, CanonicalOD<false> const& y) {
+    return !(x == y);
+}
+
+bool operator<(CanonicalOD<false> const& x, CanonicalOD<false> const& y) {
+    if (x.ap_ != y.ap_) {
+        return x.ap_ < y.ap_;
+    }
+
+    return x.context_ < y.context_;
+}
+
+bool operator==(SimpleCanonicalOD const& x, SimpleCanonicalOD const& y) {
+    return x.context_ == y.context_ && x.right_ == y.right_;
+}
+
+bool operator!=(SimpleCanonicalOD const& x, SimpleCanonicalOD const& y) {
+    return !(x == y);
+}
+
+bool operator<(SimpleCanonicalOD const& x, SimpleCanonicalOD const& y) {
+    if (x.right_ != y.right_) {
+        return x.right_ < y.right_;
+    }
+
+    return x.context_ < y.context_;
 }
 
 template class CanonicalOD<true>;

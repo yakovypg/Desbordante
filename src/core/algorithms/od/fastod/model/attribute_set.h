@@ -108,6 +108,8 @@ public:
     friend AttributeSet operator^(AttributeSet const& b1, AttributeSet const& b2) noexcept;
     friend bool operator==(AttributeSet const& b1, AttributeSet const& b2) noexcept;
     friend bool operator!=(AttributeSet const& b1, AttributeSet const& b2) noexcept;
+    friend bool operator<(AttributeSet const& b1, AttributeSet const& b2) noexcept;
+
     friend struct std::hash<AttributeSet>;
     friend struct boost::hash<AttributeSet>;
 };
@@ -133,6 +135,10 @@ inline bool operator==(AttributeSet const& b1, AttributeSet const& b2) noexcept 
 
 inline bool operator!=(AttributeSet const& b1, AttributeSet const& b2) noexcept {
     return !(b1 == b2);
+}
+
+inline bool operator<(AttributeSet const& b1, AttributeSet const& b2) noexcept {
+    return b1.bitset_.to_ullong() < b2.bitset_.to_ullong();
 }
 
 }  // namespace algos::fastod

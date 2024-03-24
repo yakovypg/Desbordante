@@ -15,10 +15,18 @@ private:
     AttributePair ap_;
 
 public:
-    CanonicalOD(AttributeSet&& context, model::ColumnIndex left, model::ColumnIndex right);
+    CanonicalOD() noexcept = default;
+    CanonicalOD(AttributeSet const& context, model::ColumnIndex left, model::ColumnIndex right);
 
     bool IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const;
     std::string ToString() const;
+
+    friend bool operator==(CanonicalOD<true> const& x, CanonicalOD<true> const& y);
+    friend bool operator!=(CanonicalOD<true> const& x, CanonicalOD<true> const& y);
+    friend bool operator<(CanonicalOD<true> const& x, CanonicalOD<true> const& y);
+    friend bool operator==(CanonicalOD<false> const& x, CanonicalOD<false> const& y);
+    friend bool operator!=(CanonicalOD<false> const& x, CanonicalOD<false> const& y);
+    friend bool operator<(CanonicalOD<false> const& x, CanonicalOD<false> const& y);
 
     friend struct std::hash<CanonicalOD<ascending>>;
 };
@@ -32,10 +40,15 @@ private:
     model::ColumnIndex right_;
 
 public:
+    SimpleCanonicalOD();
     SimpleCanonicalOD(AttributeSet const& context, model::ColumnIndex right);
 
     bool IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const;
     std::string ToString() const;
+
+    friend bool operator==(SimpleCanonicalOD const& x, SimpleCanonicalOD const& y);
+    friend bool operator!=(SimpleCanonicalOD const& x, SimpleCanonicalOD const& y);
+    friend bool operator<(SimpleCanonicalOD const& x, SimpleCanonicalOD const& y);
 
     friend struct std::hash<SimpleCanonicalOD>;
 };
