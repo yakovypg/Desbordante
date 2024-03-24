@@ -53,8 +53,7 @@ void BindOd(py::module_& main_module) {
     auto od_algos_module = BindPrimitiveNoBase<algos::Fastod>(od_module, "Fastod")
                                    .def("get_asc_ods", &algos::Fastod::GetAscendingDependencies)
                                    .def("get_desc_ods", &algos::Fastod::GetDescendingDependencies)
-                                   .def("get_simple_ods", &algos::Fastod::GetSimpleDependencies)
-                                   .def("get_elapsed_seconds", &algos::Fastod::GetElapsedSeconds);
+                                   .def("get_simple_ods", &algos::Fastod::GetSimpleDependencies);
 
     main_module.attr("od_module") = od_module;
 }
