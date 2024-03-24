@@ -57,18 +57,6 @@ CSVConfig const kOdTestNormBreastCancerWisconsin =
         CreateCsvConfig("od_norm_data/metanome/breast-cancer-wisconsin.csv", ',', true);
 CSVConfig const kOdTestNormEchocardiogram =
         CreateCsvConfig("od_norm_data/metanome/echocardiogram_norm.csv", ',', true);
-CSVConfig const kOdTestNormHepatitis1 =
-        CreateCsvConfig("od_norm_data/metanome/hepatitis_norm_1.csv", ',', true);
-CSVConfig const kOdTestNormHepatitis2 =
-        CreateCsvConfig("od_norm_data/metanome/hepatitis_norm_2.csv", ',', true);
-CSVConfig const kOdTestNormHepatitis3 =
-        CreateCsvConfig("od_norm_data/metanome/hepatitis_norm_3.csv", ',', true);
-CSVConfig const kOdTestNormHepatitis4 =
-        CreateCsvConfig("od_norm_data/metanome/hepatitis_norm_4.csv", ',', true);
-CSVConfig const kOdTestNormHepatitis5 =
-        CreateCsvConfig("od_norm_data/metanome/hepatitis_norm_5.csv", ',', true);
-CSVConfig const kOdTestNormHepatitis =
-        CreateCsvConfig("od_norm_data/metanome/hepatitis_norm.csv", ',', true);
 CSVConfig const kOdTestNormHorse10c =
         CreateCsvConfig("od_norm_data/metanome/horse_10c_norm.csv", ',', true);
 CSVConfig const kOdTestNormIris = CreateCsvConfig("od_norm_data/metanome/iris_norm.csv", ',', true);

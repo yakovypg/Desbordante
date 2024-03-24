@@ -20,18 +20,24 @@ size_t RunFastod(CSVConfig const& csv_config) {
     using namespace config::names;
 
     algos::StdParamsMap params{{kCsvConfig, csv_config}};
-
     std::unique_ptr<algos::Fastod> fastod = algos::CreateAndLoadAlgorithm<algos::Fastod>(params);
 
-    std::vector<std::string> string_ods = fastod->DiscoverAsStrings();
-    std::sort(std::begin(string_ods), std::end(string_ods));
+    auto [ods_asc, ods_desc, ods_simple] = fastod->Discover();
 
-    std::size_t result_hash = 0;
+    std::vector<algos::fastod::AscCanonicalOD> ods_asc_sorted = ods_asc;
+    std::vector<algos::fastod::DescCanonicalOD> ods_desc_sorted = ods_desc;
+    std::vector<algos::fastod::SimpleCanonicalOD> ods_simple_sorted = ods_simple;
 
-    for (std::string const& od : string_ods) {
-        size_t od_hash = std::hash<std::string>{}(od);
-        result_hash = algos::fastod::hashing::CombineHashes(result_hash, od_hash);
-    }
+    std::sort(ods_asc_sorted.begin(), ods_asc_sorted.end());
+    std::sort(ods_desc_sorted.begin(), ods_desc_sorted.end());
+    std::sort(ods_simple_sorted.begin(), ods_simple_sorted.end());
+
+    size_t ods_asc_sorted_hash = algos::fastod::hashing::CombineHashes(ods_asc_sorted);
+    size_t ods_desc_sorted_hash = algos::fastod::hashing::CombineHashes(ods_desc_sorted);
+    size_t ods_simple_sorted_hash = algos::fastod::hashing::CombineHashes(ods_simple_sorted);
+
+    std::vector<size_t> od_hashes = {ods_asc_sorted_hash, ods_desc_sorted_hash, ods_simple_sorted_hash};
+    size_t result_hash = algos::fastod::hashing::CombineHashes(od_hashes);
 
     return result_hash;
 }
@@ -48,26 +54,26 @@ TEST_P(FastodResultHashTest, CorrectnessTest) {
 
 INSTANTIATE_TEST_SUITE_P(
         TestFastodSuite, FastodResultHashTest,
-        ::testing::Values(CSVConfigHash{kOdTestNormOd, 11980520805314995804UL},
-                          CSVConfigHash{kOdTestNormSmall2x3, 7457915278574020764UL},
-                          CSVConfigHash{kOdTestNormSmall3x3, 3318291924553133612UL},
-                          CSVConfigHash{kOdTestNormAbalone, 8494646055080399391UL},
-                          CSVConfigHash{kOdTestNormBalanceScale, 0ULL},
-                          CSVConfigHash{kOdTestNormBreastCancerWisconsin, 16845062592796597733UL},
-                          CSVConfigHash{kOdTestNormEchocardiogram, 2811588447932787109UL},
-                          CSVConfigHash{kOdTestNormHepatitis1, 132585063305091933UL},
-                          CSVConfigHash{kOdTestNormHepatitis2, 10199178000978455890UL},
-                          CSVConfigHash{kOdTestNormHepatitis3, 3063999440011758644UL},
-                          CSVConfigHash{kOdTestNormHepatitis4, 132585063305091933UL},
-                          CSVConfigHash{kOdTestNormHepatitis5, 11668977472753401458UL},
-                          CSVConfigHash{kOdTestNormHepatitis, 8347405483583260580UL},
-                          CSVConfigHash{kOdTestNormHorse10c, 13235589009124491858UL},
-                          CSVConfigHash{kOdTestNormIris, 0UL},
-                          CSVConfigHash{kBernoulliRelation, 3072345414994597861UL},
-                          CSVConfigHash{kTestFD, 10356217265356097778UL},
-                          CSVConfigHash{kWDC_astrology, 16412680650821272398UL},
-                          CSVConfigHash{kWDC_game, 17253963663585814974UL},
-                          CSVConfigHash{kWDC_planetz, 16723826645866677286UL},
-                          CSVConfigHash{kWDC_symbols, 4539870310106546587UL}));
+        ::testing::Values(CSVConfigHash{kOdTestNormOd, 8741296102670149192ULL},
+                          CSVConfigHash{kOdTestNormSmall2x3, 14827049072319306073ULL},
+                          CSVConfigHash{kOdTestNormSmall3x3, 66466490561337ULL},
+                          CSVConfigHash{kOdTestNormAbalone, 14398696798633970055ULL},
+                          CSVConfigHash{kOdTestNormBalanceScale, 11093822414574ULL},
+                          CSVConfigHash{kOdTestNormBreastCancerWisconsin, 4334402279000540119ULL},
+                          CSVConfigHash{kOdTestNormEchocardiogram, 2243402441338221665ULL},
+                          CSVConfigHash{kOdTestNormHorse10c, 1462534374501425106ULL},
+                          CSVConfigHash{kOdTestNormIris, 11093822414574ULL},
+                          CSVConfigHash{kBernoulliRelation, 6518269127574092257ULL},
+                          CSVConfigHash{kTestFD, 15333753345229147120ULL},
+                          CSVConfigHash{kWDC_astrology, 723643032648123806ULL},
+                          CSVConfigHash{kWDC_game, 3164616462792843131ULL},
+                          CSVConfigHash{kWDC_planetz, 3164616455022529293ULL},
+                          CSVConfigHash{kWDC_symbols, 2211268401046792ULL},
+                          CSVConfigHash{kneighbors10k, 11706974185824900569ULL},
+                          CSVConfigHash{kneighbors50k, 13614325680376306479ULL},
+                          CSVConfigHash{kneighbors100k, 11706974185824900569ULL},
+                          CSVConfigHash{kabalone, 13440043079221534278ULL},
+                          CSVConfigHash{kiris, 386492228314919716ULL},
+                          CSVConfigHash{kbreast_cancer, 10457518087798149718ULL}));
 
 }  // namespace tests
