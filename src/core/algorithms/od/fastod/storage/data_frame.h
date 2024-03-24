@@ -15,6 +15,7 @@ class DataFrame {
 public:
     using Range = std::pair<size_t, size_t>;
     using ValueIndices = std::pair<int, Range>;
+    using DataAndIndex = std::pair<std::byte const*, int>;
 
 private:
     std::vector<std::vector<int>> data_;

@@ -3,6 +3,7 @@
 #include <memory>
 #include <stdexcept>
 
+#include "algorithms/od/fastod/util/type_util.h"
 #include "csv_parser/csv_parser.h"
 
 namespace algos::fastod {
@@ -10,7 +11,7 @@ namespace algos::fastod {
 DataFrame::DataFrame(std::vector<model::TypedColumnData> const& columns_data) {
     model::ColumnIndex cols_num = columns_data.size();
 
-    if (cols_num <= 0) {
+    if (cols_num == 0) {
         throw std::invalid_argument("Number of columns must be greater than zero");
     }
 
@@ -122,26 +123,20 @@ std::vector<std::pair<std::byte const*, int>> DataFrame::CreateIndexedColumnData
 }
 
 std::vector<int> DataFrame::ConvertColumnDataToIntegers(model::TypedColumnData const& column) {
-    using DataAndIndex = std::pair<std::byte const*, int>;
-
     auto less_mixed = [&column](DataAndIndex l, DataAndIndex r) {
-        const model::MixedType* mixed_type = column.GetIfMixed();
-        return mixed_type->ValueToString(l.first) < mixed_type->ValueToString(r.first);
+        return CompareData<true>(l, r, column) == model::CompareResult::kLess;
     };
 
     auto less_not_mixed = [&column](DataAndIndex l, DataAndIndex r) {
-        const model::Type& type = column.GetType();
-        return type.Compare(l.first, r.first) == model::CompareResult::kLess;
+        return CompareData<false>(l, r, column) == model::CompareResult::kLess;
     };
 
     auto equal_mixed = [&column](DataAndIndex l, DataAndIndex r) {
-        const model::MixedType* mixed_type = column.GetIfMixed();
-        return mixed_type->ValueToString(l.first) == mixed_type->ValueToString(r.first);
+        return CompareData<true>(l, r, column) == model::CompareResult::kEqual;
     };
 
     auto equal_not_mixed = [&column](DataAndIndex l, DataAndIndex r) {
-        const model::Type& type = column.GetType();
-        return type.Compare(l.first, r.first) == model::CompareResult::kEqual;
+        return CompareData<false>(l, r, column) == model::CompareResult::kEqual;
     };
 
     std::vector<std::pair<std::byte const*, int>> indexed_column_data =
