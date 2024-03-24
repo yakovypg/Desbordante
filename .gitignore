@@ -11,3 +11,6 @@ lib/
 .vscode/
 **/myeasylog.log
 dist
+src/tests/fastod/__pycache__
+src/tests/fastod/results
+src/tests/fastod/results_mem
