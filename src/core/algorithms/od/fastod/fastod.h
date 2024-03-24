@@ -34,7 +34,6 @@ private:
     size_t od_count_ = 0;
     size_t fd_count_ = 0;
     size_t ocd_count_ = 0;
-    size_t elapsed_seconds_ = 0;
 
     std::vector<AscCanonicalOD> result_asc_;
     std::vector<DescCanonicalOD> result_desc_;
