@@ -6,6 +6,7 @@
 
 #include "algorithms/algo_factory.h"
 #include "algorithms/od/fastod/fastod.h"
+#include "algorithms/od/fastod/hashing/hashing.h"
 #include "all_csv_configs.h"
 #include "config/names.h"
 #include "config/time_limit/type.h"
@@ -14,11 +15,6 @@
 namespace tests {
 
 namespace {
-
-size_t CombineHashes(size_t first, size_t second) {
-    size_t wave = second + 2654435769UL + (first << 6) + (first >> 2);
-    return first ^ wave;
-}
 
 size_t RunFastod(CSVConfig const& csv_config) {
     using namespace config::names;
@@ -34,7 +30,7 @@ size_t RunFastod(CSVConfig const& csv_config) {
 
     for (std::string const& od : string_ods) {
         size_t od_hash = std::hash<std::string>{}(od);
-        result_hash = CombineHashes(result_hash, od_hash);
+        result_hash = algos::fastod::hashing::CombineHashes(result_hash, od_hash);
     }
 
     return result_hash;

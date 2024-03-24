@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "algorithms/od/fastod/hashing/hashing.h"
 #include "attribute_set.h"
 #include "model/table/column_index.h"
 
@@ -24,7 +25,7 @@ namespace std {
 template <>
 struct hash<algos::fastod::AttributePair> {
     std::size_t operator()(algos::fastod::AttributePair const& pair) const {
-        return std::hash<size_t>()((pair.left << 10) + pair.right);
+        return algos::fastod::hashing::CombineHashes(pair.left, pair.right);
     }
 };
 
