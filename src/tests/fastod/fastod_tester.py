@@ -251,6 +251,24 @@ def test_algorithms(first_impl_name: str,
     print(f'Passed test: {passed_tests}')
     print(f'Failed test: {failed_tests}')
 
+def test_c_vs_old_c(c_impl_path: str,
+                    old_c_impl_path: str,
+                    comparer_path: str, 
+                    datasets: list[str]) -> None:
+    c_impl_name = 'C++_v1'
+    c_impl_start = ['python3', c_impl_path, '--task=od', f'--table={INSERT_DATASET_LABEL}', ',', 'True']
+
+    old_c_impl_name = 'C++_v2'
+    old_c_impl_start = [old_c_impl_path, INSERT_DATASET_LABEL]
+
+    test_algorithms(
+        c_impl_name,
+        c_impl_start,
+        old_c_impl_name,
+        old_c_impl_start,
+        comparer_path,
+        datasets)
+
 def test_c_vs_c(first_c_impl_path: str,
                 second_c_impl_path: str,
                 comparer_path: str, 
