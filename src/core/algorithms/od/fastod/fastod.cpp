@@ -97,10 +97,10 @@ unsigned long long Fastod::ExecuteInternal() {
 }
 
 void Fastod::PrintStatistics() const {
-    LOG(DEBUG) << "RESULT: Time=" << timer_.GetElapsedSeconds() << ", "
-               << "OD=" << fd_count_ + ocd_count_ << ", "
-               << "FD=" << fd_count_ << ", "
-               << "OCD=" << ocd_count_ << '\n';
+    std::cout << "RESULT: Time=" << timer_.GetElapsedSeconds() << ", "
+              << "OD=" << fd_count_ + ocd_count_ << ", "
+              << "FD=" << fd_count_ << ", "
+              << "OCD=" << ocd_count_ << '\n';
 }
 
 bool Fastod::IsComplete() const {
