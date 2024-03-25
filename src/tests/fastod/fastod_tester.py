@@ -88,6 +88,8 @@ def is_algorithm_results_equal(first_result_path: str, second_result_path: str, 
 
 def extract_algorithm_dependencies(output: str) -> list[str]:
     lines = output.split('\n')
+    lines = [i[i.find('{'):] for i in lines]
+
     return list(filter(lambda t: t.startswith('{') and ('}' in t), lines))
 
 def parse_algorithm_result(output: str) -> AlgorithmResult:
