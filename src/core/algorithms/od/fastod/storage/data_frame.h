@@ -53,7 +53,7 @@ public:
     size_t GetRangeIndexByItem(size_t item, model::ColumnIndex attribute) const;
 
     model::ColumnIndex GetColumnCount() const;
-    std::size_t GetTupleCount() const;
+    size_t GetTupleCount() const;
 
     bool IsAttributesMostlyRangeBased(AttributeSet attributes) const;
 

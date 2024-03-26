@@ -10,10 +10,10 @@ class CacheWithLimit {
 private:
     std::unordered_map<K, V> entries_;
     std::queue<K> keys_in_order_;
-    const std::size_t max_size_;
+    const size_t max_size_;
 
 public:
-    explicit CacheWithLimit(std::size_t max_size) : max_size_(max_size){};
+    explicit CacheWithLimit(size_t max_size) : max_size_(max_size){};
 
     void Clear() {
         entries_.clear();

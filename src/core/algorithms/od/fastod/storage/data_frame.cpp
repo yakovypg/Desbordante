@@ -63,7 +63,7 @@ model::ColumnIndex DataFrame::GetColumnCount() const {
     return data_.size();
 }
 
-std::size_t DataFrame::GetTupleCount() const {
+size_t DataFrame::GetTupleCount() const {
     return data_.size() > 0 ? data_[0].size() : 0;
 }
 
@@ -115,7 +115,7 @@ std::vector<std::pair<std::byte const*, int>> DataFrame::CreateIndexedColumnData
     const std::vector<std::byte const*> data = column.GetData();
     std::vector<std::pair<std::byte const*, int>> indexed_column_data(data.size());
 
-    for (std::size_t i = 0; i < data.size(); ++i) {
+    for (size_t i = 0; i < data.size(); ++i) {
         indexed_column_data[i] = std::make_pair(data[i], i);
     }
 
@@ -155,7 +155,7 @@ std::vector<int> DataFrame::ConvertColumnDataToIntegers(model::TypedColumnData c
     int current_value = 0;
     converted_column[indexed_column_data[0].second] = current_value;
 
-    for (std::size_t i = 1; i < indexed_column_data.size(); ++i) {
+    for (size_t i = 1; i < indexed_column_data.size(); ++i) {
         std::pair<std::byte const*, int> const& prev = indexed_column_data[i - 1];
         std::pair<std::byte const*, int> const& curr = indexed_column_data[i];
 

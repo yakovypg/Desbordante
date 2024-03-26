@@ -30,7 +30,7 @@ namespace std {
 
 template <>
 struct hash<algos::fastod::AttributePair> {
-    std::size_t operator()(algos::fastod::AttributePair const& pair) const {
+    size_t operator()(algos::fastod::AttributePair const& pair) const {
         return algos::fastod::hashing::CombineHashes(pair.left, pair.right);
     }
 };
