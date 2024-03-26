@@ -100,9 +100,10 @@ Currently, the console version of Desbordante supports:
 1) Discovery of exact functional dependencies
 2) Discovery of approximate functional dependencies
 3) Discovery of probabilistic functional dependencies
-4) Verification of exact functional dependencies
-5) Verification of approximate functional dependencies
-6) Verification of metric dependencies
+4) Discovery of exact canonical order dependencies
+5) Verification of exact functional dependencies
+6) Verification of approximate functional dependencies
+7) Verification of metric dependencies
 
 If you need other types, you should look into the C++ code, the Python
 bindings or the Web version.
