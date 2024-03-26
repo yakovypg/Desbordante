@@ -117,32 +117,29 @@ private:
                 }
             }
         } else if (level_ > 2) {
-            std::unordered_set<AttributePair> candidates;
+            context.Iterate([this, &delAttrs, &context](model::ColumnIndex attr) {
+                auto const& candidates = CSGet<Ascending>(delAttrs[attr]);
 
-            context.Iterate([this, &delAttrs, &candidates](model::ColumnIndex attr) {
-                auto const& tmp = CSGet<Ascending>(delAttrs[attr]);
-                candidates.insert(tmp.cbegin(), tmp.cend());
-            });
+                for (AttributePair const& attribute_pair : candidates) {
+                    const AttributeSet context_delete_ab = fastod::DeleteAttribute(
+                            delAttrs[attribute_pair.left], attribute_pair.right);
 
-            for (AttributePair const& attribute_pair : candidates) {
-                const AttributeSet context_delete_ab = fastod::DeleteAttribute(
-                        delAttrs[attribute_pair.left], attribute_pair.right);
+                    bool add_context = true;
 
-                bool add_context = true;
+                    context_delete_ab.Iterate([this, &delAttrs, &attribute_pair,
+                                            &add_context](model::ColumnIndex attr) {
+                        std::unordered_set<AttributePair> const& cs = CSGet<Ascending>(delAttrs[attr]);
+                        if (cs.find(attribute_pair) == cs.end()) {
+                            add_context = false;
+                            return;
+                        }
+                    });
 
-                context_delete_ab.Iterate([this, &delAttrs, &attribute_pair,
-                                           &add_context](model::ColumnIndex attr) {
-                    std::unordered_set<AttributePair> const& cs = CSGet<Ascending>(delAttrs[attr]);
-                    if (cs.find(attribute_pair) == cs.end()) {
-                        add_context = false;
-                        return;
+                    if (add_context) {
+                        CSPut<Ascending>(context, attribute_pair);
                     }
-                });
-
-                if (add_context) {
-                    CSPut<Ascending>(context, attribute_pair);
                 }
-            }
+            });
         }
     }
 
