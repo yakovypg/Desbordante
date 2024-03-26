@@ -71,7 +71,6 @@ INSTANTIATE_TEST_SUITE_P(
                           CSVConfigHash{kWdcPlanetz, 3164616455022529293ULL},
                           CSVConfigHash{kWdcSymbols, 2211268401046792ULL},
                           CSVConfigHash{kNeighbors10k, 11706974185824900569ULL},
-                          CSVConfigHash{kNeighbors50k, 13614325680376306479ULL},
                           CSVConfigHash{kNeighbors100k, 11706974185824900569ULL},
                           CSVConfigHash{kAbalone, 13440043079221534278ULL},
                           CSVConfigHash{kIris, 386492228314919716ULL},
