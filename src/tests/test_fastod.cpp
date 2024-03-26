@@ -66,15 +66,15 @@ INSTANTIATE_TEST_SUITE_P(
                           CSVConfigHash{kOdTestNormIris, 11093822414574ULL},
                           CSVConfigHash{kBernoulliRelation, 6518269127574092257ULL},
                           CSVConfigHash{kTestFD, 15333753345229147120ULL},
-                          CSVConfigHash{kWDC_astrology, 723643032648123806ULL},
-                          CSVConfigHash{kWDC_game, 3164616462792843131ULL},
-                          CSVConfigHash{kWDC_planetz, 3164616455022529293ULL},
-                          CSVConfigHash{kWDC_symbols, 2211268401046792ULL},
-                          CSVConfigHash{kneighbors10k, 11706974185824900569ULL},
-                          CSVConfigHash{kneighbors50k, 13614325680376306479ULL},
-                          CSVConfigHash{kneighbors100k, 11706974185824900569ULL},
-                          CSVConfigHash{kabalone, 13440043079221534278ULL},
-                          CSVConfigHash{kiris, 386492228314919716ULL},
-                          CSVConfigHash{kbreast_cancer, 10457518087798149718ULL}));
+                          CSVConfigHash{kWdcAstrology, 723643032648123806ULL},
+                          CSVConfigHash{kWdcGame, 3164616462792843131ULL},
+                          CSVConfigHash{kWdcPlanetz, 3164616455022529293ULL},
+                          CSVConfigHash{kWdcSymbols, 2211268401046792ULL},
+                          CSVConfigHash{kNeighbors10k, 11706974185824900569ULL},
+                          CSVConfigHash{kNeighbors50k, 13614325680376306479ULL},
+                          CSVConfigHash{kNeighbors100k, 11706974185824900569ULL},
+                          CSVConfigHash{kAbalone, 13440043079221534278ULL},
+                          CSVConfigHash{kIris, 386492228314919716ULL},
+                          CSVConfigHash{kBreastCancer, 10457518087798149718ULL}));
 
 }  // namespace tests
