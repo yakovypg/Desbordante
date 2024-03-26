@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <vector>
 
 namespace algos::fastod::hashing {
@@ -11,7 +12,7 @@ inline size_t CombineHashes(size_t first, size_t second) {
 
 template <class T>
 inline size_t CombineHashes(std::vector<T> const& items) {
-    std::size_t result_hash = 0;
+    size_t result_hash = 0;
 
     for (auto const& item : items) {
         const size_t item_hash = std::hash<T>{}(item);
