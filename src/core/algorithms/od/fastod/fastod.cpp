@@ -204,7 +204,7 @@ void Fastod::ComputeODs() {
     size_t delete_index = 0;
 
     for (AttributeSet const& context : context_in_current_level_) {
-        auto const& delAttrs = deleted_attrs[delete_index++];
+        auto const& del_attrs = deleted_attrs[delete_index++];
 
         if (IsTimeUp()) {
             is_complete_ = false;
@@ -213,8 +213,8 @@ void Fastod::ComputeODs() {
 
         AttributeSet context_intersect_cc_context = fastod::Intersect(context, CCGet(context));
 
-        context_intersect_cc_context.Iterate([this, &context, &delAttrs](model::ColumnIndex attr) {
-            SimpleCanonicalOD od(delAttrs[attr], attr);
+        context_intersect_cc_context.Iterate([this, &context, &del_attrs](model::ColumnIndex attr) {
+            SimpleCanonicalOD od(del_attrs[attr], attr);
 
             if (od.IsValid(data_, partition_cache_)) {
                 AddToResult(std::move(od));
@@ -230,8 +230,8 @@ void Fastod::ComputeODs() {
             }
         });
 
-        CalculateODs<false>(context, delAttrs);
-        CalculateODs<true>(context, delAttrs);
+        CalculateODs<false>(context, del_attrs);
+        CalculateODs<true>(context, del_attrs);
     }
 }
 
