@@ -8,7 +8,7 @@
 
 namespace algos::fastod {
 
-template <bool ascending>
+template <bool Ascending>
 class CanonicalOD {
 private:
     AttributeSet context_;
@@ -28,7 +28,7 @@ public:
     friend bool operator!=(CanonicalOD<false> const& x, CanonicalOD<false> const& y);
     friend bool operator<(CanonicalOD<false> const& x, CanonicalOD<false> const& y);
 
-    friend struct std::hash<CanonicalOD<ascending>>;
+    friend struct std::hash<CanonicalOD<Ascending>>;
 };
 
 using AscCanonicalOD = CanonicalOD<true>;
@@ -57,9 +57,9 @@ public:
 
 namespace std {
 
-template <bool ascending>
-struct hash<algos::fastod::CanonicalOD<ascending>> {
-    size_t operator()(algos::fastod::CanonicalOD<ascending> const& od) const noexcept {
+template <bool Ascending>
+struct hash<algos::fastod::CanonicalOD<Ascending>> {
+    size_t operator()(algos::fastod::CanonicalOD<Ascending> const& od) const noexcept {
         const size_t context_hash = hash<algos::fastod::AttributeSet>{}(od.context_);
         const size_t ap_hash = hash<algos::fastod::AttributePair>{}(od.ap_);
 

@@ -55,7 +55,7 @@ public:
     bool ShouldBeConvertedToStrippedPartition() const;
     void ToStrippedPartition();
 
-    template <bool ascending>
+    template <bool Ascending>
     bool Swap(model::ColumnIndex left, model::ColumnIndex right) const {
         const size_t group_count = is_stripped_partition_ ? sp_begins_->size() : rb_begins_->size();
 
@@ -87,7 +87,7 @@ public:
                 }
             }
 
-            if constexpr (ascending) {
+            if constexpr (Ascending) {
                 std::sort(values.begin(), values.end(),
                           [](auto const& p1, auto const& p2) { return p1.first < p2.first; });
             } else {
@@ -119,9 +119,9 @@ public:
         return false;
     }
 
-    template <bool range_based_mode>
+    template <bool RangeBasedMode>
     static ComplexStrippedPartition Create(std::shared_ptr<DataFrame> data) {
-        if constexpr (range_based_mode) {
+        if constexpr (RangeBasedMode) {
             auto rb_indexes = std::make_unique<std::vector<DataFrame::Range>>();
             auto rb_begins = std::make_unique<std::vector<size_t>>();
 

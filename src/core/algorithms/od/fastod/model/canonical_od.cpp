@@ -4,21 +4,21 @@
 
 namespace algos::fastod {
 
-template <bool ascending>
-CanonicalOD<ascending>::CanonicalOD(AttributeSet const& context, model::ColumnIndex left,
+template <bool Ascending>
+CanonicalOD<Ascending>::CanonicalOD(AttributeSet const& context, model::ColumnIndex left,
                                     model::ColumnIndex right)
     : context_(std::move(context)), ap_(left, right) {}
 
-template <bool ascending>
-bool CanonicalOD<ascending>::IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const {
-    return !(cache.GetStrippedPartition(context_, data).Swap<ascending>(ap_.left, ap_.right));
+template <bool Ascending>
+bool CanonicalOD<Ascending>::IsValid(std::shared_ptr<DataFrame> data, PartitionCache& cache) const {
+    return !(cache.GetStrippedPartition(context_, data).Swap<Ascending>(ap_.left, ap_.right));
 }
 
-template <bool ascending>
-std::string CanonicalOD<ascending>::ToString() const {
+template <bool Ascending>
+std::string CanonicalOD<Ascending>::ToString() const {
     std::stringstream result;
 
-    result << context_.ToString() << " : " << ap_.left + 1 << (ascending ? "<=" : ">=") << " ~ "
+    result << context_.ToString() << " : " << ap_.left + 1 << (Ascending ? "<=" : ">=") << " ~ "
            << ap_.right + 1 << "<=";
 
     return result.str();

@@ -60,9 +60,9 @@ private:
     void RegisterOptions();
     void MakeLoadOptionsAvailable();
 
-    template <bool ascending>
-    void AddToResult(fastod::CanonicalOD<ascending>&& od) {
-        if constexpr (ascending)
+    template <bool Ascending>
+    void AddToResult(fastod::CanonicalOD<Ascending>&& od) {
+        if constexpr (Ascending)
             result_asc_.emplace_back(std::move(od));
         else
             result_desc_.emplace_back(std::move(od));
@@ -77,25 +77,25 @@ private:
     void CCPut(AttributeSet const& key, AttributeSet attribute_set);
     AttributeSet const& CCGet(AttributeSet const& key);
 
-    template <bool ascending>
+    template <bool Ascending>
     void CSPut(AttributeSet const& key, AttributePair const& value) {
-        if constexpr (ascending)
+        if constexpr (Ascending)
             cs_asc_[key].emplace(value);
         else
             cs_desc_[key].emplace(value);
     }
 
-    template <bool ascending>
+    template <bool Ascending>
     void CSPut(AttributeSet const& key, AttributePair&& value) {
-        if constexpr (ascending)
+        if constexpr (Ascending)
             cs_asc_[key].emplace(std::move(value));
         else
             cs_desc_[key].emplace(std::move(value));
     }
 
-    template <bool ascending>
+    template <bool Ascending>
     std::unordered_set<AttributePair>& CSGet(AttributeSet const& key) {
-        if constexpr (ascending)
+        if constexpr (Ascending)
             return cs_asc_[key];
         else
             return cs_desc_[key];
@@ -106,13 +106,13 @@ private:
     void PruneLevels();
     void CalculateNextLevel();
 
-    template <bool ascending>
+    template <bool Ascending>
     void AddCandidates(AttributeSet const& context, std::vector<AttributeSet> const& delAttrs) {
         if (level_ == 2) {
             for (model::ColumnIndex i = 0; i < data_->GetColumnCount(); i++) {
                 for (model::ColumnIndex j = 0; j < data_->GetColumnCount(); j++) {
                     if (i == j) continue;
-                    CSPut<ascending>(fastod::CreateAttributeSet({i, j}, data_->GetColumnCount()),
+                    CSPut<Ascending>(fastod::CreateAttributeSet({i, j}, data_->GetColumnCount()),
                                      AttributePair(i, j));
                 }
             }
@@ -120,7 +120,7 @@ private:
             std::unordered_set<AttributePair> candidates;
 
             context.Iterate([this, &delAttrs, &candidates](model::ColumnIndex attr) {
-                auto const& tmp = CSGet<ascending>(delAttrs[attr]);
+                auto const& tmp = CSGet<Ascending>(delAttrs[attr]);
                 candidates.insert(tmp.cbegin(), tmp.cend());
             });
 
@@ -132,7 +132,7 @@ private:
 
                 context_delete_ab.Iterate([this, &delAttrs, &attribute_pair,
                                            &add_context](model::ColumnIndex attr) {
-                    std::unordered_set<AttributePair> const& cs = CSGet<ascending>(delAttrs[attr]);
+                    std::unordered_set<AttributePair> const& cs = CSGet<Ascending>(delAttrs[attr]);
                     if (cs.find(attribute_pair) == cs.end()) {
                         add_context = false;
                         return;
@@ -140,22 +140,22 @@ private:
                 });
 
                 if (add_context) {
-                    CSPut<ascending>(context, attribute_pair);
+                    CSPut<Ascending>(context, attribute_pair);
                 }
             }
         }
     }
 
-    template <bool ascending>
+    template <bool Ascending>
     void CalculateODs(AttributeSet const& context, std::vector<AttributeSet> const& delAttrs) {
-        auto& cs_for_con = CSGet<ascending>(context);
+        auto& cs_for_con = CSGet<Ascending>(context);
         for (auto it = cs_for_con.begin(); it != cs_for_con.end();) {
             model::ColumnIndex a = it->left;
             model::ColumnIndex b = it->right;
 
             if (ContainsAttribute(CCGet(delAttrs[b]), a) &&
                 ContainsAttribute(CCGet(delAttrs[a]), b)) {
-                fastod::CanonicalOD<ascending> od(fastod::DeleteAttribute(delAttrs[a], b), a, b);
+                fastod::CanonicalOD<Ascending> od(fastod::DeleteAttribute(delAttrs[a], b), a, b);
                 if (od.IsValid(data_, partition_cache_)) {
                     ++ocd_count_;
                     AddToResult(std::move(od));

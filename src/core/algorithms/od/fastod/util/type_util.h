@@ -10,7 +10,7 @@ bool IsUnorderedType(model::TypeId type_id);
 model::CompareResult CompareDataAsStrings(std::byte const* left, std::byte const* right,
                                           model::MixedType const* mixed_type);
 
-template <bool is_column_mixed>
+template <bool IsColumnMixed>
 model::CompareResult CompareData(DataFrame::DataAndIndex const& left,
                                  DataFrame::DataAndIndex const& right,
                                  model::TypedColumnData const& column) {
@@ -32,7 +32,7 @@ model::CompareResult CompareData(DataFrame::DataAndIndex const& left,
                                              : model::CompareResult::kGreater;
     }
 
-    if constexpr (is_column_mixed) {
+    if constexpr (IsColumnMixed) {
         model::MixedType const* mixed_type = column.GetIfMixed();
 
         return left_type_id == right_type_id
