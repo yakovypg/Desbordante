@@ -32,16 +32,16 @@ void Fastod::PrepareOptions() {
 }
 
 void Fastod::RegisterOptions() {
-    RegisterOption(config::TableOpt(&input_table_));
-    RegisterOption(config::TimeLimitSecondsOpt(&time_limit_seconds_));
+    RegisterOption(config::kTableOpt(&input_table_));
+    RegisterOption(config::kTimeLimitSecondsOpt(&time_limit_seconds_));
 }
 
 void Fastod::MakeLoadOptionsAvailable() {
-    MakeOptionsAvailable({config::TableOpt.GetName()});
+    MakeOptionsAvailable({config::kTableOpt.GetName()});
 }
 
 void Fastod::MakeExecuteOptsAvailable() {
-    MakeOptionsAvailable({config::TimeLimitSecondsOpt.GetName()});
+    MakeOptionsAvailable({config::kTimeLimitSecondsOpt.GetName()});
 }
 
 void Fastod::LoadDataInternal() {

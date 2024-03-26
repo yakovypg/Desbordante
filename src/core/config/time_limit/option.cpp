@@ -4,6 +4,6 @@
 
 namespace config {
 using names::kTimeLimitSeconds, descriptions::kDTimeLimitSeconds;
-extern CommonOption<TimeLimitSecondsType> const TimeLimitSecondsOpt{kTimeLimitSeconds,
+extern CommonOption<TimeLimitSecondsType> const kTimeLimitSecondsOpt{kTimeLimitSeconds,
                                                                     kDTimeLimitSeconds, 0u};
 }  // namespace config
