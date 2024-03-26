@@ -5,8 +5,6 @@
 #include <boost/unordered/unordered_map.hpp>
 #include <easylogging++.h>
 
-#include "config/names_and_descriptions.h"
-#include "config/option_using.h"
 #include "config/tabular_data/input_table/option.h"
 #include "config/time_limit/option.h"
 
@@ -29,26 +27,20 @@ fastod::AttributeSet const& Fastod::CCGet(AttributeSet const& key) {
 }
 
 void Fastod::PrepareOptions() {
-    using namespace config::names;
-
     RegisterOptions();
     MakeLoadOptionsAvailable();
 }
 
 void Fastod::RegisterOptions() {
-    DESBORDANTE_OPTION_USING;
-
     RegisterOption(config::TableOpt(&input_table_));
     RegisterOption(config::TimeLimitSecondsOpt(&time_limit_seconds_));
 }
 
 void Fastod::MakeLoadOptionsAvailable() {
-    using namespace config::names;
     MakeOptionsAvailable({config::TableOpt.GetName()});
 }
 
 void Fastod::MakeExecuteOptsAvailable() {
-    using namespace config::names;
     MakeOptionsAvailable({config::TimeLimitSecondsOpt.GetName()});
 }
 
