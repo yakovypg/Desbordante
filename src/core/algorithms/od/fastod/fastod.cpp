@@ -211,22 +211,23 @@ void Fastod::ComputeODs() {
             return;
         }
 
-        AttributeSet context_intersect_cc_context = fastod::Intersect(context, CCGet(context));
+        AttributeSet const& cc = CCGet(context);
+        AttributeSet context_intersect_cc_context = fastod::Intersect(context, cc);
 
-        context_intersect_cc_context.Iterate([this, &context, &del_attrs](model::ColumnIndex attr) {
+        context_intersect_cc_context.Iterate([this, &context, &del_attrs, &cc](model::ColumnIndex attr) {
             SimpleCanonicalOD od(del_attrs[attr], attr);
 
             if (od.IsValid(data_, partition_cache_)) {
                 AddToResult(std::move(od));
                 fd_count_++;
 
-                CCPut(context, fastod::DeleteAttribute(CCGet(context), attr));
+                CCPut(context, fastod::DeleteAttribute(cc, attr));
 
                 const AttributeSet diff = fastod::Difference(schema_, context);
 
-                diff.Iterate([this, &context](model::ColumnIndex i) {
-                    CCPut(context, fastod::DeleteAttribute(CCGet(context), i));
-                });
+                if (diff.Any()) {
+                    CCPut(context, cc & (~diff));
+                }
             }
         });
 
