@@ -59,7 +59,7 @@ void Fastod::ResetState() {
     result_asc_.clear();
     result_desc_.clear();
     result_simple_.clear();
-    context_in_each_level_.clear();
+    context_in_current_level_.clear();
     cc_.clear();
     cs_asc_.clear();
     cs_desc_.clear();
@@ -114,21 +114,13 @@ std::vector<fastod::SimpleCanonicalOD> const& Fastod::GetSimpleDependencies() co
 void Fastod::Initialize() {
     timer_.Start();
 
-    AttributeSet empty_set(data_->GetColumnCount());
-
-    context_in_each_level_.emplace_back();
-    context_in_each_level_[0].insert(empty_set);
     schema_ = AttributeSet(data_->GetColumnCount(), (1 << data_->GetColumnCount()) - 1);
 
-    CCPut(empty_set, schema_);
-
-    level_ = 1;
-    std::unordered_set<AttributeSet> level_1_candidates;
+    AttributeSet empty_set(data_->GetColumnCount());
+    CCPut(std::move(empty_set), schema_);
 
     for (model::ColumnIndex i = 0; i < data_->GetColumnCount(); ++i)
-        level_1_candidates.emplace(data_->GetColumnCount(), 1 << i);
-
-    context_in_each_level_.push_back(std::move(level_1_candidates));
+        context_in_current_level_.emplace(data_->GetColumnCount(), 1 << i);
 }
 
 std::tuple<std::vector<fastod::AscCanonicalOD> const&, std::vector<fastod::DescCanonicalOD> const&,
@@ -136,7 +128,7 @@ std::tuple<std::vector<fastod::AscCanonicalOD> const&, std::vector<fastod::DescC
 Fastod::Discover() {
     Initialize();
 
-    while (!context_in_each_level_[level_].empty()) {
+    while (!context_in_current_level_.empty()) {
         ComputeODs();
 
         if (IsTimeUp()) {
@@ -180,13 +172,11 @@ std::vector<std::string> Fastod::DiscoverAsStrings() {
 }
 
 void Fastod::ComputeODs() {
-    auto const& context_this_level = context_in_each_level_[level_];
-
     Timer timer(true);
-    std::vector<std::vector<AttributeSet>> deleted_attrs(context_this_level.size());
+    std::vector<std::vector<AttributeSet>> deleted_attrs(context_in_current_level_.size());
     size_t context_ind = 0;
 
-    for (AttributeSet const& context : context_this_level) {
+    for (AttributeSet const& context : context_in_current_level_) {
         auto& del_attrs = deleted_attrs[context_ind++];
         del_attrs.reserve(data_->GetColumnCount());
 
@@ -213,7 +203,7 @@ void Fastod::ComputeODs() {
 
     size_t delete_index = 0;
 
-    for (AttributeSet const& context : context_this_level) {
+    for (AttributeSet const& context : context_in_current_level_) {
         auto const& delAttrs = deleted_attrs[delete_index++];
 
         if (IsTimeUp()) {
@@ -246,16 +236,16 @@ void Fastod::ComputeODs() {
 }
 
 void Fastod::PruneLevels() {
-    if (level_ >= 2) {
-        auto& contexts = context_in_each_level_[level_];
-
-        for (auto attribute_set_it = contexts.begin(); attribute_set_it != contexts.end();) {
-            if (IsEmptySet(CCGet(*attribute_set_it)) && CSGet<true>(*attribute_set_it).empty() &&
-                CSGet<false>(*attribute_set_it).empty()) {
-                contexts.erase(attribute_set_it++);
-            } else {
-                ++attribute_set_it;
-            }
+    if (level_ == 1) {
+        return;
+    }
+    
+    for (auto attribute_set_it = context_in_current_level_.begin(); attribute_set_it != context_in_current_level_.end();) {
+        if (IsEmptySet(CCGet(*attribute_set_it)) && CSGet<true>(*attribute_set_it).empty() &&
+            CSGet<false>(*attribute_set_it).empty()) {
+            context_in_current_level_.erase(attribute_set_it++);
+        } else {
+            ++attribute_set_it;
         }
     }
 }
@@ -264,9 +254,7 @@ void Fastod::CalculateNextLevel() {
     boost::unordered_map<AttributeSet, std::vector<size_t>> prefix_blocks;
     std::unordered_set<AttributeSet> context_next_level;
 
-    auto const& context_this_level = context_in_each_level_[level_];
-
-    for (AttributeSet const& attribute_set : context_this_level) {
+    for (AttributeSet const& attribute_set : context_in_current_level_) {
         attribute_set.Iterate([&prefix_blocks, &attribute_set](model::ColumnIndex attr) {
             prefix_blocks[fastod::DeleteAttribute(attribute_set, attr)].push_back(attr);
         });
@@ -289,10 +277,9 @@ void Fastod::CalculateNextLevel() {
                 const AttributeSet candidate = fastod::AddAttribute(
                         fastod::AddAttribute(prefix, single_attributes[i]), single_attributes[j]);
 
-                candidate.Iterate([&context_this_level, &candidate,
-                                   &create_context](model::ColumnIndex attr) {
-                    if (context_this_level.find(fastod::DeleteAttribute(candidate, attr)) ==
-                        context_this_level.end()) {
+                candidate.Iterate([this, &candidate, &create_context](model::ColumnIndex attr) {
+                    if (context_in_current_level_.find(fastod::DeleteAttribute(candidate, attr)) ==
+                        context_in_current_level_.end()) {
                         create_context = false;
                         return;
                     }
@@ -305,7 +292,7 @@ void Fastod::CalculateNextLevel() {
         }
     }
 
-    context_in_each_level_.push_back(std::move(context_next_level));
+    context_in_current_level_ = std::move(context_next_level);
 }
 
 }  // namespace algos

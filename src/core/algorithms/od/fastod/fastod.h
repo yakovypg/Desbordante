@@ -38,7 +38,7 @@ private:
     std::vector<AscCanonicalOD> result_asc_;
     std::vector<DescCanonicalOD> result_desc_;
     std::vector<SimpleCanonicalOD> result_simple_;
-    std::vector<std::unordered_set<AttributeSet>> context_in_each_level_;
+    std::unordered_set<AttributeSet> context_in_current_level_;
     std::unordered_map<AttributeSet, AttributeSet> cc_;
     std::unordered_map<AttributeSet, std::unordered_set<AttributePair>> cs_asc_;
     std::unordered_map<AttributeSet, std::unordered_set<AttributePair>> cs_desc_;
