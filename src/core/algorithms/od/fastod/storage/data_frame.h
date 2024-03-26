@@ -64,7 +64,7 @@ public:
                                     config::EqNullsType is_null_equal_null = true);
 };
 
-inline size_t range_size(DataFrame::Range const& range) {
+inline size_t RangeSize(DataFrame::Range const& range) {
     return range.second - range.first + 1;
 }
 

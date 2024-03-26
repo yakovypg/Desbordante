@@ -76,7 +76,7 @@ void ComplexStrippedPartition::ToStrippedPartition() {
 
         for (size_t i = group_begin; i < group_end; ++i) {
             const DataFrame::Range range = (*rb_indexes_)[i];
-            sp_begin += range_size(range);
+            sp_begin += RangeSize(range);
 
             for (size_t sp_index = range.first; sp_index <= range.second; ++sp_index) {
                 sp_indexes_->push_back(sp_index);
@@ -248,7 +248,7 @@ void ComplexStrippedPartition::RangeBasedProduct(model::ColumnIndex attribute) {
             for (size_t i = start_index; i <= end_index; ++i) {
                 DataFrame::Range const& range = intersection[i].second;
 
-                if (range_size(range) < kMinMeaningfulRangeSize) {
+                if (RangeSize(range) < kMinMeaningfulRangeSize) {
                     small_ranges_count++;
                 }
 
