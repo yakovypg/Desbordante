@@ -127,8 +127,9 @@ private:
                     bool add_context = true;
 
                     context_delete_ab.Iterate([this, &delAttrs, &attribute_pair,
-                                            &add_context](model::ColumnIndex attr) {
-                        std::unordered_set<AttributePair> const& cs = CSGet<Ascending>(delAttrs[attr]);
+                                               &add_context](model::ColumnIndex attr) {
+                        std::unordered_set<AttributePair> const& cs =
+                                CSGet<Ascending>(delAttrs[attr]);
                         if (cs.find(attribute_pair) == cs.end()) {
                             add_context = false;
                             return;

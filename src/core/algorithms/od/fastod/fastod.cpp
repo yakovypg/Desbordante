@@ -214,22 +214,23 @@ void Fastod::ComputeODs() {
         AttributeSet const& cc = CCGet(context);
         AttributeSet context_intersect_cc_context = fastod::Intersect(context, cc);
 
-        context_intersect_cc_context.Iterate([this, &context, &del_attrs, &cc](model::ColumnIndex attr) {
-            SimpleCanonicalOD od(del_attrs[attr], attr);
+        context_intersect_cc_context.Iterate(
+                [this, &context, &del_attrs, &cc](model::ColumnIndex attr) {
+                    SimpleCanonicalOD od(del_attrs[attr], attr);
 
-            if (od.IsValid(data_, partition_cache_)) {
-                AddToResult(std::move(od));
-                fd_count_++;
+                    if (od.IsValid(data_, partition_cache_)) {
+                        AddToResult(std::move(od));
+                        fd_count_++;
 
-                CCPut(context, fastod::DeleteAttribute(cc, attr));
+                        CCPut(context, fastod::DeleteAttribute(cc, attr));
 
-                const AttributeSet diff = fastod::Difference(schema_, context);
+                        const AttributeSet diff = fastod::Difference(schema_, context);
 
-                if (diff.Any()) {
-                    CCPut(context, cc & (~diff));
-                }
-            }
-        });
+                        if (diff.Any()) {
+                            CCPut(context, cc & (~diff));
+                        }
+                    }
+                });
 
         CalculateODs<false>(context, del_attrs);
         CalculateODs<true>(context, del_attrs);
@@ -240,8 +241,9 @@ void Fastod::PruneLevels() {
     if (level_ == 1) {
         return;
     }
-    
-    for (auto attribute_set_it = context_in_current_level_.begin(); attribute_set_it != context_in_current_level_.end();) {
+
+    for (auto attribute_set_it = context_in_current_level_.begin();
+         attribute_set_it != context_in_current_level_.end();) {
         if (IsEmptySet(CCGet(*attribute_set_it)) && CSGet<true>(*attribute_set_it).empty() &&
             CSGet<false>(*attribute_set_it).empty()) {
             context_in_current_level_.erase(attribute_set_it++);
