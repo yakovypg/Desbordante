@@ -19,8 +19,8 @@ private:
     bool is_stripped_partition_;
     bool should_be_converted_to_sp_;
 
-    static constexpr inline double SMALL_RANGES_RATIO_TO_CONVERT = 0.5;
-    static constexpr inline size_t MIN_MEANINGFUL_RANGE_SIZE = static_cast<size_t>(40);
+    static constexpr inline double kSmallRangesRatioToConvert = 0.5;
+    static constexpr inline size_t kMinMeaningfulRangeSize = static_cast<size_t>(40);
 
     std::string CommonToString() const;
     void CommonProduct(model::ColumnIndex attribute);

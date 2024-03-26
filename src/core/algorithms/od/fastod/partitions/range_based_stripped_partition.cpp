@@ -122,7 +122,7 @@ void RangeBasedStrippedPartition::Product(model::ColumnIndex attribute) {
             for (size_t i = start_index; i <= end_index; ++i) {
                 DataFrame::Range const& range = intersection[i].second;
 
-                if (range_size(range) < MIN_MEANINGFUL_RANGE_SIZE) {
+                if (range_size(range) < kMinMeaningfulRangeSize) {
                     small_ranges_count++;
                 }
 
@@ -145,7 +145,7 @@ void RangeBasedStrippedPartition::Product(model::ColumnIndex attribute) {
         add_group(group_start, intersection_size - 1);
 
         if (intersection_size > 0 && small_ranges_count / static_cast<double>(intersection_size) >=
-                                             SMALL_RANGES_RATIO_TO_CONVERT) {
+                                             kSmallRangesRatioToConvert) {
             should_be_converted_to_sp_ = true;
         }
     }
